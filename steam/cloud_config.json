@@ -1,0 +1,41 @@
+{
+  "cloud": {
+    "enabled": true,
+    "maxFileSizeKB": 1024,
+    "numFiles": 5,
+    "folders": [
+      {
+        "path": "save/",
+        "pattern": "*.json",
+        "description": "游戏存档和设置"
+      }
+    ]
+  },
+  "saveData": {
+    "structure": {
+      "settings": {
+        "language": "zh-CN",
+        "boardSize": 15,
+        "defaultRule": "classic",
+        "defaultMode": "pvp",
+        "aiDifficulty": "medium",
+        "soundEnabled": true,
+        "musicEnabled": true,
+        "theme": "default"
+      },
+      "stats": {
+        "gamesPlayed": 0,
+        "gamesWon": 0,
+        "winningStreak": 0,
+        "currentStreak": 0,
+        "movesMade": 0,
+        "fastestWin": null,
+        "achievements": []
+      },
+      "history": {
+        "recentGames": [],
+        "favoriteBoards": []
+      }
+    }
+  }
+}

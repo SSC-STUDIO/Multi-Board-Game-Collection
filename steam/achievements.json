@@ -1,0 +1,90 @@
+{
+  "achievements": [
+    {
+      "id": "FIRST_WIN",
+      "name": "首胜",
+      "description": "赢得第一局游戏",
+      "icon": "achievement_first_win.png",
+      "hidden": false,
+      "rarity": "common"
+    },
+    {
+      "id": "WINNING_STREAK",
+      "name": "连胜之路",
+      "description": "连续获胜3局",
+      "icon": "achievement_streak.png",
+      "hidden": false,
+      "rarity": "rare"
+    },
+    {
+      "id": "AI_CONQUEROR",
+      "name": "AI终结者",
+      "description": "在大师难度击败AI",
+      "icon": "achievement_ai_master.png",
+      "hidden": false,
+      "rarity": "epic"
+    },
+    {
+      "id": "PERFECT_GAME",
+      "name": "完美对局",
+      "description": "不使用悔棋完成一局",
+      "icon": "achievement_perfect.png",
+      "hidden": false,
+      "rarity": "rare"
+    },
+    {
+      "id": "QUICK_VICTORY",
+      "name": "快速制胜",
+      "description": "20手内获胜",
+      "icon": "achievement_quick.png",
+      "hidden": false,
+      "rarity": "epic"
+    },
+    {
+      "id": "STRATEGY_MASTER",
+      "name": "战略大师",
+      "description": "使用禁手规则获胜",
+      "icon": "achievement_strategy.png",
+      "hidden": false,
+      "rarity": "rare"
+    },
+    {
+      "id": "APPRENTICE",
+      "name": "棋道学徒",
+      "description": "完成10局游戏",
+      "icon": "achievement_apprentice.png",
+      "hidden": false,
+      "rarity": "common"
+    },
+    {
+      "id": "MASTER_PLAYER",
+      "name": "棋坛霸主",
+      "description": "完成100局游戏",
+      "icon": "achievement_master.png",
+      "hidden": false,
+      "rarity": "epic"
+    }
+  ],
+  "stats": [
+    {
+      "id": "games_played",
+      "name": "游戏局数",
+      "aggregation_method": "lifetime"
+    },
+    {
+      "id": "games_won",
+      "name": "获胜局数",
+      "aggregation_method": "lifetime"
+    },
+    {
+      "id": "winning_streak",
+      "name": "最长连胜",
+      "aggregation_method": "lifetime_max"
+    },
+    {
+      "id": "moves_made",
+      "name": "总手数",
+      "aggregation_method": "lifetime"
+    }
+  ]
+}

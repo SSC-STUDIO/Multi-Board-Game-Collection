@@ -1,0 +1,629 @@
+/**
+ * 多语言支持模块
+ * 支持中英文切换
+ */
+
+const translations = {
+    zh: {
+        // 设置界面
+        appTitle: '五子棋 · Gomoku',
+        setupTitle: '五子棋',
+        setupSubtitle: '进入 3D 棋盘，直接开局。',
+        mode: '游戏模式',
+        pvp: '人人对战',
+        pve: '人机对战',
+        practice: '练习模式',
+        qi: 'QI 指导',
+        rules: '规则',
+        classic: '经典',
+        renju: '禁手',
+        boardSize: '棋盘尺寸',
+        scene: '场景',
+        sceneHome: '家里',
+        scenePark: '公园',
+        sceneCompetition: '比赛现场',
+        scenePresence: '场景氛围',
+        sceneHomeMood: '窗边对局',
+        sceneHomeBlurb: '暖灯窗景，适合安静推演。',
+        sceneParkMood: '树荫棋桌',
+        sceneParkBlurb: '树荫与园路，让视野更开阔。',
+        sceneCompetitionMood: '比赛大厅',
+        sceneCompetitionBlurb: '顶灯、屏幕与观众席带来正式赛场感。',
+        sceneSoundHome: '室内暖光',
+        sceneSoundPark: '微风水声',
+        sceneSoundCompetition: '馆场底噪',
+        aiLevel: 'AI 难度',
+        easy: '轻松',
+        medium: '进阶',
+        hard: '大师',
+        yourColor: '执子颜色',
+        blackFirst: '黑子（先手）',
+        whiteSecond: '白子（后手）',
+        startGame: '开始游戏',
+
+        // 游戏界面
+        opening: '布局阶段',
+        midgame: '中盘阶段',
+        endgame: '终盘阶段',
+        undo: '悔棋',
+        hint: '提示',
+        swapSides: '换边',
+        restart: '重开',
+        resign: '认输',
+        resetView: '重置视角',
+        currentStone: '当前执子',
+        moveCountLabel: '手数',
+        hudMeta: '对局参数',
+        modeLabel: '模式',
+        ruleLabel: '规则',
+        boardLabel: '棋盘',
+        sceneLabel: '场景',
+        spotlightTitle: '局势聚焦',
+        momentumPanel: '局势节奏',
+        quickTools: '快捷功能',
+        immersiveUi: '沉浸 HUD',
+        immersiveUiOn: '沉浸开',
+        immersiveUiOff: '沉浸关',
+        immersiveUiUnavailable: '沉浸 HUD 仅桌面端可用',
+        soundOn: '音效开',
+        soundOff: '音效关',
+        confirmMove: '确认落子',
+        cancelSelection: '取消选点',
+        selectedPoint: '已选落点',
+        coachTitle: 'QI 指导',
+        coachRecommended: '推荐点',
+        coachReason: '原因',
+        coachRisk: '风险',
+        coachReview: '复盘',
+        coachWaiting: '等待你的回合后生成新建议。',
+        coachAlternatives: '候选点',
+        coachPlan: '下一步',
+        coachConfidence: '置信度',
+        coachReanalyze: '重新分析',
+        coachSourceLocal: '本地 AI',
+        coachSourceLlm: 'LLM',
+        coachStatusLocal: '本地推荐已显示',
+        coachStatusLlmLoading: 'LLM 分析中',
+        coachStatusLlmReady: 'LLM 已接管讲解',
+        coachStatusLlmUnavailable: 'LLM 不可用',
+        coachStatusLlmMissing: 'LLM 未配置',
+        coachStatusLlmDisabled: 'LLM 未启用',
+        coachPlanLocal: '先按推荐点稳住当前要点，再观察对手是否形成直接威胁。',
+        llmCoachSetupLabel: 'LLM 教学',
+        llmSettingsButton: 'LLM 设置',
+        llmSettingsTitle: 'LLM 设置',
+        llmEnable: '启用 LLM 教学',
+        llmBaseUrl: 'Base URL',
+        llmModel: 'Model',
+        llmApiKey: 'API Key',
+        saveLlmSettings: '保存',
+        testLlmConnection: '测试连接',
+        clearLlmKey: '清除 Key',
+        closeLlmSettings: '关闭 LLM 设置',
+        choosePointFirst: '先轻点棋盘选择落点，再确认落子。',
+
+        // 玩家
+        black: '黑方',
+        white: '白方',
+        moves: '手',
+        yourTurn: '你的回合',
+        aiThinking: 'AI 思考中...',
+        aiThinkingNext: 'AI 正在思考下一手。',
+        boardAria: '棋盘',
+
+        // 结果
+        gameEnd: '对局结束',
+        blackWins: '黑方获胜',
+        whiteWins: '白方获胜',
+        draw: '平局',
+        totalMoves: '总手数',
+        lastMove: '最后一手',
+        playAgain: '再来一局',
+        backToSetup: '返回设置',
+
+        // 棋谱
+        moveHistory: '棋谱记录',
+        noMoves: '暂无棋谱',
+
+        // 消息
+        gameStarted: '游戏已开始',
+        forbiddenMove: '禁手位置，不能落子',
+        forbiddenOverline: '黑方此处属于长连禁手。',
+        forbiddenDoubleFour: '黑方此处属于四四禁手。',
+        forbiddenDoubleThree: '黑方此处属于三三禁手。',
+        cellOccupied: '这个位置已经有棋子了',
+        gameOver: '游戏已结束',
+        hintSuggestion: '建议落子',
+        aiMoved: 'AI 落子',
+        introPvp: '人人对战已开始，黑方先行。',
+        introPractice: '练习模式已开始，可自由落子与复盘。',
+        introPveBlack: '人机对战已开始，你执黑先行。',
+        introPveWhite: '人机对战已开始，AI 执黑先行。',
+        introQiBlack: 'QI 指导已开始，每回合都会给出推荐点、原因和风险提醒。',
+        introQiWhite: 'QI 指导已开始，AI 执黑先行，轮到你时会给出推荐点。',
+        gameAlreadyEndedReturn: '对局已经结束，请重新开始或返回设置。',
+        aiTurnWait: '现在是 AI 回合，请稍候。',
+        selectedMoveConfirm: '已选中 {move}，点击确认落子。',
+        selectPointFirstConfirm: '请先在棋盘上选择一个落点。',
+        selectionCanceledMessage: '已取消当前选点。',
+        coachSuggestedMessage: 'QI 推荐：{move}',
+        coachCandidateFocused: '已聚焦候选点 {move}，请在棋盘上确认落子。',
+        llmSettingsSaved: 'LLM 设置已保存。',
+        llmKeyCleared: 'API Key 已清除。',
+        llmTesting: '正在测试连接...',
+        llmTestOk: '连接测试成功。',
+        llmTestFailed: '连接测试失败。',
+        llmConfigIncomplete: '请填写 Base URL、Model 和 API Key。',
+        playerWinsMessage: '{player} 获胜。',
+        boardFullDrawMessage: '棋盘已满，本局平手。',
+        playerTurnMessage: '轮到 {player} 落子。',
+        aiThinkingMessage: 'AI 正在思考下一手。',
+        aiNoMoveMessage: 'AI 无可落子位置，本局结束。',
+        aiPlayedMessage: 'AI 落子：{move}',
+        nothingToUndo: '当前没有可悔的棋。',
+        undoneMoves: '已悔棋 {count} 手。',
+        noHintNeededGameOver: '对局已结束，无需提示。',
+        noHintDuringAiTurn: '当前是 AI 回合，暂不提供提示。',
+        noHintAvailable: '没有可用提示位置。',
+        hintSuggestionMessage: '建议落子：{move}',
+        swapOnlyBeforeOpening: '换边仅支持开局前使用。',
+        swappedToWhiteAiFirst: '已换边，你现在执白，AI 将先手。',
+        swappedToBlack: '已换边，你现在执黑。',
+        swappedFirstPlayer: '已切换先手，当前由 {player} 先行。',
+        gameRestartedMessage: '棋局已重新开始。',
+        gameAlreadyEnded: '对局已经结束。',
+        resignWinMessage: '{loser} 认输，{winner} 获胜。',
+
+        // 相机控制
+        cameraControls: '左键环绕 | 滚轮缩放',
+
+        // 说明与引导
+        helpCenter: '功能说明',
+        helpTitle: '把说明集中到这里',
+        helpSubtitle: '主界面只保留操作，具体功能统一放在这一页。',
+        closeHelp: '关闭说明',
+        guideWelcome: '首次打开',
+        guideTitle: '开始前看三点',
+        guideSubtitle: '详细说明集中在右上角的说明页，这里只保留最必要的引导。',
+        guideDismiss: '知道了',
+        guideDetails: '查看说明',
+        guideBoardTitle: '目标',
+        guideBoardBody: '黑先白后，先连成五子。',
+        guideDesktopTitle: '桌面操作',
+        guideDesktopBody: '左键拖拽环绕，滚轮缩放，悬停可看短提示。',
+        guideTouchTitle: '移动端操作',
+        guideTouchBody: '轻点选点，再确认落子。',
+        guideFeatureTitle: '更多功能',
+        guideFeatureBody: 'QI、提示、沉浸 HUD 都在说明页里。',
+        helpSectionBasics: '基础',
+        helpSectionControls: '操作',
+        helpSectionFeatures: '功能',
+        helpBasicsBoardTitle: '对局',
+        helpBasicsBoardBody: '黑先白后，连五即胜。',
+        helpBasicsModesTitle: '模式',
+        helpBasicsModesBody: 'PvP、AI、练习、QI 四种模式。',
+        helpBasicsSceneTitle: '场景',
+        helpBasicsSceneBody: '场景只改呈现，不改规则。',
+        helpControlDesktopOrbitTitle: '桌面视角',
+        helpControlDesktopOrbitBody: '左键拖拽可沿棋盘四周 360 度环绕，滚轮缩放，镜头不会翻到顶部。',
+        helpControlDesktopHudTitle: '桌面 HUD',
+        helpControlDesktopHudBody: '开启沉浸 HUD 后，鼠标靠边再显示对应区域。',
+        helpControlDesktopTipTitle: '桌面提示',
+        helpControlDesktopTipBody: '悬停按钮可以看简短提示。',
+        helpControlTouchPlaceTitle: '移动端落子',
+        helpControlTouchPlaceBody: '先轻点选点，再确认落子。',
+        helpControlTouchHudTitle: '移动端 HUD',
+        helpControlTouchHudBody: '左右侧信息卡可以横向滑动查看。',
+        helpControlTouchViewTitle: '移动端视角',
+        helpControlTouchViewBody: '画面以稳定构图为主，不需要频繁调镜头。',
+        helpFeatureHintTitle: '提示',
+        helpFeatureHintBody: '给出一个可落点。',
+        helpFeatureQiTitle: 'QI',
+        helpFeatureQiBody: '显示推荐点、原因和风险。',
+        helpFeatureAudioTitle: '音效',
+        helpFeatureAudioBody: '可随时开关。',
+        helpFeatureImmersiveTitle: '沉浸 HUD',
+        helpFeatureImmersiveBody: '仅桌面端可用，靠近边缘时显示。',
+        tooltipHelp: '查看功能说明',
+        tooltipCloseHelp: '关闭说明页',
+        tooltipBackSetup: '返回设置',
+        tooltipStartGame: '开始当前配置',
+        tooltipResetView: '回到默认镜头',
+        tooltipSoundToggle: '切换音效',
+        tooltipImmersiveToggle: '切换沉浸 HUD',
+        tooltipUndo: '撤回上一步',
+        tooltipHint: '显示推荐落点',
+        tooltipSwap: '开局前切换先后',
+        tooltipRestart: '重新开始这一局',
+        tooltipResign: '结束当前对局',
+        tooltipLlmSettings: '配置 LLM 教学',
+        tooltipCloseLlmSettings: '关闭 LLM 设置',
+        tooltipCoachReanalyze: '重新请求本回合分析',
+
+        // 指导原因
+        coachReasonWin: '这里可以直接形成致胜连线，优先终结对局。',
+        coachReasonBlock: '这里必须先挡住对手的直接成五点，先活下来。',
+        coachReasonAttack: '这里能把威胁升级到强攻形，逼迫对手应手。',
+        coachReasonShape: '这里能延伸己方连线骨架，后续更容易形成活三或活四。',
+        coachReasonCenter: '这里先稳住中心和节奏，后续选择面会更大。',
+        coachReasonPressure: '这里能兼顾扩张与压制，让对手的落点变窄。',
+
+        // 指导风险
+        coachRiskThreat: '如果忽略这里，对手很可能立刻抢到高威胁点。',
+        coachRiskInitiative: '如果拖延这里，先手会松掉，局势会变被动。',
+        coachRiskCounter: '如果走偏，这一带会留下明显反击窗口。',
+        coachRiskForbidden: '禁手规则下要继续避免过线、三三和四四陷阱。',
+
+        // 指导复盘
+        coachReviewFollowed: '这一手和建议一致，节奏保持得很干净。',
+        coachReviewFlexible: '你没有完全照做，但这一手仍然保持了不错的质量。',
+        coachReviewDeviation: '这手可以继续下，但效率比建议点略低。',
+        coachReviewPunishable: '这手给了对方更多反击空间，下一回合要更谨慎。'
+    },
+    en: {
+        // Setup
+        appTitle: 'Gomoku',
+        setupTitle: 'Gomoku',
+        setupSubtitle: 'Enter the 3D board and start at once.',
+        mode: 'Game Mode',
+        pvp: 'PvP',
+        pve: 'vs AI',
+        practice: 'Practice',
+        qi: 'QI Coach',
+        rules: 'Rules',
+        classic: 'Classic',
+        renju: 'Renju',
+        boardSize: 'Board Size',
+        scene: 'Scene',
+        sceneHome: 'Home',
+        scenePark: 'Park',
+        sceneCompetition: 'Tournament',
+        scenePresence: 'Venue Mood',
+        sceneHomeMood: 'Window-side match',
+        sceneHomeBlurb: 'Warm light and a window-side table for quiet play.',
+        sceneParkMood: 'Shade table',
+        sceneParkBlurb: 'A brighter outdoor board with paths and tree shade.',
+        sceneCompetitionMood: 'Match hall',
+        sceneCompetitionBlurb: 'Hall lights, screens, and seating frame a formal venue.',
+        sceneSoundHome: 'Warm interior',
+        sceneSoundPark: 'Breeze and water',
+        sceneSoundCompetition: 'Hall ambience',
+        aiLevel: 'AI Level',
+        easy: 'Easy',
+        medium: 'Medium',
+        hard: 'Master',
+        yourColor: 'Your Color',
+        blackFirst: 'Black (First)',
+        whiteSecond: 'White (Second)',
+        startGame: 'Start Game',
+
+        // Game
+        opening: 'Opening',
+        midgame: 'Midgame',
+        endgame: 'Endgame',
+        undo: 'Undo',
+        hint: 'Hint',
+        swapSides: 'Swap Sides',
+        restart: 'Restart',
+        resign: 'Resign',
+        resetView: 'Reset View',
+        currentStone: 'Turn',
+        moveCountLabel: 'Moves',
+        hudMeta: 'Match Info',
+        modeLabel: 'Mode',
+        ruleLabel: 'Rules',
+        boardLabel: 'Board',
+        sceneLabel: 'Scene',
+        spotlightTitle: 'Focus',
+        momentumPanel: 'Tempo',
+        quickTools: 'Quick Tools',
+        immersiveUi: 'Immersive HUD',
+        immersiveUiOn: 'Immersive On',
+        immersiveUiOff: 'Immersive Off',
+        immersiveUiUnavailable: 'Immersive HUD is desktop-only',
+        soundOn: 'Sound On',
+        soundOff: 'Sound Off',
+        confirmMove: 'Confirm Move',
+        cancelSelection: 'Cancel',
+        selectedPoint: 'Selected',
+        coachTitle: 'QI Coach',
+        coachRecommended: 'Recommended',
+        coachReason: 'Reason',
+        coachRisk: 'Risk',
+        coachReview: 'Review',
+        coachWaiting: 'A fresh suggestion will appear when it is your turn again.',
+        coachAlternatives: 'Candidates',
+        coachPlan: 'Plan',
+        coachConfidence: 'Confidence',
+        coachReanalyze: 'Reanalyze',
+        coachSourceLocal: 'Local AI',
+        coachSourceLlm: 'LLM',
+        coachStatusLocal: 'Local suggestion shown',
+        coachStatusLlmLoading: 'LLM analyzing',
+        coachStatusLlmReady: 'LLM explanation active',
+        coachStatusLlmUnavailable: 'LLM unavailable',
+        coachStatusLlmMissing: 'LLM not configured',
+        coachStatusLlmDisabled: 'LLM disabled',
+        coachPlanLocal: 'Play the recommendation to stabilize the key point, then watch for the opponent’s immediate threats.',
+        llmCoachSetupLabel: 'LLM Teaching',
+        llmSettingsButton: 'LLM Settings',
+        llmSettingsTitle: 'LLM Settings',
+        llmEnable: 'Enable LLM teaching',
+        llmBaseUrl: 'Base URL',
+        llmModel: 'Model',
+        llmApiKey: 'API Key',
+        saveLlmSettings: 'Save',
+        testLlmConnection: 'Test Connection',
+        clearLlmKey: 'Clear Key',
+        closeLlmSettings: 'Close LLM settings',
+        choosePointFirst: 'Tap a point first, then confirm the move.',
+
+        // Players
+        black: 'Black',
+        white: 'White',
+        moves: 'moves',
+        yourTurn: 'Your turn',
+        aiThinking: 'AI thinking...',
+        aiThinkingNext: 'AI is thinking about the next move.',
+        boardAria: 'Board',
+
+        // Results
+        gameEnd: 'Game Over',
+        blackWins: 'Black Wins',
+        whiteWins: 'White Wins',
+        draw: 'Draw',
+        totalMoves: 'Total Moves',
+        lastMove: 'Last Move',
+        playAgain: 'Play Again',
+        backToSetup: 'Back to Setup',
+
+        // History
+        moveHistory: 'Move History',
+        noMoves: 'No moves yet',
+
+        // Messages
+        gameStarted: 'Game started',
+        forbiddenMove: 'Forbidden move',
+        forbiddenOverline: 'This black move is forbidden because it creates an overline.',
+        forbiddenDoubleFour: 'This black move is forbidden because it creates a double-four.',
+        forbiddenDoubleThree: 'This black move is forbidden because it creates a double-three.',
+        cellOccupied: 'Cell already occupied',
+        gameOver: 'Game over',
+        hintSuggestion: 'Suggested move',
+        aiMoved: 'AI played',
+        introPvp: 'The local match has started. Black moves first.',
+        introPractice: 'Practice mode has started. You can place stones freely and review lines at will.',
+        introPveBlack: 'The AI match has started. You play black and move first.',
+        introPveWhite: 'The AI match has started. AI plays black and moves first.',
+        introQiBlack: 'QI Coach has started. Each turn now comes with a recommended point, a reason, and a risk note.',
+        introQiWhite: 'QI Coach has started. AI plays black first and your guidance appears when your turn begins.',
+        gameAlreadyEndedReturn: 'The game is over. Restart or return to setup.',
+        aiTurnWait: 'It is the AI turn right now. Please wait.',
+        selectedMoveConfirm: 'Selected {move}. Confirm to place the stone.',
+        selectPointFirstConfirm: 'Select a point on the board first.',
+        selectionCanceledMessage: 'Selection cleared.',
+        coachSuggestedMessage: 'QI suggests {move}',
+        coachCandidateFocused: 'Focused candidate {move}. Confirm the move on the board.',
+        llmSettingsSaved: 'LLM settings saved.',
+        llmKeyCleared: 'API key cleared.',
+        llmTesting: 'Testing connection...',
+        llmTestOk: 'Connection test succeeded.',
+        llmTestFailed: 'Connection test failed.',
+        llmConfigIncomplete: 'Fill Base URL, Model, and API Key first.',
+        playerWinsMessage: '{player} wins.',
+        boardFullDrawMessage: 'The board is full. This round is a draw.',
+        playerTurnMessage: '{player} to move.',
+        aiThinkingMessage: 'AI is thinking about the next move.',
+        aiNoMoveMessage: 'AI has no legal move. The game ends here.',
+        aiPlayedMessage: 'AI played {move}',
+        nothingToUndo: 'There are no moves to undo.',
+        undoneMoves: 'Undid {count} move(s).',
+        noHintNeededGameOver: 'The game is already over. No hint is needed.',
+        noHintDuringAiTurn: 'Hints are unavailable during the AI turn.',
+        noHintAvailable: 'No hint is available right now.',
+        hintSuggestionMessage: 'Suggested move: {move}',
+        swapOnlyBeforeOpening: 'Swap sides is only available before the opening move.',
+        swappedToWhiteAiFirst: 'Sides swapped. You are now White and the AI moves first.',
+        swappedToBlack: 'Sides swapped. You are now Black.',
+        swappedFirstPlayer: 'First move switched. {player} moves first now.',
+        gameRestartedMessage: 'The game has been restarted.',
+        gameAlreadyEnded: 'The game is already over.',
+        resignWinMessage: '{loser} resigns. {winner} wins.',
+
+        // Camera
+        cameraControls: 'Left-drag to orbit | Scroll to zoom',
+
+        // Help and first-run guide
+        helpCenter: 'Help',
+        helpTitle: 'Put the guidance here',
+        helpSubtitle: 'The main interface stays lean. Feature notes live on this page instead.',
+        closeHelp: 'Close help',
+        guideWelcome: 'First Launch',
+        guideTitle: 'Read these three points first',
+        guideSubtitle: 'The full explanation lives in the help page at the top right. This card keeps only the essentials.',
+        guideDismiss: 'Got it',
+        guideDetails: 'Open Help',
+        guideBoardTitle: 'Goal',
+        guideBoardBody: 'Black moves first. Connect five to win.',
+        guideDesktopTitle: 'Desktop',
+        guideDesktopBody: 'Left-drag to orbit, scroll to zoom, and hover for short tips.',
+        guideTouchTitle: 'Mobile',
+        guideTouchBody: 'Tap to select a point, then confirm the move.',
+        guideFeatureTitle: 'More',
+        guideFeatureBody: 'QI, hints, and immersive HUD are all explained in Help.',
+        helpSectionBasics: 'Basics',
+        helpSectionControls: 'Controls',
+        helpSectionFeatures: 'Features',
+        helpBasicsBoardTitle: 'Match',
+        helpBasicsBoardBody: 'Black starts. Five in a row wins.',
+        helpBasicsModesTitle: 'Modes',
+        helpBasicsModesBody: 'PvP, AI, Practice, and QI Coach.',
+        helpBasicsSceneTitle: 'Scenes',
+        helpBasicsSceneBody: 'Scenes change presentation, not rules.',
+        helpControlDesktopOrbitTitle: 'Desktop View',
+        helpControlDesktopOrbitBody: 'Left-drag to orbit 360 degrees around the board, scroll to zoom, and the camera stays below the top-down band.',
+        helpControlDesktopHudTitle: 'Desktop HUD',
+        helpControlDesktopHudBody: 'With immersive HUD on, each region appears only near its screen edge.',
+        helpControlDesktopTipTitle: 'Desktop Tips',
+        helpControlDesktopTipBody: 'Hover important buttons for short hints.',
+        helpControlTouchPlaceTitle: 'Mobile Move Flow',
+        helpControlTouchPlaceBody: 'Tap a point first, then confirm the move.',
+        helpControlTouchHudTitle: 'Mobile HUD',
+        helpControlTouchHudBody: 'The side info cards can be swiped horizontally.',
+        helpControlTouchViewTitle: 'Mobile View',
+        helpControlTouchViewBody: 'The board keeps a stable view so camera tweaks are rarely needed.',
+        helpFeatureHintTitle: 'Hint',
+        helpFeatureHintBody: 'Shows one playable recommendation.',
+        helpFeatureQiTitle: 'QI Coach',
+        helpFeatureQiBody: 'Shows a move, a reason, and a risk note.',
+        helpFeatureAudioTitle: 'Sound',
+        helpFeatureAudioBody: 'Can be toggled at any time.',
+        helpFeatureImmersiveTitle: 'Immersive HUD',
+        helpFeatureImmersiveBody: 'Desktop-only. Reveal it by moving near an edge.',
+        tooltipHelp: 'Open Help',
+        tooltipCloseHelp: 'Close Help',
+        tooltipBackSetup: 'Back to setup',
+        tooltipStartGame: 'Start with this setup',
+        tooltipResetView: 'Return to the default camera',
+        tooltipSoundToggle: 'Toggle sound',
+        tooltipImmersiveToggle: 'Toggle the immersive HUD',
+        tooltipUndo: 'Undo the last move',
+        tooltipHint: 'Show a recommended move',
+        tooltipSwap: 'Swap sides before the opening',
+        tooltipRestart: 'Restart this game',
+        tooltipResign: 'End the current game',
+        tooltipLlmSettings: 'Configure LLM teaching',
+        tooltipCloseLlmSettings: 'Close LLM settings',
+        tooltipCoachReanalyze: 'Request a fresh analysis for this turn',
+
+        // Guidance reasons
+        coachReasonWin: 'This move finishes the line immediately and should end the game on the spot.',
+        coachReasonBlock: 'This point must block the opponent’s direct win before anything else.',
+        coachReasonAttack: 'This move upgrades the pressure into a forcing attack and makes the reply narrow.',
+        coachReasonShape: 'This point extends your shape cleanly and improves future open-three or open-four chances.',
+        coachReasonCenter: 'This keeps the center and the tempo under control while the board is still forming.',
+        coachReasonPressure: 'This move expands your influence while reducing the opponent’s comfortable replies.',
+
+        // Guidance risks
+        coachRiskThreat: 'Ignoring this area likely hands the opponent an immediate high-threat point.',
+        coachRiskInitiative: 'Delaying here can give away the initiative and turn the position passive.',
+        coachRiskCounter: 'A weaker move here leaves a clearer counterattack window for the opponent.',
+        coachRiskForbidden: 'Under renju rules, keep avoiding overlines and double-three or double-four traps.',
+
+        // Guidance review
+        coachReviewFollowed: 'You matched the recommendation and kept the tempo clean.',
+        coachReviewFlexible: 'You chose a different move, but the quality is still solid.',
+        coachReviewDeviation: 'The move is playable, but it is less efficient than the recommended point.',
+        coachReviewPunishable: 'This move gives the opponent more counterplay. The next reply needs extra care.'
+    }
+};
+
+class I18n {
+    constructor() {
+        this.currentLang = this.detectLanguage();
+        this.translations = translations;
+        this.listeners = [];
+    }
+
+    detectLanguage() {
+        // 从 localStorage 获取
+        const saved = localStorage.getItem('gomoku-lang');
+        if (saved && translations[saved]) {
+            return saved;
+        }
+
+        // 从浏览器语言检测
+        const browserLang = navigator.language.toLowerCase();
+        if (browserLang.startsWith('zh')) {
+            return 'zh';
+        }
+        return 'en';
+    }
+
+    /**
+     * 获取翻译文本
+     * @param {string} key 翻译键
+     * @param {Object} params 插值参数
+     * @returns {string}
+     */
+    t(key, params = {}) {
+        const text = this.translations[this.currentLang]?.[key] || key;
+        return this.interpolate(text, params);
+    }
+
+    /**
+     * 插值替换
+     */
+    interpolate(text, params) {
+        return text.replace(/\{(\w+)\}/g, (_, key) => {
+            return params[key] !== undefined ? params[key] : `{${key}}`;
+        });
+    }
+
+    /**
+     * 切换语言
+     * @param {string} lang 'zh' | 'en'
+     */
+    setLanguage(lang) {
+        if (this.translations[lang]) {
+            this.currentLang = lang;
+            localStorage.setItem('gomoku-lang', lang);
+            this.notifyListeners();
+            this.updateDOM();
+        }
+    }
+
+    /**
+     * 获取当前语言
+     * @returns {string}
+     */
+    getLanguage() {
+        return this.currentLang;
+    }
+
+    /**
+     * 添加语言变更监听器
+     * @param {Function} callback
+     */
+    onChange(callback) {
+        this.listeners.push(callback);
+    }
+
+    /**
+     * 通知所有监听器
+     */
+    notifyListeners() {
+        this.listeners.forEach(cb => cb(this.currentLang));
+    }
+
+    /**
+     * 更新 DOM 元素的文本
+     */
+    updateDOM() {
+        document.documentElement.lang = this.currentLang === 'zh' ? 'zh-CN' : 'en';
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            el.textContent = this.t(key);
+        });
+
+        document.querySelectorAll('[data-i18n-title]').forEach(el => {
+            const key = el.getAttribute('data-i18n-title');
+            el.setAttribute('title', this.t(key));
+        });
+
+        document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+            const key = el.getAttribute('data-i18n-aria-label');
+            el.setAttribute('aria-label', this.t(key));
+        });
+
+        document.querySelectorAll('[data-i18n-tooltip]').forEach(el => {
+            const key = el.getAttribute('data-i18n-tooltip');
+            el.setAttribute('data-tooltip', this.t(key));
+        });
+    }
+}
+
+// 导出单例
+export const i18n = new I18n();
+export const t = i18n.t.bind(i18n);

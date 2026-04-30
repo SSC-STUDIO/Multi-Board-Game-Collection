@@ -1,0 +1,120 @@
+:root {
+    --bg-start: #f0e7d8;
+    --bg-end: #e0c7a1;
+    --ink: #1c1c1c;
+    --muted: #5a4e42;
+    --accent: #d17b30;
+    --accent-deep: #9e5220;
+    --panel: rgba(255, 255, 255, 0.92);
+    --panel-strong: rgba(255, 255, 255, 0.98);
+    --shadow: 0 18px 40px rgba(56, 32, 10, 0.2);
+    --wood: #c58b4c;
+    --wood-deep: #a0672c;
+    --cell-size: 32px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    font-family: "ZCOOL XiaoWei", "STKaiti", "KaiTi", serif;
+    color: var(--ink);
+    background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    position: relative;
+    overflow-x: hidden;
+    transition: background 0.7s ease, color 0.4s ease;
+}
+
+body::before,
+body::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+body::before {
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, #fbe9c8, transparent 70%);
+    top: -160px;
+    left: -120px;
+}
+
+body::after {
+    width: 360px;
+    height: 360px;
+    background: radial-gradient(circle, #f6d9ae, transparent 70%);
+    bottom: -120px;
+    right: -80px;
+}
+
+body.scene-game-active {
+    background:
+        radial-gradient(circle at top, #f7ecd7 0%, #e1c394 48%, #c98a51 100%);
+}
+
+body.turn-black-active::before {
+    opacity: 0.34;
+    transform: scale(1.02);
+}
+
+body.turn-white-active::after {
+    opacity: 0.34;
+    transform: scale(1.05);
+}
+
+body.ai-active {
+    cursor: progress;
+}
+
+body.game-finished {
+    background:
+        radial-gradient(circle at top, #f9f0de 0%, #e7ceac 44%, #c37a42 100%);
+}
+
+.bg-orb {
+    position: fixed;
+    border-radius: 999px;
+    filter: blur(18px);
+    opacity: 0.38;
+    pointer-events: none;
+    z-index: 0;
+    animation: floatOrb 13s ease-in-out infinite;
+}
+
+.bg-orb-left {
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(255, 241, 202, 0.88), rgba(255, 241, 202, 0));
+    left: 5vw;
+    top: 18vh;
+}
+
+.bg-orb-right {
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, rgba(227, 158, 92, 0.48), rgba(227, 158, 92, 0));
+    right: 4vw;
+    bottom: 14vh;
+    animation-delay: -5s;
+}
+
+@keyframes floatOrb {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(0, -18px, 0) scale(1.08);
+    }
+}

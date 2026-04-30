@@ -1,0 +1,21 @@
+{
+  "$schema": "https://capacitorjs.com/schema",
+  "appId": "com.gomoku.game",
+  "appName": "Gomoku",
+  "webDir": "builds/web",
+  "server": {
+    "cleartext": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "launchAutoHide": true,
+      "backgroundColor": "#07111d",
+      "androidScaleType": "CENTER_CROP"
+    }
+  },
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  }
+}
