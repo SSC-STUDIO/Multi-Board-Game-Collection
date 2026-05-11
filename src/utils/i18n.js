@@ -3,6 +3,38 @@
  * 支持中英文切换
  */
 
+/**
+ * 通过点路径解析嵌套对象
+ * @param {Object} obj 对象
+ * @param {string} path 点分隔路径
+ * @returns {*}
+ */
+function resolve(obj, path) {
+    return path.split('.').reduce((acc, key) => acc?.[key], obj);
+}
+
+/**
+ * 将嵌套翻译对象展开为叶子键到值的映射
+ * 用于向后兼容：当 JSON 使用嵌套命名空间结构时，
+ * 仍能通过叶子键名（如 'appTitle'）查到值
+ * @param {Object} obj 嵌套对象
+ * @returns {Object} 叶子键 → 值的平面映射
+ */
+function flattenTranslations(obj) {
+    const flat = {};
+    const walk = (node) => {
+        for (const [key, value] of Object.entries(node)) {
+            if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+                walk(value);
+            } else {
+                flat[key] = value;
+            }
+        }
+    };
+    walk(obj);
+    return flat;
+}
+
 const translations = {
     zh: {
         // 设置界面
@@ -80,6 +112,151 @@ const translations = {
         coachPlan: '下一步',
         coachConfidence: '置信度',
         coachReanalyze: '重新分析',
+        coachUploadImage: '上传棋盘',
+        coachImportBoard: '导入棋局',
+        coachAnalyzing: '正在识别棋盘...',
+        coachAnalyzeSuccess: '识别完成，发现 {count} 枚棋子。',
+        coachAnalyzeFailed: '棋盘识别失败。',
+        coachImportSuccess: '棋局已导入，共 {count} 手。',
+        coachImportConfirm: '导入将替换当前棋局，确定继续？',
+        coachPreviewEdit: '预览 & 编辑',
+        coachPreviewHint: '点击格子切换棋子颜色（空 → 黑 → 白 → 空）',
+        coachPreviewCommit: '确认修改并导入',
+        coachPreviewCancel: '退出编辑',
+        coachAnalyzeCancel: '取消识别',
+        coachAnalyzeCanceled: '已取消识别。',
+        coachDropHint: '松开以上传',
+        coachConfirmTitle: '导入识别结果',
+        coachConfirmCancel: '取消',
+        coachConfirmOk: '确定导入',
+        coachConfidenceLabel: '置信度 {pct}%',
+        coachStoneCount: '{count} 枚棋子',
+        devPanelTitle: '开发者面板',
+        devPanelSnapshot: '实时快照',
+        devPanelLlmLog: 'LLM 请求日志',
+        devPanelLlmEmpty: '暂无 LLM 请求记录。',
+        devPanelClose: '关闭面板',
+
+        // 多游戏启动器
+        launcherTitle: '四款棋类，一个棋局',
+        launcherSubtitle: '选择一种棋类开始。其他几款正在陆续到来。',
+        launcherWelcome: '棋类游戏',
+        launcherAvailableBadge: '可游玩',
+        launcherComingSoonBadge: '敬请期待',
+        launcherBackToLauncher: '返回选择',
+        launcherEnter: '进入对局',
+        comingSoon: '敬请期待',
+        gameGomokuTitle: '五子棋',
+        gameGomokuTagline: '先连成五子者胜。支持 3D 沉浸棋盘、QI 指导与图片识别导入。',
+        gameGoTitle: '围棋',
+        gameGoTagline: '气、提子、数目终局。9/13/19 路棋盘与让子，可切换 2D/3D 视角。',
+        gameChessTitle: '国际象棋',
+        gameChessTagline: '王车易位、吃过路兵、升变，完整规则与启发式 AI。',
+        gameXiangqiTitle: '中国象棋',
+        gameXiangqiTagline: '楚河汉界，九宫相隔。完整行棋规则与内置 AI 对战。',
+        gameJunqiTitle: '军棋',
+        gameJunqiTagline: '翻翻棋（暗棋）已可游玩，四国军棋变体开发中。',
+
+        // 围棋
+        goSetupTitle: '开始一局围棋',
+        goSetupSubtitle: '选择棋盘尺寸、贴目与模式，准备开子。',
+        goBoardSize: '棋盘',
+        goMode: '模式',
+        goHandicap: '让子',
+        goPass: '虚手',
+        go3DToggle: '3D',
+        go3DUnavailable: '3D 视图不可用，已切回 2D。',
+        goGameStart: '围棋对局开始，黑先白后。',
+        goPassedMessage: '{player} 选择虚手。',
+        goIllegalOccupied: '这个位置已经有棋子。',
+        goIllegalSuicide: '这是自杀手，不可落子。',
+        goIllegalKo: '打劫即时禁着点，下一手再考虑。',
+        goCapturedBlack: '黑方提子',
+        goCapturedWhite: '白方提子',
+        goBlackScore: '黑方得分',
+        goWhiteScore: '白方得分',
+        goScoreBadge: '数子终局',
+        goScoreWinnerTitle: '{player} 胜 {margin} 目',
+        goScoreDrawTitle: '双方同分，平局',
+        goScoreDetail: '按中国规则数子。贴目 {komi}。',
+        goResignDetail: '对方认输，本局结束。',
+
+        // 国际象棋
+        chessSetupTitle: '开始一局国际象棋',
+        chessSetupSubtitle: '选择模式与难度，准备开局。',
+        chessMode: '模式',
+        chessColorWhite: '执白（先手）',
+        chessColorBlack: '执黑（后手）',
+        chessYourColor: '执子颜色',
+        chessWhite: '白方',
+        chessBlack: '黑方',
+        chessGameStart: '对局开始，白方先行。',
+        chessCheck: '将军',
+        chessCheckmate: '将死',
+        chessStalemate: '逼和',
+        chessDraw: '和棋',
+        chessDraw50: '50 步规则和棋',
+        chessDrawInsufficient: '子力不足和棋',
+        chessDrawDetail: '本局和棋结束。',
+        chessCheckmateTitle: '{player} 将死对方',
+        chessCheckmateDetail: '胜负已定，本局结束。',
+        chessStalemateTitle: '逼和，无合法走法',
+        chessStalemateDetail: '虽未被将但已无棋可走，按和棋处理。',
+        chessResignDetail: '对方认输，本局结束。',
+        chessPromoteTitle: '选择升变',
+        chessPromoteQueen: '后',
+        chessPromoteRook: '车',
+        chessPromoteBishop: '象',
+        chessPromoteKnight: '马',
+        chessMoveCount: '手数',
+        chessLastMove: '最后一手',
+        chessCapturedByWhite: '白方吃子',
+        chessCapturedByBlack: '黑方吃子',
+
+        // 中国象棋
+        xiangqiSetupTitle: '开始一局中国象棋',
+        xiangqiSetupSubtitle: '红先黑后，车马炮 将相士，楚河汉界。',
+        xiangqiMode: '模式',
+        xiangqiYourColor: '执子颜色',
+        xiangqiColorRed: '执红（先手）',
+        xiangqiColorBlack: '执黑（后手）',
+        xiangqiRed: '红方',
+        xiangqiBlack: '黑方',
+        xiangqiRiverLeft: '楚 河',
+        xiangqiRiverRight: '汉 界',
+        xiangqiGameStart: '红先落子，鸣锣开棋。',
+        xiangqiCheckmateBadge: '绝杀',
+        xiangqiCheckmateTitle: '{player} 胜',
+        xiangqiCheckmateDetail: '对方将/帅已被将死，本局结束。',
+        xiangqiStalemateBadge: '困毙',
+        xiangqiStalemateTitle: '{player} 胜',
+        xiangqiStalemateDetail: '对方无棋可走，按困毙判负。',
+        xiangqiResignDetail: '对方认输，本局结束。',
+        xiangqiMoveCount: '手数',
+        xiangqiLastMove: '最后一手',
+
+        // 军棋 Junqi
+        junqiSetupTitle: '开始一局军棋',
+        junqiSetupSubtitle: '选择变体：翻翻棋已可游玩；四国军棋敬请期待。',
+        junqiVariant: '变体',
+        junqiVariantFlip: '翻翻棋',
+        junqiVariantFourKingdom: '四国军棋',
+        junqiVariantFourKingdomSoon: '四国（敬请期待）',
+        junqiRed: '红方',
+        junqiBlack: '黑方',
+        junqiFlip: '翻棋',
+        junqiFirstFlip: '首翻定色',
+        junqiFirstFlipAssigned: '首翻完成：你执 {player}。',
+        junqiHintFirstFlip: '点击任意棋子翻开，翻出的颜色即为你方。',
+        junqiHintPlay: '点击己方已翻棋子查看走法。',
+        junqiFlipIntro: '棋子随机散置。先翻一枚决定己方色。',
+        junqiAnnihilationBadge: '全军覆没',
+        junqiAnnihilationTitle: '{player} 胜',
+        junqiAnnihilationDetail: '对方全部棋子被吃，本局结束。',
+        junqiStalemateBadge: '无子可动',
+        junqiStalemateTitle: '{player} 胜',
+        junqiStalemateDetail: '对方无合法走法，本局结束。',
+        junqiResignDetail: '对方认输，本局结束。',
         coachSourceLocal: '本地 AI',
         coachSourceLlm: 'LLM',
         coachStatusLocal: '本地推荐已显示',
@@ -176,6 +353,12 @@ const translations = {
 
         // 相机控制
         cameraControls: '左键环绕 | 滚轮缩放',
+        cameraPresetDefault: '默认视角',
+        cameraPresetTopDown: '俯视视角',
+        cameraPresetSide: '侧面视角',
+        cameraPresetCorner: '角落视角',
+        cameraPresetClose: '近距离视角',
+        cameraPresetCustom: '自定义视角',
 
         // 说明与引导
         helpCenter: '功能说明',
@@ -258,7 +441,56 @@ const translations = {
         coachReviewFollowed: '这一手和建议一致，节奏保持得很干净。',
         coachReviewFlexible: '你没有完全照做，但这一手仍然保持了不错的质量。',
         coachReviewDeviation: '这手可以继续下，但效率比建议点略低。',
-        coachReviewPunishable: '这手给了对方更多反击空间，下一回合要更谨慎。'
+        coachReviewPunishable: '这手给了对方更多反击空间，下一回合要更谨慎。',
+
+        // 局势阶段
+        phaseGameOverLabel: '终局已定',
+        phaseGameOverPill: '胜负揭晓',
+        phaseGameOverTitle: '关键一手已经落定',
+        phaseGameOverSubtitle: '复盘这一盘的转折。',
+        phaseGameOverBlackSpotlight: '黑方正在塑造攻势',
+        phaseGameOverWhiteSpotlight: '白方正在寻找反击点',
+        phaseGameOverFinishedSpotlight: '胜负已定，复盘这一盘的关键转折。',
+        phaseGameOverMomentumTitle: '终局复盘',
+        phaseGameOverMomentumNote: '回看最后几手。',
+        phaseOpeningLabel: '布局阶段',
+        phaseOpeningPill: '开局布局',
+        phaseOpeningTitle: '抢占天元与关键星位',
+        phaseOpeningSubtitle: '先立形，再争先手。',
+        phaseOpeningBlackSpotlight: '黑方正在塑造攻势',
+        phaseOpeningWhiteSpotlight: '白方正在寻找反击点',
+        phaseOpeningFinishedSpotlight: '胜负已定，复盘这一盘的关键转折。',
+        phaseOpeningMomentumTitle: '棋势未定',
+        phaseOpeningMomentumNote: '先看空间与节奏。',
+        phaseMidgameLabel: '中盘拉扯',
+        phaseMidgamePill: '局势升温',
+        phaseMidgameTitle: '攻守开始交错，判断先后手',
+        phaseMidgameSubtitle: '连威胁，拆对方。',
+        phaseMidgameBlackSpotlight: '黑方正在塑造攻势',
+        phaseMidgameWhiteSpotlight: '白方正在寻找反击点',
+        phaseMidgameFinishedSpotlight: '胜负已定，复盘这一盘的关键转折。',
+        phaseMidgameMomentumTitle: '压力上升',
+        phaseMidgameMomentumNote: '留意活三、活四与先手。',
+        phaseEndgameLabel: '终盘决胜',
+        phaseEndgamePill: '决胜阶段',
+        phaseEndgameTitle: '一步失先，可能直接定胜负',
+        phaseEndgameSubtitle: '先解最高威胁。',
+        phaseEndgameBlackSpotlight: '黑方正在塑造攻势',
+        phaseEndgameWhiteSpotlight: '白方正在寻找反击点',
+        phaseEndgameFinishedSpotlight: '胜负已定，复盘这一盘的关键转折。',
+        phaseEndgameMomentumTitle: '胜负临近',
+        phaseEndgameMomentumNote: '优先算直接胜与强制手。',
+
+        // 结果摘要
+        resultDrawBadge: '平局',
+        resultDrawTitle: '棋盘已满，双方打成均势',
+        resultDrawDetail: '这一局没有出现致命破绽，适合回看中盘节奏与关键防点。',
+        resultResignBadge: '认输结束',
+        resultResignTitle: '{player} 接管胜势',
+        resultResignDetail: '局面已经倾斜，认输为这盘对局画上句点。可以直接再开一局继续。',
+        resultWinBadge: '连五制胜',
+        resultWinTitle: '{player} 完成致胜连线',
+        resultWinDetail: '关键连线已经形成，攻守转换在这一手彻底落定。'
     },
     en: {
         // Setup
@@ -336,6 +568,151 @@ const translations = {
         coachPlan: 'Plan',
         coachConfidence: 'Confidence',
         coachReanalyze: 'Reanalyze',
+        coachUploadImage: 'Upload Board',
+        coachImportBoard: 'Import Position',
+        coachAnalyzing: 'Recognizing board...',
+        coachAnalyzeSuccess: 'Done — {count} stones detected.',
+        coachAnalyzeFailed: 'Board recognition failed.',
+        coachImportSuccess: 'Position imported — {count} moves.',
+        coachImportConfirm: 'This will replace the current game. Continue?',
+        coachPreviewEdit: 'Preview & Edit',
+        coachPreviewHint: 'Tap cells to cycle (empty → black → white → empty)',
+        coachPreviewCommit: 'Confirm and Import',
+        coachPreviewCancel: 'Exit Edit',
+        coachAnalyzeCancel: 'Cancel',
+        coachAnalyzeCanceled: 'Recognition canceled.',
+        coachDropHint: 'Drop to upload',
+        coachConfirmTitle: 'Import Recognition',
+        coachConfirmCancel: 'Cancel',
+        coachConfirmOk: 'Import',
+        coachConfidenceLabel: 'Confidence {pct}%',
+        coachStoneCount: '{count} stones',
+        devPanelTitle: 'Dev Tools',
+        devPanelSnapshot: 'Live Snapshot',
+        devPanelLlmLog: 'LLM Request Log',
+        devPanelLlmEmpty: 'No LLM requests yet.',
+        devPanelClose: 'Close panel',
+
+        // Multi-game launcher
+        launcherTitle: 'Four games, one board room',
+        launcherSubtitle: 'Pick one to begin. The rest are on the way.',
+        launcherWelcome: 'Board Games',
+        launcherAvailableBadge: 'Available',
+        launcherComingSoonBadge: 'Coming Soon',
+        launcherBackToLauncher: 'Back to library',
+        launcherEnter: 'Enter match',
+        comingSoon: 'Coming soon',
+        gameGomokuTitle: 'Gomoku',
+        gameGomokuTagline: 'Five in a row wins. 3D immersive board, QI coach, and image import.',
+        gameGoTitle: 'Go',
+        gameGoTagline: 'Liberties, capture, and territory scoring on 9/13/19 boards. 2D/3D toggle.',
+        gameChessTitle: 'Chess',
+        gameChessTagline: 'Castling, en passant, promotion — full rules with heuristic AI.',
+        gameXiangqiTitle: 'Xiangqi',
+        gameXiangqiTagline: 'The river and nine-palace. Full rules with built-in AI.',
+        gameJunqiTitle: 'Junqi',
+        gameJunqiTagline: 'Flip Chess (hidden pieces) playable now; Four-Kingdom variant in progress.',
+
+        // Go
+        goSetupTitle: 'Start a Go match',
+        goSetupSubtitle: 'Choose board size, komi and mode before the first stone.',
+        goBoardSize: 'Board',
+        goMode: 'Mode',
+        goHandicap: 'Handicap',
+        goPass: 'Pass',
+        go3DToggle: '3D',
+        go3DUnavailable: '3D view unavailable; reverted to 2D.',
+        goGameStart: 'The Go game begins. Black moves first.',
+        goPassedMessage: '{player} passes.',
+        goIllegalOccupied: 'This point is occupied.',
+        goIllegalSuicide: 'That would be suicide.',
+        goIllegalKo: 'Ko — try somewhere else first.',
+        goCapturedBlack: 'Black captures',
+        goCapturedWhite: 'White captures',
+        goBlackScore: 'Black',
+        goWhiteScore: 'White',
+        goScoreBadge: 'Area scoring',
+        goScoreWinnerTitle: '{player} wins by {margin}',
+        goScoreDrawTitle: 'The game ends in a draw',
+        goScoreDetail: 'Chinese (area) scoring. Komi {komi}.',
+        goResignDetail: 'The opponent resigned. The game ends.',
+
+        // Chess
+        chessSetupTitle: 'Start a Chess match',
+        chessSetupSubtitle: 'Pick mode and difficulty to begin.',
+        chessMode: 'Mode',
+        chessColorWhite: 'White (first)',
+        chessColorBlack: 'Black (second)',
+        chessYourColor: 'Your side',
+        chessWhite: 'White',
+        chessBlack: 'Black',
+        chessGameStart: 'Match begins. White moves first.',
+        chessCheck: 'Check',
+        chessCheckmate: 'Checkmate',
+        chessStalemate: 'Stalemate',
+        chessDraw: 'Draw',
+        chessDraw50: 'Fifty-move rule draw',
+        chessDrawInsufficient: 'Insufficient material draw',
+        chessDrawDetail: 'The game is a draw.',
+        chessCheckmateTitle: '{player} delivers checkmate',
+        chessCheckmateDetail: 'The game is decided.',
+        chessStalemateTitle: 'Stalemate — no legal moves',
+        chessStalemateDetail: 'The side to move has no legal move though not in check.',
+        chessResignDetail: 'The opponent resigned. The game ends.',
+        chessPromoteTitle: 'Choose promotion',
+        chessPromoteQueen: 'Queen',
+        chessPromoteRook: 'Rook',
+        chessPromoteBishop: 'Bishop',
+        chessPromoteKnight: 'Knight',
+        chessMoveCount: 'Moves',
+        chessLastMove: 'Last move',
+        chessCapturedByWhite: 'White captures',
+        chessCapturedByBlack: 'Black captures',
+
+        // Xiangqi
+        xiangqiSetupTitle: 'Start a Xiangqi match',
+        xiangqiSetupSubtitle: 'Red moves first. Chariots, horses, cannons — across the river.',
+        xiangqiMode: 'Mode',
+        xiangqiYourColor: 'Your side',
+        xiangqiColorRed: 'Red (first)',
+        xiangqiColorBlack: 'Black (second)',
+        xiangqiRed: 'Red',
+        xiangqiBlack: 'Black',
+        xiangqiRiverLeft: 'Chu River',
+        xiangqiRiverRight: 'Han Border',
+        xiangqiGameStart: 'Red moves first. Let the match begin.',
+        xiangqiCheckmateBadge: 'Checkmate',
+        xiangqiCheckmateTitle: '{player} wins',
+        xiangqiCheckmateDetail: 'The opposing general is checkmated.',
+        xiangqiStalemateBadge: 'Stalemate',
+        xiangqiStalemateTitle: '{player} wins',
+        xiangqiStalemateDetail: 'Opponent has no legal move — counted as a loss in Xiangqi.',
+        xiangqiResignDetail: 'The opponent resigned. The game ends.',
+        xiangqiMoveCount: 'Moves',
+        xiangqiLastMove: 'Last move',
+
+        // Junqi
+        junqiSetupTitle: 'Start a Junqi match',
+        junqiSetupSubtitle: 'Flip Chess is playable. Four-Kingdom Junqi is coming soon.',
+        junqiVariant: 'Variant',
+        junqiVariantFlip: 'Flip Chess',
+        junqiVariantFourKingdom: 'Four-Kingdom',
+        junqiVariantFourKingdomSoon: 'Four-Kingdom (soon)',
+        junqiRed: 'Red',
+        junqiBlack: 'Black',
+        junqiFlip: 'Flip',
+        junqiFirstFlip: 'First flip decides color',
+        junqiFirstFlipAssigned: 'First flip done: you play {player}.',
+        junqiHintFirstFlip: 'Tap any piece to flip. Revealed color becomes yours.',
+        junqiHintPlay: 'Tap one of your revealed pieces to see its moves.',
+        junqiFlipIntro: 'Pieces are randomly placed face-down. Flip one to set your color.',
+        junqiAnnihilationBadge: 'Annihilation',
+        junqiAnnihilationTitle: '{player} wins',
+        junqiAnnihilationDetail: 'All opposing pieces have been captured.',
+        junqiStalemateBadge: 'No move',
+        junqiStalemateTitle: '{player} wins',
+        junqiStalemateDetail: 'The opponent has no legal move.',
+        junqiResignDetail: 'The opponent resigned. The game ends.',
         coachSourceLocal: 'Local AI',
         coachSourceLlm: 'LLM',
         coachStatusLocal: 'Local suggestion shown',
@@ -432,6 +809,12 @@ const translations = {
 
         // Camera
         cameraControls: 'Left-drag to orbit | Scroll to zoom',
+        cameraPresetDefault: 'Default View',
+        cameraPresetTopDown: 'Top-Down View',
+        cameraPresetSide: 'Side View',
+        cameraPresetCorner: 'Corner View',
+        cameraPresetClose: 'Close View',
+        cameraPresetCustom: 'Custom View',
 
         // Help and first-run guide
         helpCenter: 'Help',
@@ -514,7 +897,56 @@ const translations = {
         coachReviewFollowed: 'You matched the recommendation and kept the tempo clean.',
         coachReviewFlexible: 'You chose a different move, but the quality is still solid.',
         coachReviewDeviation: 'The move is playable, but it is less efficient than the recommended point.',
-        coachReviewPunishable: 'This move gives the opponent more counterplay. The next reply needs extra care.'
+        coachReviewPunishable: 'This move gives the opponent more counterplay. The next reply needs extra care.',
+
+        // Phase labels
+        phaseGameOverLabel: 'Game Finished',
+        phaseGameOverPill: 'Outcome Locked',
+        phaseGameOverTitle: 'The decisive move has landed',
+        phaseGameOverSubtitle: 'Review the turning point.',
+        phaseGameOverBlackSpotlight: 'Black is shaping the initiative',
+        phaseGameOverWhiteSpotlight: 'White is looking for counterplay',
+        phaseGameOverFinishedSpotlight: 'The winner is set. Review the turning point.',
+        phaseGameOverMomentumTitle: 'Final review',
+        phaseGameOverMomentumNote: 'Look back at the last few moves.',
+        phaseOpeningLabel: 'Opening',
+        phaseOpeningPill: 'Opening Shape',
+        phaseOpeningTitle: 'Claim the center and key star points',
+        phaseOpeningSubtitle: 'Build shape first, then fight for tempo.',
+        phaseOpeningBlackSpotlight: 'Black is shaping the initiative',
+        phaseOpeningWhiteSpotlight: 'White is looking for counterplay',
+        phaseOpeningFinishedSpotlight: 'The winner is set. Review the turning point.',
+        phaseOpeningMomentumTitle: 'Shape first',
+        phaseOpeningMomentumNote: 'Watch space and tempo.',
+        phaseMidgameLabel: 'Midgame',
+        phaseMidgamePill: 'Battle Rising',
+        phaseMidgameTitle: 'Attack and defense start to overlap',
+        phaseMidgameSubtitle: 'Link threats and break shape.',
+        phaseMidgameBlackSpotlight: 'Black is shaping the initiative',
+        phaseMidgameWhiteSpotlight: 'White is looking for counterplay',
+        phaseMidgameFinishedSpotlight: 'The winner is set. Review the turning point.',
+        phaseMidgameMomentumTitle: 'Pressure is building',
+        phaseMidgameMomentumNote: 'Track open threes, open fours, and forcing moves.',
+        phaseEndgameLabel: 'Endgame',
+        phaseEndgamePill: 'Winning Threats',
+        phaseEndgameTitle: 'One tempo loss can decide everything',
+        phaseEndgameSubtitle: 'Answer the biggest threat first.',
+        phaseEndgameBlackSpotlight: 'Black is shaping the initiative',
+        phaseEndgameWhiteSpotlight: 'White is looking for counterplay',
+        phaseEndgameFinishedSpotlight: 'The winner is set. Review the turning point.',
+        phaseEndgameMomentumTitle: 'The winning move is near',
+        phaseEndgameMomentumNote: 'Prioritize direct wins and forced lines.',
+
+        // Result summaries
+        resultDrawBadge: 'Draw',
+        resultDrawTitle: 'The board is full and the game is balanced',
+        resultDrawDetail: 'No fatal break appeared in this round. It is a good game to review the midgame rhythm and key defensive points.',
+        resultResignBadge: 'Resignation',
+        resultResignTitle: '{player} takes over the game',
+        resultResignDetail: 'The position has already tilted. Resignation closes this round cleanly and you can launch the next one immediately.',
+        resultWinBadge: 'Five in a Row',
+        resultWinTitle: '{player} completes the winning line',
+        resultWinDetail: 'The decisive connection is formed and the initiative fully converts on this move.'
     }
 };
 
@@ -522,6 +954,8 @@ class I18n {
     constructor() {
         this.currentLang = this.detectLanguage();
         this.translations = translations;
+        this.remoteTranslations = {};
+        this.flatRemoteTranslations = {};
         this.listeners = [];
     }
 
@@ -541,14 +975,85 @@ class I18n {
     }
 
     /**
+     * 从远程加载翻译文件
+     * @param {string} lang 语言代码
+     * @returns {Promise<boolean>}
+     */
+    async loadTranslations(lang) {
+        try {
+            const response = await fetch(`src/locales/${lang}.json`);
+            if (response.ok) {
+                const data = await response.json();
+                this.remoteTranslations[lang] = data;
+                this.flatRemoteTranslations[lang] = flattenTranslations(data);
+                return true;
+            }
+        } catch { /* ignore */ }
+        return false;
+    }
+
+    /**
      * 获取翻译文本
-     * @param {string} key 翻译键
-     * @param {Object} params 插值参数
+     * @param {string} key 翻译键，支持点路径（如 'section.key'）
+     * @param {Object} params 插值参数；若包含 count 且值为复数对象则自动选择单复数形式
      * @returns {string}
      */
     t(key, params = {}) {
-        const text = this.translations[this.currentLang]?.[key] || key;
-        return this.interpolate(text, params);
+        let val;
+
+        // 1. 尝试当前语言的远程翻译（点路径或叶子键）
+        val = resolve(this.remoteTranslations[this.currentLang], key);
+        if (val === undefined) {
+            val = this.flatRemoteTranslations[this.currentLang]?.[key];
+        }
+        if (val !== undefined) {
+            return this.interpolate(this._formatPlural(val, params, this.currentLang), params);
+        }
+
+        // 2. 尝试当前语言的内置翻译
+        val = resolve(this.translations[this.currentLang], key);
+        if (val !== undefined) {
+            return this.interpolate(this._formatPlural(val, params, this.currentLang), params);
+        }
+
+        // 3. 当前语言非英语时尝试英语远程翻译
+        if (this.currentLang !== 'en') {
+            val = resolve(this.remoteTranslations.en, key);
+            if (val === undefined) {
+                val = this.flatRemoteTranslations.en?.[key];
+            }
+            if (val !== undefined) {
+                return this.interpolate(this._formatPlural(val, params, 'en'), params);
+            }
+
+            // 4. 尝试英语内置翻译
+            val = resolve(this.translations.en, key);
+            if (val !== undefined) {
+                return this.interpolate(this._formatPlural(val, params, 'en'), params);
+            }
+        }
+
+        // 5. 返回键名作为兜底
+        return key;
+    }
+
+    /**
+     * 处理复数形式
+     * @param {*} val 翻译值
+     * @param {Object} params 参数
+     * @param {string} lang 语言代码
+     * @returns {*}
+     */
+    _formatPlural(val, params, lang) {
+        if (typeof val === 'object' && val !== null && val.one && val.other) {
+            const count = params.count;
+            if (count !== undefined) {
+                const rules = new Intl.PluralRules(lang);
+                return val[rules.select(count)] || val.other;
+            }
+            return val.other;
+        }
+        return val;
     }
 
     /**
@@ -562,10 +1067,10 @@ class I18n {
 
     /**
      * 切换语言
-     * @param {string} lang 'zh' | 'en'
+     * @param {string} lang 'zh' | 'en' 或已通过 loadTranslations() 加载的语言
      */
     setLanguage(lang) {
-        if (this.translations[lang]) {
+        if (this.translations[lang] || this.remoteTranslations[lang]) {
             this.currentLang = lang;
             localStorage.setItem('gomoku-lang', lang);
             this.notifyListeners();
@@ -587,6 +1092,15 @@ class I18n {
      */
     onChange(callback) {
         this.listeners.push(callback);
+    }
+
+    /**
+     * 移除语言变更监听器
+     * @param {Function} callback
+     */
+    offChange(callback) {
+        const idx = this.listeners.indexOf(callback);
+        if (idx > -1) this.listeners.splice(idx, 1);
     }
 
     /**

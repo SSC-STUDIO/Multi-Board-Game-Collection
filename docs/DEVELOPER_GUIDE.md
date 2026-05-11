@@ -123,7 +123,7 @@
 **依赖模块**:
 - GameState (游戏状态)
 - GameRules (游戏规则)
-- AIPlayer (AI玩家)
+- AI (人工智能)
 - Renderer (渲染器)
 
 **示例**:
@@ -189,49 +189,59 @@ const app = new GomokuApp();
 
 ---
 
-### AIPlayer - AI算法
+### AI算法
 
 **文件**: `src/game/ai.js`
 
 **职责**: 实现五子棋AI算法。
 
 **算法原理**:
-采用 **启发式评估 + 搜索算法** 的组合策略。
+采用 **启发式评分 + 棋型识别** 的决策策略。轻松/进阶难度使用纯贪心评分，大师难度额外使用 minimax + alpha-beta 剪枝搜索。
 
 **评估要素**:
-1. **棋型评分**:
-   - 连五: 100000分
-   - 活四: 10000分
-   - 冲四: 1000分
-   - 活三: 100分
-   - 眠三: 10分
-   - 活二: 1分
+1. **棋型评分** (`getLineScore`):
+   - 连五: 500,000分
+   - 活四 (openEnds=2): 80,000分
+   - 冲四 (openEnds=1): 12,000分
+   - 活三 (openEnds=2): 5,200分
+   - 眠三 (openEnds=1): 1,000分
+   - 活二 (openEnds=2): 380分
+   - 眠二 (openEnds=1): 90分
 
-2. **位置权重**:
-   - 中心位置权重更高
-   - 越靠近中心,分数越高
+2. **特殊棋型加成** (`getPatternBonus`):
+   - 四子棋型匹配: +18,000分
+   - 三子棋型匹配: +2,800分
 
-3. **攻防评估**:
-   - 进攻得分: 形成威胁棋型
-   - 防守得分: 阻止对手威胁
+3. **复合威胁加成** (`getCompositeBonus`):
+   - 双活三: +120,000分
+   - 四三配合: +200,000分
+   - 双四: +150,000分
+   - 单活四: +25,000分
+   - 单活三: +3,000分
+
+4. **位置权重**:
+   - 中心偏置: 距离中心越近分数越高
+
+5. **攻防评估**:
+   - 进攻得分: 形成威胁棋型 (权重 1.18)
+   - 防守得分: 阻止对手威胁 (权重 0.92)
 
 **难度设置**:
-- **轻松**: 浅层搜索(1-2层),简单评估
-- **进阶**: 中等深度搜索(2-3层),完整评估
-- **大师**: 深度搜索(3-4层),高级评估
+- **轻松 (easy)**: 从前6个候选位置中随机选择 (纯贪心评分，无搜索)
+- **进阶 (medium)**: 从前3个候选位置按分数权重概率选择 (纯贪心评分，无搜索)
+- **大师 (hard)**: 使用 minimax + alpha-beta 剪枝搜索 (深度2-4层)，选择搜索最优位置
 
 **核心方法**:
-- `getBestMove(state, difficulty)` - 获取最佳落子
-- `evaluatePosition(board, row, col, player)` - 评估位置
-- `minimax(state, depth, isMaximizing)` - 极大极小搜索
-- `alphaBeta(state, depth, alpha, beta)` - Alpha-Beta剪枝
+- `getBestMove(state, color)` - 获取最佳落子位置
+- `getMoveGuidance(state, color)` - 获取落子建议和风险分析
+- `evaluateMove(state, row, col, color)` - 评估单个位置得分
+- `getAIDelay(level)` - 获取AI思考延迟时间
 
 **示例**:
 ```javascript
-import AIPlayer from './game/ai.js';
+import { getBestMove } from './game/ai.js';
 
-const ai = new AIPlayer();
-const bestMove = ai.getBestMove(gameState, 'medium');
+const bestMove = getBestMove(gameState, 'black');
 // 返回: { row: 7, col: 7 }
 ```
 
@@ -399,9 +409,9 @@ npm run check
    - 有效落子判断
 
 2. **AI测试**
-   - 评估函数正确性
-   - 搜索算法正确性
-   - 不同难度表现
+   - 评分函数正确性
+   - 不同难度落子策略
+   - 棋型识别与复合威胁检测
 
 3. **工具函数测试**
    - 坐标转换
@@ -462,9 +472,9 @@ npm run build:steam
    - 按需渲染
 
 2. **算法优化**
-   - Alpha-Beta剪枝
-   - 启发式评估
-   - 搜索深度限制
+   - 启发式评分函数
+   - 棋型模式识别
+   - 位置权重评估
 
 3. **资源优化**
    - 零依赖设计
@@ -509,8 +519,7 @@ npm run build:steam
 
 ### 五子棋算法
 - [五子棋AI算法详解](https://www.aaai.org/)
-- [极大极小算法](https://en.wikipedia.org/wiki/Minimax)
-- [Alpha-Beta剪枝](https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning)
+- [启发式评估](https://en.wikipedia.org/wiki/Heuristic_evaluation)
 
 ### Web技术
 - [MDN Web Docs](https://developer.mozilla.org/)
@@ -532,3 +541,49 @@ npm run build:steam
 ## 📄 许可证
 
 本项目采用 MIT 许可证,详见 [LICENSE](../LICENSE)。
+
+---
+
+## 代码注释规范
+
+### 文件级注释
+每个源文件顶部需包含 `@module` JSDoc 注释，标明文件职责和所属模块。示例：
+
+```javascript
+/** 游戏状态管理：创建和初始化游戏状态 @module game/state */
+```
+
+### 导出函数
+所有 `export` 导出的函数必须包含 JSDoc，标注 `@param` 和 `@returns`。复杂对象类型使用 `@typedef` 定义。示例：
+
+```javascript
+/**
+ * 评估指定位置对指定玩家的价值
+ * @param {GameState} state - 当前游戏状态
+ * @param {number} row - 行坐标
+ * @param {number} col - 列坐标
+ * @param {string} color - 棋子颜色 ('black' | 'white')
+ * @returns {number} 得分值
+ */
+export function evaluateMove(state, row, col, color) { ... }
+```
+
+### 导出常量
+所有 `export` 导出的常量必须包含 `@type` JSDoc 注释。示例：
+
+```javascript
+/** @type {number} 练习模式的手数限制 */
+export const PRACTICE_MOVE_LIMIT = 60;
+```
+
+### 非导出函数
+内部函数（未 export）的 JSDoc 为可选，但必须有描述性的函数名或在函数体前添加行内注释说明其作用。
+
+### 节标题
+大型源文件应使用 `// === Section Name ===` 格式的节标题来划分逻辑区域。搜索算法、评分逻辑等应有独立的节。
+
+### 非明显逻辑
+复杂算法必须有行内注释说明"为什么"这么做，而非"做了什么"。例如禁手检测、alpha-beta 剪枝、复合威胁检测等处。
+
+### 参考示例
+`src/config/gameConfig.js` 是代码注释规范的正面示例，可作为对标参考。

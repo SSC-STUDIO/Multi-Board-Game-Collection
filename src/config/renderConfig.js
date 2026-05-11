@@ -3,7 +3,8 @@
  * 集中管理棋盘、棋子、光照、相机的渲染参数
  */
 
-import * as THREE from 'three';
+// THREE.ACESFilmicToneMapping = 6 (避免在此配置模块中引入 Three.js 运行时依赖)
+const ACESFilmicToneMapping = 6;
 
 export const RENDER_CONFIG = {
     // 棋盘配置
@@ -100,7 +101,7 @@ export const RENDER_CONFIG = {
         stencil: false,
         shadowMapEnabled: true,
         pixelRatioCap: 2,
-        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMapping: ACESFilmicToneMapping,
         toneMappingExposure: 1.0,
     },
 

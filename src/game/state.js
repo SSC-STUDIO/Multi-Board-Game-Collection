@@ -1,41 +1,7 @@
-import { DEFAULT_OPTIONS } from '../config/gameConfig.js';
-
-export function createOptions(overrides = {}) {
-    return {
-        ...DEFAULT_OPTIONS,
-        ...overrides
-    };
-}
-
-export function createEmptyBoard(size) {
-    return Array.from({ length: size }, () => Array(size).fill(null));
-}
-
-export function createGameState(options) {
-    return {
-        options: createOptions(options),
-        board: createEmptyBoard(options.size),
-        currentPlayer: 'black',
-        gameOver: false,
-        moveHistory: [],
-        lastMove: null,
-        hintMove: null,
-        aiThinking: false,
-        coachSuggestion: null,
-        coachAlternatives: [],
-        coachSource: 'local',
-        coachLlmStatus: 'disabled',
-        coachInsight: '',
-        coachRisk: '',
-        coachPlan: '',
-        coachConfidence: null,
-        coachFocus: null,
-        coachFeedback: '',
-        selectedCell: null,
-        awaitingPlacementConfirm: false,
-        winningCells: [],
-        resultSummary: null,
-        resultType: null,
-        resultWinnerColor: null
-    };
-}
+/**
+ * 向后兼容 shim。
+ * 新位置：src/games/gomoku/state.js。
+ * 现有 import `../../game/state.js` 继续工作。后续 sprint 可以逐步替换 import 路径。
+ * @module game/state
+ */
+export * from '../games/gomoku/state.js';

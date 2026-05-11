@@ -14,6 +14,9 @@
     "check": "node tools/check.mjs",
     "serve": "node tools/serve.mjs",
     "build": "node tools/build.mjs",
+    "dev": "vite",
+    "vite:build": "vite build",
+    "vite:preview": "vite preview",
     "android:sync": "npm run build && npx cap sync android",
     "android:open": "npm run android:sync && npx cap open android",
     "android:build:debug": "npm run android:sync && node tools/android-gradle.mjs assembleDebug && node tools/copy-android-apk.mjs debug",
@@ -24,7 +27,9 @@
     "build:all": "electron-builder --config electron.json -mwl",
     "start": "node --input-type=module -e \"import path from 'node:path'; import { pathToFileURL } from 'node:url'; const entry = path.resolve(path.dirname(process.env.npm_package_json), 'tools/run-electron.mjs'); await import(pathToFileURL(entry).href);\"",
     "start:dev": "node --input-type=module -e \"process.env.GOMOKU_ELECTRON_DEV='1'; import path from 'node:path'; import { pathToFileURL } from 'node:url'; const entry = path.resolve(path.dirname(process.env.npm_package_json), 'tools/run-electron.mjs'); await import(pathToFileURL(entry).href);\"",
-    "clean": "node tools/clean.mjs"
+    "clean": "node tools/clean.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "gomoku",
@@ -42,6 +47,8 @@
   "devDependencies": {
     "@capacitor/cli": "^8.3.1",
     "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron-builder": "^24.9.1",
+    "vite": "^8.0.10",
+    "vitest": "^4.1.5"
   }
 }

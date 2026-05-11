@@ -1,5 +1,15 @@
 import { i18n } from '../utils/i18n.js';
 
+/**
+ * DOM 引用与基础 UI 辅助方法。
+ * @module ui/dom
+ */
+
+/**
+ * 获取页面中所有关键 DOM 元素的引用
+ * @param {Document|HTMLElement} [root=document] - 查询根元素
+ * @returns {Object} 按功能分组的 DOM 元素映射
+ */
 export function getDOMReferences(root = document) {
     return {
         overlay: root.querySelector('.ui-overlay'),
@@ -10,6 +20,7 @@ export function getDOMReferences(root = document) {
         scene3d: root.getElementById('scene-3d'),
         board: root.getElementById('board'),
         boardShell: root.getElementById('board-shell'),
+        boardPreviewOverlay: root.getElementById('board-preview-overlay'),
         message: root.getElementById('message'),
         moveList: root.getElementById('move-list'),
         aiThinking: root.getElementById('ai-thinking'),
@@ -86,7 +97,8 @@ export function getDOMReferences(root = document) {
             immersiveToggle: root.getElementById('immersive-ui-btn'),
             placementConfirm: root.getElementById('placement-confirm-btn'),
             selectionCancel: root.getElementById('selection-cancel-btn'),
-            setupLlmSettings: root.getElementById('setup-llm-settings-btn')
+            setupLlmSettings: root.getElementById('setup-llm-settings-btn'),
+            setupBackToLauncher: root.getElementById('setup-back-to-launcher-btn')
         },
         guidance: {
             card: root.getElementById('coach-card'),
@@ -104,7 +116,19 @@ export function getDOMReferences(root = document) {
             feedbackWrap: root.getElementById('coach-feedback-wrap'),
             feedback: root.getElementById('coach-feedback'),
             rerun: root.getElementById('coach-rerun-btn'),
-            settings: root.getElementById('coach-llm-settings-btn')
+            settings: root.getElementById('coach-llm-settings-btn'),
+            upload: root.getElementById('coach-upload-btn'),
+            imageInput: root.getElementById('coach-image-input'),
+            importWrap: root.getElementById('coach-import-wrap'),
+            importBtn: root.getElementById('coach-import-btn'),
+            editBtn: root.getElementById('coach-edit-btn'),
+            analyzeImage: root.getElementById('coach-analyze-image'),
+            analyzeCount: root.getElementById('coach-analyze-count'),
+            analyzeConfidence: root.getElementById('coach-analyze-confidence'),
+            previewHint: root.getElementById('coach-preview-hint'),
+            previewCommit: root.getElementById('coach-preview-commit'),
+            previewCancel: root.getElementById('coach-preview-cancel'),
+            previewActions: root.getElementById('coach-preview-actions')
         },
         llmSettings: {
             overlay: root.getElementById('llm-settings-overlay'),
@@ -141,12 +165,30 @@ export function getDOMReferences(root = document) {
     };
 }
 
+/**
+ * 设置选项组中的激活按钮
+ * @param {HTMLElement} group - 选项按钮容器
+ * @param {HTMLElement} activeButton - 当前激活的按钮元素
+ * @returns {void}
+ */
 export function setActiveButton(group, activeButton) {
     group.querySelectorAll('.option-btn').forEach((button) => {
-        button.classList.toggle('active', button === activeButton);
+        const isActive = button === activeButton;
+        button.classList.toggle('active', isActive);
+        // Sync ARIA checked state for radio buttons
+        if (button.getAttribute('role') === 'radio') {
+            button.setAttribute('aria-checked', isActive ? 'true' : 'false');
+        }
     });
 }
 
+/**
+ * 通过 data 属性值设置选项组中的激活按钮
+ * @param {HTMLElement} group - 选项按钮容器
+ * @param {string} attribute - data 属性名（不含 data- 前缀）
+ * @param {string} value - 要匹配的属性值
+ * @returns {void}
+ */
 export function setActiveByValue(group, attribute, value) {
     const button = group?.querySelector(`[data-${attribute}="${value}"]`);
     if (button) {
@@ -154,6 +196,12 @@ export function setActiveByValue(group, attribute, value) {
     }
 }
 
+/**
+ * 设置语言切换按钮的事件监听与状态同步
+ * @param {Object} dom - DOM 元素引用集合
+ * @param {Function} [onChange=null] - 语言切换后的回调函数
+ * @returns {void}
+ */
 export function setupLanguageSwitch(dom, onChange = null) {
     const sync = () => {
         const lang = i18n.getLanguage();

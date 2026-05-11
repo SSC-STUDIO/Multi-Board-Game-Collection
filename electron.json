@@ -3,7 +3,7 @@
   "productName": "五子棋 · Gomoku",
   "version": "1.0.0",
   "description": "一个精致的五子棋游戏",
-  "main": "main.js",
+  "main": "electron-main.js",
   "author": "Your Name",
   "license": "MIT",
   "build": {
@@ -19,7 +19,9 @@
       "assets/**/*",
       "locales/**/*",
       "steam/**/*",
-      "version.json"
+      "version.json",
+      "electron-preload.js",
+      "electron-main.js"
     ],
     "win": {
       "target": [
@@ -103,10 +105,9 @@
       }
     }
   },
-  "dependencies": {
-    "electron": "^28.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "electron": "^28.0.0",
     "electron-builder": "^24.9.1"
   }
 }

@@ -1,15 +1,41 @@
+/** 音效管理：棋盘音效与环境音景合成 @module audio/SoundManager */
+
 const STORAGE_KEY = 'gomoku-sound-enabled';
 
+/**
+ * 基于 Web Audio API 的音频管理器。
+ * 负责音效开关持久化、场景环境音景，以及交互/对局音效的即时合成。
+ */
 export class SoundManager {
+    /** @type {number} 主音量系数 */
+    static MASTER_VOLUME = 0.16;
+
+    // === Lifecycle ===
+
+    /**
+     * 初始化音频管理器的基础状态，但延迟创建实际的 `AudioContext`。
+     */
     constructor() {
-        this.AudioContextClass = window.AudioContext || window.webkitAudioContext || null;
-        this.context = null;
-        this.masterGain = null;
-        this.enabled = this.loadEnabled();
-        this.ambienceCue = null;
-        this.ambienceHandle = null;
+    /** @type {typeof AudioContext|null} */
+    this.AudioContextClass = window.AudioContext || window.webkitAudioContext || null;
+    /** @type {AudioContext|null} */
+    this.context = null;
+    /** @type {GainNode|null} */
+    this.masterGain = null;
+    /** @type {boolean} */
+    this.enabled = this.loadEnabled();
+    /** @type {string|null} */
+    this.ambienceCue = null;
+    /** @type {{ cue: string, output: GainNode, cleanup: Array<{stop: Function}> }|null} */
+    this.ambienceHandle = null;
+    /** @type {Map<string, AudioBuffer>} */
+    this.noiseBufferCache = new Map();
     }
 
+    /**
+     * 从 localStorage 读取音效启用状态
+     * @returns {boolean} 音效是否启用（默认 true）
+     */
     loadEnabled() {
         try {
             const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -19,6 +45,9 @@ export class SoundManager {
         }
     }
 
+    /**
+     * 将音效启用状态持久化到 localStorage
+     */
     persistEnabled() {
         try {
             window.localStorage.setItem(STORAGE_KEY, String(this.enabled));
@@ -27,21 +56,39 @@ export class SoundManager {
         }
     }
 
+    /**
+     * 获取音效是否启用
+     * @returns {boolean} 音效启用状态
+     */
     isEnabled() {
         return this.enabled;
     }
 
+    /**
+     * 设置音效启用状态并持久化，同时更新主音量
+     * @param {boolean} enabled - 是否启用音效
+     */
     setEnabled(enabled) {
         this.enabled = Boolean(enabled);
         this.persistEnabled();
-        this.updateMasterLevel(this.enabled ? 0.16 : 0);
+        this.updateMasterLevel(this.enabled ? SoundManager.MASTER_VOLUME : 0);
     }
 
+    /**
+     * 切换音效启用/停用状态
+     * @returns {boolean} 切换后的音效启用状态
+     */
     toggle() {
         this.setEnabled(!this.enabled);
         return this.enabled;
     }
 
+    // === Audio Graph ===
+
+    /**
+     * 延迟创建 AudioContext 实例（单例模式），初始化主音量增益节点
+     * @returns {AudioContext|null} AudioContext 实例，若 Web Audio API 不可用则返回 null
+     */
     ensureContext() {
         if (!this.AudioContextClass) {
             return null;
@@ -53,7 +100,7 @@ export class SoundManager {
 
         const context = new this.AudioContextClass();
         const masterGain = context.createGain();
-        masterGain.gain.value = this.enabled ? 0.16 : 0;
+        masterGain.gain.value = this.enabled ? SoundManager.MASTER_VOLUME : 0;
         masterGain.connect(context.destination);
 
         this.context = context;
@@ -61,6 +108,10 @@ export class SoundManager {
         return context;
     }
 
+    /**
+     * 更新主音量增益值
+     * @param {number} level - 目标音量值（0-1）
+     */
     updateMasterLevel(level) {
         if (!this.masterGain || !this.context) {
             return;
@@ -71,6 +122,10 @@ export class SoundManager {
         this.masterGain.gain.setTargetAtTime(level, now, 0.015);
     }
 
+    /**
+     * 恢复 AudioContext 并重新应用音景
+     * @returns {Promise<boolean>} 是否成功解锁
+     */
     unlock() {
         const context = this.ensureContext();
         if (!context) {
@@ -80,7 +135,7 @@ export class SoundManager {
         if (context.state === 'suspended') {
             return context.resume()
                 .then(() => {
-                    this.updateMasterLevel(this.enabled ? 0.16 : 0);
+                    this.updateMasterLevel(this.enabled ? SoundManager.MASTER_VOLUME : 0);
                     this.applyAmbience(this.ambienceCue, { forceRebuild: true });
                     return true;
                 })
@@ -91,15 +146,36 @@ export class SoundManager {
         return Promise.resolve(true);
     }
 
+    // === Ambience ===
+
+    /**
+     * 设置当前音景场景标识，并触发音景重建
+     * @param {string|null} cue - 音景标识符（如 "home-active", "park-thinking"），null 表示清除音景
+     * @returns {void}
+     */
     setAmbience(cue) {
         this.ambienceCue = cue || null;
         this.applyAmbience(this.ambienceCue);
     }
 
+    /**
+     * 获取当前音景场景标识
+     * @returns {string|null} 当前音景标识符，无音景时返回 null
+     */
     getAmbienceCue() {
         return this.ambienceCue;
     }
 
+    /**
+     * 应用（重建）指定音景场景
+     * 根据场景类型（home/park/competition）和阶段（setup/active/thinking/finished）
+     * 组合对应的噪声层与 drone 层，连接到主音量输出。
+     * 若 forceRebuild 为 false 且 cue 与当前音景相同，则跳过重建。
+     * @param {string|null} cue - 音景标识符，null 则清除音景
+     * @param {{ forceRebuild?: boolean }} [options] - 选项
+     * @param {boolean} [options.forceRebuild=false] - 是否强制重建（即使 cue 未变）
+     * @returns {void}
+     */
     applyAmbience(cue, { forceRebuild = false } = {}) {
         if (!cue) {
             this.clearAmbience();
@@ -129,6 +205,7 @@ export class SoundManager {
         ambienceOutput.gain.value = stateLevel;
         ambienceOutput.connect(this.masterGain);
 
+        // 每个场景都由噪声底床 + 若干 drone 叠加而成，拓扑保持一致，便于统一清理与渐进替换。
         const cleanup = [];
 
         if (scene === 'home') {
@@ -227,6 +304,10 @@ export class SoundManager {
         };
     }
 
+    /**
+     * 停止并断开当前环境音景的所有节点。
+     * @returns {void}
+     */
     clearAmbience() {
         if (!this.ambienceHandle) {
             return;
@@ -237,6 +318,11 @@ export class SoundManager {
         this.ambienceHandle = null;
     }
 
+    /**
+     * 创建一条由噪声源、高通、低通和输出增益组成的底噪链路。
+     * @param {{ type?: 'white'|'brown', gain?: number, lowpass?: number, highpass?: number }} [options={}] - 噪声参数
+     * @returns {{ output: GainNode, stop: () => void }} 可连接并可停止的节点句柄
+     */
     createFilteredNoise({ type = 'white', gain = 0.03, lowpass = 2000, highpass = 80 }) {
         const context = this.context;
         const source = context.createBufferSource();
@@ -270,7 +356,15 @@ export class SoundManager {
         };
     }
 
+    /**
+     * 创建或复用缓存的噪声缓冲区。
+     * @param {'white'|'brown'} [type='white'] - 噪声类型
+     * @returns {AudioBuffer} 可循环播放的噪声缓冲区
+     */
     createNoiseBuffer(type = 'white') {
+        const cached = this.noiseBufferCache.get(type);
+        if (cached) return cached;
+
         const context = this.context;
         const length = Math.max(1, Math.floor(context.sampleRate * 2));
         const buffer = context.createBuffer(1, length, context.sampleRate);
@@ -287,9 +381,15 @@ export class SoundManager {
             }
         }
 
+        this.noiseBufferCache.set(type, buffer);
         return buffer;
     }
 
+    /**
+     * 创建一条带 LFO 振幅调制的持续音 drone。
+     * @param {{ frequency: number, type?: OscillatorType, gain?: number, lfoFrequency?: number, lfoDepth?: number }} options - drone 参数
+     * @returns {{ output: GainNode, stop: () => void }} 可连接并可停止的节点句柄
+     */
     createDrone({ frequency, type = 'sine', gain = 0.01, lfoFrequency = 0.1, lfoDepth = 0.1 }) {
         const context = this.context;
         const oscillator = context.createOscillator();
@@ -325,6 +425,14 @@ export class SoundManager {
         };
     }
 
+    // === Sound Effects ===
+
+    /**
+     * 按名称播放预定义音效。
+     * @param {string} name - 音效名称
+     * @param {{ color?: 'black'|'white', source?: 'human'|'ai' }} [detail={}] - 补充参数
+     * @returns {void}
+     */
     play(name, detail = {}) {
         if (!this.enabled) {
             return;
@@ -380,75 +488,147 @@ export class SoundManager {
         }
     }
 
+    /**
+     * 播放轻触 UI 的短提示音。
+     * @returns {void}
+     */
     playUiTap() {
         this.voice({ frequency: 620, duration: 0.045, type: 'triangle', volume: 0.28 });
         this.voice({ frequency: 860, duration: 0.05, type: 'sine', volume: 0.12, delay: 0.012 });
     }
 
+    /**
+     * 播放选中动作音。
+     * @returns {void}
+     */
     playSelect() {
         this.voice({ frequency: 430, duration: 0.08, type: 'triangle', volume: 0.22, endFrequency: 560 });
         this.voice({ frequency: 840, duration: 0.06, type: 'sine', volume: 0.07, delay: 0.015 });
     }
 
+    /**
+     * 播放取消动作音。
+     * @returns {void}
+     */
     playCancel() {
         this.voice({ frequency: 480, duration: 0.08, type: 'triangle', volume: 0.18, endFrequency: 300 });
     }
 
+    /**
+     * 播放提示音。
+     * @returns {void}
+     */
     playHint() {
-        this.voice({ frequency: 470, duration: 0.09, type: 'triangle', volume: 0.16 });
+        this.voice({ frequency: 470, duration: 0.09, type: 'triangle', volume: SoundManager.MASTER_VOLUME });
         this.voice({ frequency: 628, duration: 0.09, type: 'triangle', volume: 0.15, delay: 0.055 });
         this.voice({ frequency: 785, duration: 0.11, type: 'sine', volume: 0.14, delay: 0.11 });
     }
 
+    /**
+     * 播放错误提示音。
+     * @returns {void}
+     */
     playError() {
         this.voice({ frequency: 260, duration: 0.1, type: 'sawtooth', volume: 0.15, endFrequency: 210 });
     }
 
+    /**
+     * 播放开局音。
+     * @returns {void}
+     */
     playStart() {
         this.voice({ frequency: 240, duration: 0.22, type: 'triangle', volume: 0.18, endFrequency: 380 });
         this.voice({ frequency: 520, duration: 0.16, type: 'sine', volume: 0.08, delay: 0.04 });
     }
 
+    /**
+     * 播放落子音；颜色与来源会影响音高和声像。
+     * @param {'black'|'white'} [color='black'] - 棋子颜色
+     * @param {'human'|'ai'} [source='human'] - 落子来源
+     * @returns {void}
+     */
     playMove(color = 'black', source = 'human') {
         const isBlack = color === 'black';
         const base = isBlack ? 162 : 228;
         const accent = isBlack ? 254 : 346;
         const volume = source === 'ai' ? 0.15 : 0.2;
+        const pan = isBlack
+            ? (source === 'ai' ? -0.6 : -0.3)
+            : (source === 'ai' ? 0.6 : 0.3);
 
-        this.voice({ frequency: base, duration: 0.075, type: 'sine', volume, endFrequency: base * 0.96 });
-        this.voice({ frequency: accent, duration: 0.085, type: 'triangle', volume: volume * 0.66, delay: 0.01, endFrequency: accent * 0.92 });
+        this.voice({ frequency: base, duration: 0.075, type: 'sine', volume, endFrequency: base * 0.96, pan });
+        this.voice({ frequency: accent, duration: 0.085, type: 'triangle', volume: volume * 0.66, delay: 0.01, endFrequency: accent * 0.92, pan });
     }
 
+    /**
+     * 播放悔棋音。
+     * @returns {void}
+     */
     playUndo() {
         this.voice({ frequency: 520, duration: 0.08, type: 'triangle', volume: 0.12, endFrequency: 420 });
         this.voice({ frequency: 360, duration: 0.09, type: 'sine', volume: 0.1, delay: 0.03 });
     }
 
+    /**
+     * 播放胜利音。
+     * @returns {void}
+     */
     playWin() {
         this.voice({ frequency: 392, duration: 0.16, type: 'triangle', volume: 0.18 });
         this.voice({ frequency: 523, duration: 0.18, type: 'triangle', volume: 0.18, delay: 0.1 });
         this.voice({ frequency: 659, duration: 0.28, type: 'sine', volume: 0.2, delay: 0.22 });
     }
 
+    /**
+     * 播放和棋音。
+     * @returns {void}
+     */
     playDraw() {
         this.voice({ frequency: 330, duration: 0.14, type: 'triangle', volume: 0.12 });
         this.voice({ frequency: 392, duration: 0.16, type: 'sine', volume: 0.11, delay: 0.12 });
     }
 
+    /**
+     * 播放认输音。
+     * @returns {void}
+     */
     playResign() {
         this.voice({ frequency: 370, duration: 0.12, type: 'triangle', volume: 0.14, endFrequency: 320 });
-        this.voice({ frequency: 262, duration: 0.2, type: 'sine', volume: 0.16, delay: 0.09, endFrequency: 196 });
+        this.voice({ frequency: 262, duration: 0.2, type: 'sine', volume: SoundManager.MASTER_VOLUME, delay: 0.09, endFrequency: 196 });
     }
 
+    /**
+     * 播放音效开启提示音。
+     * @returns {void}
+     */
     playToggleOn() {
         this.voice({ frequency: 580, duration: 0.08, type: 'triangle', volume: 0.14 });
         this.voice({ frequency: 820, duration: 0.1, type: 'sine', volume: 0.12, delay: 0.045 });
     }
 
+    /**
+     * 播放音效关闭提示音。
+     * @returns {void}
+     */
     playToggleOff() {
         this.voice({ frequency: 520, duration: 0.07, type: 'triangle', volume: 0.12, endFrequency: 420 });
     }
 
+    /**
+     * 合成并播放一个包络化的短音符，可选终止频率和声像。
+     * @param {{
+     *   frequency: number,
+     *   duration?: number,
+     *   type?: OscillatorType,
+     *   volume?: number,
+     *   delay?: number,
+     *   attack?: number,
+     *   release?: number,
+     *   endFrequency?: number|null,
+     *   pan?: number|null
+     * }} options - 合成参数
+     * @returns {void}
+     */
     voice({
         frequency,
         duration = 0.1,
@@ -458,6 +638,7 @@ export class SoundManager {
         attack = 0.003,
         release = 0.08,
         endFrequency = null,
+        pan = null,
     }) {
         const context = this.context;
         if (!context || !this.masterGain) {
@@ -484,12 +665,26 @@ export class SoundManager {
         );
 
         oscillator.connect(gainNode);
-        gainNode.connect(this.masterGain);
+
+        if (pan !== null && context.createStereoPanner) {
+            const panner = context.createStereoPanner();
+            panner.pan.setValueAtTime(pan, context.currentTime + delay);
+            gainNode.connect(panner);
+            panner.connect(this.masterGain);
+        } else {
+            gainNode.connect(this.masterGain);
+        }
 
         oscillator.start(context.currentTime + delay);
         oscillator.stop(context.currentTime + delay + duration + release + 0.02);
     }
 
+    // === Lifecycle ===
+
+    /**
+     * 释放环境音景和音频上下文。
+     * @returns {void}
+     */
     dispose() {
         this.clearAmbience();
         if (this.context) {

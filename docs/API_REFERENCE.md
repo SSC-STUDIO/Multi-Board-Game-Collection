@@ -298,7 +298,7 @@ interface GameState {
 创建游戏选项默认值。
 
 ```typescript
-function createOptions(): GameOptions
+function createOptions(overrides?: Partial<GameOptions>): GameOptions
 ```
 
 **返回：**
@@ -311,6 +311,9 @@ interface GameOptions {
     playerColor: Player; // 'black' | 'white'
 }
 ```
+
+**参数：**
+- `overrides` - 可选的部分选项覆盖
 
 ---
 
@@ -591,6 +594,29 @@ function getBestMove(state: GameState, color: Player): Cell | null
 
 **返回：** 最佳落子位置或null
 
+**算法说明：**
+- **轻松/进阶**：纯贪心策略，对所有候选位置进行启发式评分排序，难度通过随机性差异实现
+  - 轻松：从前6个候选中随机选择
+  - 进阶：从前3个候选中按分数权重概率选择
+- **大师**：minimax 搜索 + alpha-beta 剪枝（深度2-4层，根据手数动态调整），选择搜索最优位置
+- 评估因素：棋型得分、复合威胁加成、位置权重、攻防价值
+
+---
+
+### getMoveGuidance()
+
+获取落子建议和风险分析。
+
+```typescript
+function getMoveGuidance(state: GameState, color: Player): MoveGuidance | null
+```
+
+**参数：**
+- `state` - 当前游戏状态
+- `color` - 执子颜色
+
+**返回：** 包含建议位置、洞察标签、风险标签和备选方案
+
 ---
 
 ### getAIDelay()
@@ -604,6 +630,28 @@ function getAIDelay(level: Difficulty): number
 **参数：** AI难度等级
 
 **返回：** 延迟时间（毫秒）
+
+---
+
+### getMoveReview()
+
+评估玩家实际落子与AI建议的偏差。
+
+```typescript
+function getMoveReview(state: GameState, row: number, col: number, color: Player): string
+```
+
+**参数：**
+- `state` - 当前游戏状态
+- `row` - 落子行索引
+- `col` - 落子列索引
+- `color` - 执子颜色
+
+**返回：** 评价标签键名
+- `'coachReviewFollowed'` - 与AI推荐一致
+- `'coachReviewFlexible'` - 与推荐接近 (ratio >= 0.88)
+- `'coachReviewDeviation'` - 偏离推荐 (ratio >= 0.56)
+- `'coachReviewPunishable'` - 严重偏离推荐 (ratio < 0.56)
 
 ---
 
@@ -821,6 +869,21 @@ interface LineInfo {
     count: number;
     openEnds: number;
 }
+
+// AI落子建议
+interface MoveGuidance {
+    row: number;
+    col: number;
+    score: number;
+    insight: string;
+    risk: string;
+    alternatives: Array<{
+        row: number;
+        col: number;
+        score: number;
+        reason: string;
+    }>;
+}
 ```
 
 ---
@@ -894,5 +957,5 @@ if (reason) {
 
 ---
 
-**文档版本：** 1.0.0
-**最后更新：** 2026-04-04
+**文档版本：** 1.0.1
+**最后更新：** 2026-05-03

@@ -6,27 +6,28 @@
 import * as THREE from 'three';
 import { RENDER_CONFIG, boardToWorld } from '../config/renderConfig.js';
 import { getSceneSpec } from '../config/sceneConfig.js';
+import { i18n } from '../utils/i18n.js';
 
 export const CAMERA_PRESETS = {
     default: {
         position: { x: 0, y: 12, z: 10 },
-        name: '默认视角',
+        nameKey: 'cameraPresetDefault',
     },
     topDown: {
         position: { x: 0, y: 28, z: 0.01 },
-        name: '俯视视角',
+        nameKey: 'cameraPresetTopDown',
     },
     side: {
         position: { x: 0, y: 6, z: 14 },
-        name: '侧面视角',
+        nameKey: 'cameraPresetSide',
     },
     corner: {
         position: { x: 10, y: 10, z: 10 },
-        name: '角落视角',
+        nameKey: 'cameraPresetCorner',
     },
     close: {
         position: { x: 0, y: 8, z: 7 },
-        name: '近距离视角',
+        nameKey: 'cameraPresetClose',
     },
 };
 
@@ -315,7 +316,8 @@ export class CameraController {
      * @returns {string}
      */
     getCurrentPresetName() {
-        return CAMERA_PRESETS[this.currentPreset]?.name || '自定义视角';
+        const preset = CAMERA_PRESETS[this.currentPreset];
+        return preset ? i18n.t(preset.nameKey) : i18n.t('cameraPresetCustom');
     }
 
     /**
@@ -325,7 +327,7 @@ export class CameraController {
     getAvailablePresets() {
         return Object.entries(CAMERA_PRESETS).map(([key, value]) => ({
             key,
-            name: value.name,
+            name: i18n.t(value.nameKey),
         }));
     }
 

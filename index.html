@@ -14,15 +14,6 @@
     <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-title" content="五子棋">
-    <link rel="stylesheet" href="src/styles/main.css">
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "./node_modules/three/build/three.module.js",
-            "three/addons/": "./node_modules/three/examples/jsm/"
-        }
-    }
-    </script>
 </head>
 <body
     class="scene-setup-active"
@@ -74,7 +65,7 @@
     </div>
 
     <div class="ui-overlay">
-        <div class="lang-switch glass-panel">
+        <nav class="lang-switch glass-panel" aria-label="语言与帮助切换">
             <button
                 id="help-open-btn"
                 class="lang-btn help-toggle"
@@ -88,48 +79,57 @@
             </button>
             <button id="lang-zh" class="lang-btn active" type="button">中文</button>
             <button id="lang-en" class="lang-btn" type="button">EN</button>
-        </div>
+        </nav>
 
-        <section id="setup" class="setup-panel glass-panel">
+        <section id="launcher" class="launcher-panel glass-panel hidden" aria-labelledby="launcher-heading">
+            <header class="launcher-header">
+                <span class="launcher-kicker" data-i18n="launcherWelcome">棋类游戏</span>
+                <h1 id="launcher-heading" class="launcher-title" data-i18n="launcherTitle">四款棋类，一个棋局</h1>
+                <p class="launcher-subtitle" data-i18n="launcherSubtitle">选择一种棋类开始。其他几款正在陆续到来。</p>
+            </header>
+            <div id="launcher-grid" class="launcher-grid" role="list"></div>
+        </section>
+
+        <section id="setup" class="setup-panel glass-panel hidden" aria-labelledby="setup-heading">
             <header class="setup-header">
                 <div class="setup-kicker">Immersive Board Duel</div>
-                <h1 class="setup-title" data-i18n="setupTitle">五子棋</h1>
+                <h1 id="setup-heading" class="setup-title" data-i18n="setupTitle">五子棋</h1>
                 <p class="setup-subtitle" data-i18n="setupSubtitle">进入 3D 棋盘，直接开局。</p>
             </header>
 
             <div class="setup-options">
                 <div class="option-row option-row-mode">
-                    <label class="option-label" data-i18n="mode">游戏模式</label>
-                    <div class="option-buttons" id="mode-options">
-                        <button class="option-btn active" type="button" data-mode="pvp" data-i18n="pvp">人人对战</button>
-                        <button class="option-btn" type="button" data-mode="pve" data-i18n="pve">人机对战</button>
-                        <button class="option-btn" type="button" data-mode="practice" data-i18n="practice">练习模式</button>
-                        <button class="option-btn" type="button" data-mode="qi" data-i18n="qi">QI 指导</button>
+                    <label class="option-label" id="mode-label" data-i18n="mode">游戏模式</label>
+                    <div class="option-buttons" id="mode-options" role="radiogroup" aria-labelledby="mode-label">
+                        <button class="option-btn active" type="button" data-mode="pvp" data-i18n="pvp" role="radio" aria-checked="true">人人对战</button>
+                        <button class="option-btn" type="button" data-mode="pve" data-i18n="pve" role="radio" aria-checked="false">人机对战</button>
+                        <button class="option-btn" type="button" data-mode="practice" data-i18n="practice" role="radio" aria-checked="false">练习模式</button>
+                        <button class="option-btn" type="button" data-mode="qi" data-i18n="qi" role="radio" aria-checked="false">QI 指导</button>
                     </div>
                 </div>
 
                 <div class="option-row option-row-rule">
-                    <label class="option-label" data-i18n="rules">规则</label>
-                    <div class="option-buttons" id="rule-options">
-                        <button class="option-btn active" type="button" data-rule="classic" data-i18n="classic">经典</button>
-                        <button class="option-btn" type="button" data-rule="renju" data-i18n="renju">禁手</button>
+                    <label class="option-label" id="rule-label" data-i18n="rules">规则</label>
+                    <div class="option-buttons" id="rule-options" role="radiogroup" aria-labelledby="rule-label">
+                        <button class="option-btn active" type="button" data-rule="classic" data-i18n="classic" role="radio" aria-checked="true">经典</button>
+                        <button class="option-btn" type="button" data-rule="renju" data-i18n="renju" role="radio" aria-checked="false">禁手</button>
                     </div>
                 </div>
 
                 <div class="option-row option-row-size">
-                    <label class="option-label" data-i18n="boardSize">棋盘尺寸</label>
-                    <div class="option-buttons" id="size-options">
-                        <button class="option-btn active" type="button" data-size="15">15 x 15</button>
-                        <button class="option-btn" type="button" data-size="19">19 x 19</button>
+                    <label class="option-label" id="size-label" data-i18n="boardSize">棋盘尺寸</label>
+                    <div class="option-buttons" id="size-options" role="radiogroup" aria-labelledby="size-label">
+                        <button class="option-btn active" type="button" data-size="15" role="radio" aria-checked="true">15 x 15</button>
+                        <button class="option-btn" type="button" data-size="19" role="radio" aria-checked="false">19 x 19</button>
                     </div>
                 </div>
 
                 <div class="option-row option-row-scene">
-                    <label class="option-label" data-i18n="scene">场景</label>
-                    <div class="option-buttons" id="scene-options">
-                        <button class="option-btn" type="button" data-scene="home" data-i18n="sceneHome">家里</button>
-                        <button class="option-btn" type="button" data-scene="park" data-i18n="scenePark">公园</button>
-                        <button class="option-btn active" type="button" data-scene="competition" data-i18n="sceneCompetition">比赛现场</button>
+                    <label class="option-label" id="scene-label" data-i18n="scene">场景</label>
+                    <div class="option-buttons" id="scene-options" role="radiogroup" aria-labelledby="scene-label">
+                        <button class="option-btn" type="button" data-scene="home" data-i18n="sceneHome" role="radio" aria-checked="false">家里</button>
+                        <button class="option-btn" type="button" data-scene="park" data-i18n="scenePark" role="radio" aria-checked="false">公园</button>
+                        <button class="option-btn active" type="button" data-scene="competition" data-i18n="sceneCompetition" role="radio" aria-checked="true">比赛现场</button>
                     </div>
                 </div>
 
@@ -157,19 +157,19 @@
                 </div>
 
                 <div id="ai-options" class="option-row option-row-ai hidden">
-                    <label class="option-label" data-i18n="aiLevel">AI 难度</label>
-                    <div class="option-buttons" id="difficulty-options">
-                        <button class="option-btn" type="button" data-level="easy" data-i18n="easy">轻松</button>
-                        <button class="option-btn active" type="button" data-level="medium" data-i18n="medium">进阶</button>
-                        <button class="option-btn" type="button" data-level="hard" data-i18n="hard">大师</button>
+                    <label class="option-label" id="ai-label" data-i18n="aiLevel">AI 难度</label>
+                    <div class="option-buttons" id="difficulty-options" role="radiogroup" aria-labelledby="ai-label">
+                        <button class="option-btn" type="button" data-level="easy" data-i18n="easy" role="radio" aria-checked="false">轻松</button>
+                        <button class="option-btn active" type="button" data-level="medium" data-i18n="medium" role="radio" aria-checked="true">进阶</button>
+                        <button class="option-btn" type="button" data-level="hard" data-i18n="hard" role="radio" aria-checked="false">大师</button>
                     </div>
                 </div>
 
                 <div id="color-options" class="option-row option-row-color hidden">
-                    <label class="option-label" data-i18n="yourColor">执子颜色</label>
-                    <div class="option-buttons" id="color-select">
-                        <button class="option-btn active" type="button" data-color="black" data-i18n="blackFirst">黑子（先手）</button>
-                        <button class="option-btn" type="button" data-color="white" data-i18n="whiteSecond">白子（后手）</button>
+                    <label class="option-label" id="color-label" data-i18n="yourColor">执子颜色</label>
+                    <div class="option-buttons" id="color-select" role="radiogroup" aria-labelledby="color-label">
+                        <button class="option-btn active" type="button" data-color="black" data-i18n="blackFirst" role="radio" aria-checked="true">黑子（先手）</button>
+                        <button class="option-btn" type="button" data-color="white" data-i18n="whiteSecond" role="radio" aria-checked="false">白子（后手）</button>
                     </div>
                 </div>
 
@@ -193,6 +193,13 @@
             </div>
 
             <button
+                id="setup-back-to-launcher-btn"
+                class="ghost-btn setup-launcher-btn"
+                type="button"
+                data-i18n="launcherBackToLauncher"
+            >返回选择</button>
+
+            <button
                 id="start-btn"
                 class="primary-btn start-btn"
                 type="button"
@@ -201,18 +208,18 @@
             >开始游戏</button>
         </section>
 
-        <section id="game" class="game-panel hidden">
-            <header class="hud-top glass-panel">
+        <section id="game" class="game-panel hidden" aria-label="对局区域">
+            <header class="hud-top glass-panel" role="banner">
                 <div class="hud-top-cluster">
-                    <div class="status-chip">
+                    <div class="status-chip" aria-live="polite" aria-atomic="true">
                         <span class="hud-label" data-i18n="currentStone">当前执子</span>
                         <span id="current-player" class="hud-value player-indicator">黑方</span>
                     </div>
-                    <div class="status-chip">
+                    <div class="status-chip" aria-live="polite" aria-atomic="true">
                         <span class="hud-label" data-i18n="moveCountLabel">手数</span>
                         <span id="move-count" class="hud-value">0</span>
                     </div>
-                    <div class="status-chip wide">
+                    <div class="status-chip wide" aria-live="polite" aria-atomic="true">
                         <span class="hud-label" data-i18n="lastMove">最后一手</span>
                         <span id="last-move" class="hud-value">-</span>
                     </div>
@@ -235,7 +242,7 @@
                 </button>
             </header>
 
-            <aside class="hud-side hud-left glass-panel">
+            <aside class="hud-side hud-left glass-panel" aria-label="对局信息">
                 <div class="panel-block panel-meta">
                     <div class="panel-heading" data-i18n="hudMeta">对局参数</div>
                     <div class="meta-grid">
@@ -314,11 +321,11 @@
                     </div>
                 </div>
 
-                <div id="ai-thinking" class="ai-thinking hidden" data-i18n="aiThinkingNext">AI 正在思考下一手。</div>
+                <div id="ai-thinking" class="ai-thinking hidden" aria-live="assertive" role="status" data-i18n="aiThinkingNext">AI 正在思考下一手。</div>
             </aside>
 
             <main class="board-stage">
-                <div id="message" class="message glass-panel hidden"></div>
+                <div id="message" class="message glass-panel hidden" role="alert"></div>
 
                 <div id="placement-panel" class="placement-panel glass-panel hidden">
                     <div class="placement-copy">
@@ -342,14 +349,15 @@
                     </div>
                 </div>
 
-                <div id="board-shell" class="board-shell glass-panel">
+                <div id="board-shell" class="board-shell glass-panel" role="application" aria-label="五子棋棋盘交互区域">
                     <div class="board-frame">
-                        <div id="board" class="board" data-i18n-aria-label="boardAria" aria-label="棋盘"></div>
+                        <div id="board" class="board" data-i18n-aria-label="boardAria" aria-label="棋盘" role="grid" aria-roledescription="五子棋棋盘"></div>
+                        <div id="board-preview-overlay" class="board-preview-overlay hidden" role="grid" aria-hidden="true"></div>
                     </div>
                 </div>
             </main>
 
-            <aside class="hud-side hud-right glass-panel">
+            <aside class="hud-side hud-right glass-panel" aria-label="局势与教练">
                 <div class="panel-block panel-momentum">
                     <div class="panel-heading" data-i18n="momentumPanel">局势节奏</div>
                     <div id="momentum-text" class="panel-value">棋势尚在酝酿</div>
@@ -418,6 +426,46 @@
                                 </svg>
                                 <span class="btn-label" data-i18n="coachReanalyze">重新分析</span>
                             </button>
+                            <button
+                                id="coach-upload-btn"
+                                class="ghost-btn coach-action-btn"
+                                type="button"
+                                data-i18n-aria-label="coachUploadImage"
+                            >
+                                <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                                    <path fill="currentColor" d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2ZM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5Z"/>
+                                </svg>
+                                <span class="btn-label" data-i18n="coachUploadImage">上传棋盘</span>
+                            </button>
+                            <input id="coach-image-input" type="file" accept="image/*" class="hidden" aria-hidden="true">
+                        </div>
+                        <div id="coach-import-wrap" class="coach-row hidden">
+                            <div class="coach-analyze-preview">
+                                <img id="coach-analyze-image" class="coach-analyze-image" alt="" src="">
+                                <div class="coach-analyze-meta">
+                                    <span id="coach-analyze-count" class="coach-analyze-count">0 stones</span>
+                                    <span id="coach-analyze-confidence" class="coach-analyze-confidence"></span>
+                                </div>
+                            </div>
+                            <div class="coach-import-actions">
+                                <button id="coach-edit-btn" class="ghost-btn coach-action-btn" type="button">
+                                    <span data-i18n="coachPreviewEdit">预览 & 编辑</span>
+                                </button>
+                                <button id="coach-import-btn" class="primary-btn coach-action-btn" type="button">
+                                    <span data-i18n="coachImportBoard">导入棋局</span>
+                                </button>
+                            </div>
+                            <div id="coach-preview-actions" class="coach-preview-actions hidden">
+                                <span id="coach-preview-hint" class="coach-preview-hint" data-i18n="coachPreviewHint">点击格子切换棋子颜色（空 → 黑 → 白 → 空）</span>
+                                <div class="coach-preview-buttons">
+                                    <button id="coach-preview-cancel" class="ghost-btn coach-action-btn" type="button">
+                                        <span data-i18n="coachPreviewCancel">退出编辑</span>
+                                    </button>
+                                    <button id="coach-preview-commit" class="primary-btn coach-action-btn" type="button">
+                                        <span data-i18n="coachPreviewCommit">确认修改并导入</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -428,7 +476,7 @@
                 </div>
             </aside>
 
-            <footer class="hud-bottom glass-panel">
+            <footer class="hud-bottom glass-panel" role="toolbar" aria-label="游戏操作">
                 <div class="controls-row">
                     <button id="undo-btn" class="control-btn" type="button" data-i18n-aria-label="undo" data-i18n-tooltip="tooltipUndo">
                         <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -465,11 +513,11 @@
         </section>
 
         <div id="help-overlay" class="help-overlay hidden" aria-hidden="true">
-            <div class="help-sheet glass-panel">
+            <div class="help-sheet glass-panel" role="dialog" aria-modal="true" aria-labelledby="help-title">
                 <div class="help-header">
                     <div class="help-heading-wrap">
                         <span class="panel-heading" data-i18n="helpCenter">功能说明</span>
-                        <h2 class="help-title" data-i18n="helpTitle">把说明集中到这里</h2>
+                        <h2 id="help-title" class="help-title" data-i18n="helpTitle">把说明集中到这里</h2>
                         <p class="help-subtitle" data-i18n="helpSubtitle">主界面只保留操作，具体功能统一放在这一页。</p>
                     </div>
                     <button
@@ -561,9 +609,9 @@
             </div>
         </div>
 
-        <div id="first-run-guide" class="first-run-guide glass-panel hidden" aria-hidden="true">
+        <div id="first-run-guide" class="first-run-guide glass-panel hidden" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="guide-title">
             <span class="panel-heading" data-i18n="guideWelcome">首次打开</span>
-            <h2 class="guide-title" data-i18n="guideTitle">开始前看三点</h2>
+            <h2 id="guide-title" class="guide-title" data-i18n="guideTitle">开始前看三点</h2>
             <p class="guide-subtitle" data-i18n="guideSubtitle">详细说明集中在右上角的说明页，这里只保留最必要的引导。</p>
 
             <div class="guide-cards guide-desktop">
@@ -658,7 +706,7 @@
         </div>
 
         <div id="result-overlay" class="result-overlay hidden" aria-hidden="true">
-            <div class="result-card glass-panel">
+            <div class="result-card glass-panel" role="dialog" aria-modal="true" aria-labelledby="result-title">
                 <div id="result-badge" class="result-badge" data-i18n="gameEnd">对局结束</div>
                 <h3 id="result-title" class="result-title">黑方获胜</h3>
                 <p id="result-detail" class="result-detail"></p>
@@ -678,8 +726,398 @@
                 </div>
             </div>
         </div>
+
+        <!-- 围棋独立面板（Go 游戏入口；由 GoApp.js 挂载） -->
+        <section id="go-root" class="go-root hidden" aria-label="围棋对局">
+            <section id="go-setup" class="go-setup glass-panel hidden" aria-labelledby="go-setup-heading">
+                <header class="go-setup-header">
+                    <span class="launcher-kicker" data-i18n="gameGoTitle">围棋</span>
+                    <h2 id="go-setup-heading" class="go-setup-title" data-i18n="goSetupTitle">开始一局围棋</h2>
+                    <p class="go-setup-subtitle" data-i18n="goSetupSubtitle">选择棋盘尺寸、贴目与模式，准备开子。</p>
+                </header>
+                <div class="go-setup-options">
+                    <div class="option-row">
+                        <label class="option-label" data-i18n="goBoardSize">棋盘</label>
+                        <div class="option-buttons" id="go-size-options" role="radiogroup">
+                            <button class="option-btn" type="button" data-size="9" role="radio" aria-checked="false">9 x 9</button>
+                            <button class="option-btn" type="button" data-size="13" role="radio" aria-checked="false">13 x 13</button>
+                            <button class="option-btn active" type="button" data-size="19" role="radio" aria-checked="true">19 x 19</button>
+                        </div>
+                    </div>
+                    <div class="option-row">
+                        <label class="option-label" data-i18n="goMode">模式</label>
+                        <div class="option-buttons" id="go-mode-options" role="radiogroup">
+                            <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
+                            <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
+                            <button class="option-btn" type="button" data-mode="practice" role="radio" aria-checked="false" data-i18n="practice">练习</button>
+                        </div>
+                    </div>
+                    <div class="option-row" id="go-level-row">
+                        <label class="option-label" data-i18n="aiLevel">AI 难度</label>
+                        <div class="option-buttons" id="go-level-options" role="radiogroup">
+                            <button class="option-btn" type="button" data-level="easy" role="radio" aria-checked="false" data-i18n="easy">轻松</button>
+                            <button class="option-btn active" type="button" data-level="medium" role="radio" aria-checked="true" data-i18n="medium">进阶</button>
+                            <button class="option-btn" type="button" data-level="hard" role="radio" aria-checked="false" data-i18n="hard">大师</button>
+                        </div>
+                    </div>
+                    <div class="option-row" id="go-handicap-row">
+                        <label class="option-label" data-i18n="goHandicap">让子</label>
+                        <div class="option-buttons" id="go-handicap-options" role="radiogroup">
+                            <button class="option-btn active" type="button" data-handicap="0" role="radio" aria-checked="true">0</button>
+                            <button class="option-btn" type="button" data-handicap="2" role="radio" aria-checked="false">2</button>
+                            <button class="option-btn" type="button" data-handicap="3" role="radio" aria-checked="false">3</button>
+                            <button class="option-btn" type="button" data-handicap="4" role="radio" aria-checked="false">4</button>
+                            <button class="option-btn" type="button" data-handicap="6" role="radio" aria-checked="false">6</button>
+                            <button class="option-btn" type="button" data-handicap="9" role="radio" aria-checked="false">9</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="go-setup-actions">
+                    <button id="go-back-to-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                    <button id="go-start-btn" class="primary-btn" type="button" data-i18n="startGame">开始游戏</button>
+                </div>
+            </section>
+
+            <section id="go-game" class="go-game hidden" aria-label="围棋对局界面">
+                <header class="go-hud glass-panel">
+                    <div class="go-hud-cluster">
+                        <div class="go-hud-chip">
+                            <span class="hud-label" data-i18n="currentStone">当前执子</span>
+                            <span id="go-current-player" class="hud-value">黑方</span>
+                        </div>
+                        <div class="go-hud-chip">
+                            <span class="hud-label" data-i18n="moveCountLabel">手数</span>
+                            <span id="go-move-count" class="hud-value">0</span>
+                        </div>
+                        <div class="go-hud-chip">
+                            <span class="hud-label" data-i18n="goCapturedBlack">黑方提子</span>
+                            <span id="go-captures-black" class="hud-value">0</span>
+                        </div>
+                        <div class="go-hud-chip">
+                            <span class="hud-label" data-i18n="goCapturedWhite">白方提子</span>
+                            <span id="go-captures-white" class="hud-value">0</span>
+                        </div>
+                    </div>
+                    <button id="go-back-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                </header>
+
+                <div id="go-message" class="message glass-panel hidden" role="alert"></div>
+
+                <main class="go-stage">
+                    <div id="go-board-shell" class="go-board-shell glass-panel">
+                        <div id="go-board" class="go-board" role="grid" aria-label="围棋棋盘"></div>
+                        <div id="go-board-3d" class="go-board-3d hidden" aria-hidden="true"></div>
+                        <button id="go-view-toggle" class="go-view-toggle ghost-btn" type="button" aria-pressed="false">
+                            <span data-i18n="go3DToggle">3D</span>
+                        </button>
+                    </div>
+                </main>
+
+                <footer class="go-controls glass-panel" role="toolbar">
+                    <button id="go-pass-btn" class="control-btn" type="button" data-i18n="goPass">虚手</button>
+                    <button id="go-undo-btn" class="control-btn" type="button" data-i18n="undo">悔棋</button>
+                    <button id="go-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
+                    <button id="go-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
+                </footer>
+            </section>
+
+            <div id="go-result-overlay" class="result-overlay hidden" aria-hidden="true">
+                <div class="result-card glass-panel" role="dialog" aria-modal="true">
+                    <div id="go-result-badge" class="result-badge" data-i18n="gameEnd">对局结束</div>
+                    <h3 id="go-result-title" class="result-title">对局结束</h3>
+                    <p id="go-result-detail" class="result-detail"></p>
+                    <div class="go-result-scores">
+                        <div class="result-stat">
+                            <span class="stat-label" data-i18n="goBlackScore">黑方得分</span>
+                            <span id="go-black-score" class="stat-value">0</span>
+                        </div>
+                        <div class="result-stat">
+                            <span class="stat-label" data-i18n="goWhiteScore">白方得分</span>
+                            <span id="go-white-score" class="stat-value">0</span>
+                        </div>
+                    </div>
+                    <div class="result-actions">
+                        <button id="go-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
+                        <button id="go-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 国际象棋独立面板 -->
+        <section id="chess-root" class="chess-root hidden" aria-label="国际象棋对局">
+            <section id="chess-setup" class="chess-setup glass-panel hidden" aria-labelledby="chess-setup-heading">
+                <header class="chess-setup-header">
+                    <span class="launcher-kicker" data-i18n="gameChessTitle">国际象棋</span>
+                    <h2 id="chess-setup-heading" class="chess-setup-title" data-i18n="chessSetupTitle">开始一局国际象棋</h2>
+                    <p class="chess-setup-subtitle" data-i18n="chessSetupSubtitle">选择模式与难度，准备开局。</p>
+                </header>
+                <div class="chess-setup-options">
+                    <div class="option-row">
+                        <label class="option-label" data-i18n="chessMode">模式</label>
+                        <div class="option-buttons" id="chess-mode-options" role="radiogroup">
+                            <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
+                            <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
+                        </div>
+                    </div>
+                    <div class="option-row" id="chess-level-row">
+                        <label class="option-label" data-i18n="aiLevel">AI 难度</label>
+                        <div class="option-buttons" id="chess-level-options" role="radiogroup">
+                            <button class="option-btn" type="button" data-level="easy" role="radio" aria-checked="false" data-i18n="easy">轻松</button>
+                            <button class="option-btn active" type="button" data-level="medium" role="radio" aria-checked="true" data-i18n="medium">进阶</button>
+                            <button class="option-btn" type="button" data-level="hard" role="radio" aria-checked="false" data-i18n="hard">大师</button>
+                        </div>
+                    </div>
+                    <div class="option-row" id="chess-color-row">
+                        <label class="option-label" data-i18n="chessYourColor">执子颜色</label>
+                        <div class="option-buttons" id="chess-color-options" role="radiogroup">
+                            <button class="option-btn active" type="button" data-color="w" role="radio" aria-checked="true" data-i18n="chessColorWhite">执白（先手）</button>
+                            <button class="option-btn" type="button" data-color="b" role="radio" aria-checked="false" data-i18n="chessColorBlack">执黑（后手）</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chess-setup-actions">
+                    <button id="chess-back-to-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                    <button id="chess-start-btn" class="primary-btn" type="button" data-i18n="startGame">开始游戏</button>
+                </div>
+            </section>
+
+            <section id="chess-game" class="chess-game hidden" aria-label="国际象棋对局界面">
+                <header class="chess-hud glass-panel">
+                    <div class="chess-hud-cluster">
+                        <div class="chess-hud-chip">
+                            <span class="hud-label" data-i18n="currentStone">当前执子</span>
+                            <span id="chess-current-player" class="hud-value">白方</span>
+                        </div>
+                        <div class="chess-hud-chip">
+                            <span class="hud-label" data-i18n="chessMoveCount">手数</span>
+                            <span id="chess-move-count" class="hud-value">0</span>
+                        </div>
+                        <div class="chess-hud-chip chess-hud-last">
+                            <span class="hud-label" data-i18n="chessLastMove">最后一手</span>
+                            <span id="chess-last-move" class="hud-value">-</span>
+                        </div>
+                        <div class="chess-hud-chip">
+                            <span class="hud-label" data-i18n="chessCapturedByWhite">白方吃子</span>
+                            <span id="chess-captured-white" class="hud-value">-</span>
+                        </div>
+                        <div class="chess-hud-chip">
+                            <span class="hud-label" data-i18n="chessCapturedByBlack">黑方吃子</span>
+                            <span id="chess-captured-black" class="hud-value">-</span>
+                        </div>
+                    </div>
+                    <button id="chess-back-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                </header>
+                <div id="chess-message" class="message glass-panel hidden" role="alert"></div>
+                <main class="chess-stage">
+                    <div id="chess-board-shell" class="chess-board-shell glass-panel">
+                        <div id="chess-board" class="chess-board" role="grid" aria-label="国际象棋棋盘"></div>
+                    </div>
+                </main>
+                <footer class="chess-controls glass-panel" role="toolbar">
+                    <button id="chess-undo-btn" class="control-btn" type="button" data-i18n="undo">悔棋</button>
+                    <button id="chess-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
+                    <button id="chess-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
+                </footer>
+            </section>
+
+            <div id="chess-promotion-overlay" class="confirm-overlay hidden" aria-hidden="true">
+                <div class="confirm-card glass-panel" role="dialog" aria-modal="true">
+                    <h2 class="confirm-title" data-i18n="chessPromoteTitle">选择升变</h2>
+                    <div id="chess-promotion-buttons" class="chess-promotion-buttons">
+                        <button class="primary-btn" type="button" data-promotion="Q">♛ <span data-i18n="chessPromoteQueen">后</span></button>
+                        <button class="ghost-btn" type="button" data-promotion="R">♜ <span data-i18n="chessPromoteRook">车</span></button>
+                        <button class="ghost-btn" type="button" data-promotion="B">♝ <span data-i18n="chessPromoteBishop">象</span></button>
+                        <button class="ghost-btn" type="button" data-promotion="N">♞ <span data-i18n="chessPromoteKnight">马</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="chess-result-overlay" class="result-overlay hidden" aria-hidden="true">
+                <div class="result-card glass-panel" role="dialog" aria-modal="true">
+                    <div id="chess-result-badge" class="result-badge" data-i18n="gameEnd">对局结束</div>
+                    <h3 id="chess-result-title" class="result-title">对局结束</h3>
+                    <p id="chess-result-detail" class="result-detail"></p>
+                    <div class="result-actions">
+                        <button id="chess-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
+                        <button id="chess-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 中国象棋独立面板 -->
+        <section id="xiangqi-root" class="xiangqi-root hidden" aria-label="中国象棋对局">
+            <section id="xiangqi-setup" class="xiangqi-setup glass-panel hidden" aria-labelledby="xiangqi-setup-heading">
+                <header class="xiangqi-setup-header">
+                    <span class="launcher-kicker" data-i18n="gameXiangqiTitle">中国象棋</span>
+                    <h2 id="xiangqi-setup-heading" class="xiangqi-setup-title" data-i18n="xiangqiSetupTitle">开始一局中国象棋</h2>
+                    <p class="xiangqi-setup-subtitle" data-i18n="xiangqiSetupSubtitle">红先黑后，车马炮 将相士，楚河汉界。</p>
+                </header>
+                <div class="xiangqi-setup-options">
+                    <div class="option-row">
+                        <label class="option-label" data-i18n="xiangqiMode">模式</label>
+                        <div class="option-buttons" id="xiangqi-mode-options" role="radiogroup">
+                            <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
+                            <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
+                        </div>
+                    </div>
+                    <div class="option-row" id="xiangqi-level-row">
+                        <label class="option-label" data-i18n="aiLevel">AI 难度</label>
+                        <div class="option-buttons" id="xiangqi-level-options" role="radiogroup">
+                            <button class="option-btn" type="button" data-level="easy" role="radio" aria-checked="false" data-i18n="easy">轻松</button>
+                            <button class="option-btn active" type="button" data-level="medium" role="radio" aria-checked="true" data-i18n="medium">进阶</button>
+                            <button class="option-btn" type="button" data-level="hard" role="radio" aria-checked="false" data-i18n="hard">大师</button>
+                        </div>
+                    </div>
+                    <div class="option-row" id="xiangqi-color-row">
+                        <label class="option-label" data-i18n="xiangqiYourColor">执子颜色</label>
+                        <div class="option-buttons" id="xiangqi-color-options" role="radiogroup">
+                            <button class="option-btn active" type="button" data-color="r" role="radio" aria-checked="true" data-i18n="xiangqiColorRed">执红（先手）</button>
+                            <button class="option-btn" type="button" data-color="b" role="radio" aria-checked="false" data-i18n="xiangqiColorBlack">执黑（后手）</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="xiangqi-setup-actions">
+                    <button id="xiangqi-back-to-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                    <button id="xiangqi-start-btn" class="primary-btn" type="button" data-i18n="startGame">开始游戏</button>
+                </div>
+            </section>
+
+            <section id="xiangqi-game" class="xiangqi-game hidden" aria-label="中国象棋对局界面">
+                <header class="xiangqi-hud glass-panel">
+                    <div class="xiangqi-hud-cluster">
+                        <div class="xiangqi-hud-chip">
+                            <span class="hud-label" data-i18n="currentStone">当前执子</span>
+                            <span id="xiangqi-current-player" class="hud-value">红方</span>
+                        </div>
+                        <div class="xiangqi-hud-chip">
+                            <span class="hud-label" data-i18n="xiangqiMoveCount">手数</span>
+                            <span id="xiangqi-move-count" class="hud-value">0</span>
+                        </div>
+                        <div class="xiangqi-hud-chip xiangqi-hud-last">
+                            <span class="hud-label" data-i18n="xiangqiLastMove">最后一手</span>
+                            <span id="xiangqi-last-move" class="hud-value">-</span>
+                        </div>
+                    </div>
+                    <button id="xiangqi-back-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                </header>
+                <div id="xiangqi-message" class="message glass-panel hidden" role="alert"></div>
+                <main class="xiangqi-stage">
+                    <div id="xiangqi-board-shell" class="xiangqi-board-shell glass-panel">
+                        <div class="xiangqi-river-label xiangqi-river-left" data-i18n="xiangqiRiverLeft">楚 河</div>
+                        <div class="xiangqi-river-label xiangqi-river-right" data-i18n="xiangqiRiverRight">汉 界</div>
+                        <div id="xiangqi-board" class="xiangqi-board" role="grid" aria-label="中国象棋棋盘"></div>
+                    </div>
+                </main>
+                <footer class="xiangqi-controls glass-panel" role="toolbar">
+                    <button id="xiangqi-undo-btn" class="control-btn" type="button" data-i18n="undo">悔棋</button>
+                    <button id="xiangqi-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
+                    <button id="xiangqi-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
+                </footer>
+            </section>
+
+            <div id="xiangqi-result-overlay" class="result-overlay hidden" aria-hidden="true">
+                <div class="result-card glass-panel" role="dialog" aria-modal="true">
+                    <div id="xiangqi-result-badge" class="result-badge" data-i18n="gameEnd">对局结束</div>
+                    <h3 id="xiangqi-result-title" class="result-title">对局结束</h3>
+                    <p id="xiangqi-result-detail" class="result-detail"></p>
+                    <div class="result-actions">
+                        <button id="xiangqi-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
+                        <button id="xiangqi-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 军棋独立面板 -->
+        <section id="junqi-root" class="junqi-root hidden" aria-label="军棋对局">
+            <section id="junqi-setup" class="junqi-setup glass-panel hidden" aria-labelledby="junqi-setup-heading">
+                <header class="junqi-setup-header">
+                    <span class="launcher-kicker" data-i18n="gameJunqiTitle">军棋</span>
+                    <h2 id="junqi-setup-heading" class="junqi-setup-title" data-i18n="junqiSetupTitle">开始一局军棋</h2>
+                    <p class="junqi-setup-subtitle" data-i18n="junqiSetupSubtitle">选择变体：翻翻棋已可游玩；四国军棋敬请期待。</p>
+                </header>
+                <div class="junqi-setup-options">
+                    <div class="option-row">
+                        <label class="option-label" data-i18n="junqiVariant">变体</label>
+                        <div class="option-buttons" id="junqi-variant-options" role="radiogroup">
+                            <button class="option-btn active" type="button" data-variant="flip" role="radio" aria-checked="true" data-i18n="junqiVariantFlip">翻翻棋</button>
+                            <button class="option-btn" type="button" data-variant="fourKingdom" role="radio" aria-checked="false" data-i18n="junqiVariantFourKingdomSoon">四国（敬请期待）</button>
+                        </div>
+                    </div>
+                    <div class="option-row">
+                        <label class="option-label" data-i18n="chessMode">模式</label>
+                        <div class="option-buttons" id="junqi-mode-options" role="radiogroup">
+                            <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
+                            <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
+                        </div>
+                    </div>
+                    <div class="option-row" id="junqi-level-row">
+                        <label class="option-label" data-i18n="aiLevel">AI 难度</label>
+                        <div class="option-buttons" id="junqi-level-options" role="radiogroup">
+                            <button class="option-btn" type="button" data-level="easy" role="radio" aria-checked="false" data-i18n="easy">轻松</button>
+                            <button class="option-btn active" type="button" data-level="medium" role="radio" aria-checked="true" data-i18n="medium">进阶</button>
+                            <button class="option-btn" type="button" data-level="hard" role="radio" aria-checked="false" data-i18n="hard">大师</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="junqi-setup-actions">
+                    <button id="junqi-back-to-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                    <button id="junqi-start-btn" class="primary-btn" type="button" data-i18n="startGame">开始游戏</button>
+                </div>
+            </section>
+
+            <section id="junqi-game" class="junqi-game hidden" aria-label="军棋对局界面">
+                <header class="junqi-hud glass-panel">
+                    <div class="junqi-hud-cluster">
+                        <div class="junqi-hud-chip">
+                            <span class="hud-label" data-i18n="currentStone">当前执子</span>
+                            <span id="junqi-current-player" class="hud-value">首翻</span>
+                        </div>
+                        <div class="junqi-hud-chip">
+                            <span class="hud-label" data-i18n="moveCountLabel">手数</span>
+                            <span id="junqi-move-count" class="hud-value">0</span>
+                        </div>
+                        <div class="junqi-hud-chip junqi-hud-last">
+                            <span class="hud-label" data-i18n="lastMove">最后一手</span>
+                            <span id="junqi-last-move" class="hud-value">-</span>
+                        </div>
+                    </div>
+                    <button id="junqi-back-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                </header>
+                <div id="junqi-message" class="message glass-panel hidden" role="alert"></div>
+                <div id="junqi-hint" class="junqi-hint">提示</div>
+                <main class="junqi-stage">
+                    <div id="junqi-board-shell" class="junqi-board-shell glass-panel">
+                        <div id="junqi-board" class="junqi-board" role="grid" aria-label="军棋棋盘"></div>
+                    </div>
+                </main>
+                <footer class="junqi-controls glass-panel" role="toolbar">
+                    <button id="junqi-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
+                    <button id="junqi-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
+                </footer>
+            </section>
+
+            <div id="junqi-result-overlay" class="result-overlay hidden" aria-hidden="true">
+                <div class="result-card glass-panel" role="dialog" aria-modal="true">
+                    <div id="junqi-result-badge" class="result-badge" data-i18n="gameEnd">对局结束</div>
+                    <h3 id="junqi-result-title" class="result-title">对局结束</h3>
+                    <p id="junqi-result-detail" class="result-detail"></p>
+                    <div class="result-actions">
+                        <button id="junqi-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
+                        <button id="junqi-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 
     <script type="module" src="src/main.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      }
+    </script>
 </body>
 </html>
