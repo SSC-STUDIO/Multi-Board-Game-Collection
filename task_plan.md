@@ -17,8 +17,8 @@ Expand test coverage across all game modules. The project has evolved from a sin
 - [completed] Add last-move highlight and ko marker in GoRenderer3D
 - [completed] Add territory visualization in GoRenderer3D (scoring phase)
 - [completed] Add scoring rule selector (area/territory) to Go setup UI (HTML + i18n)
-- [next] Add tests for `scoreBoardWithRule` (territory rule) and `getTerritoryMap`
-- [ ] Add tests for `src/games/chess/rules.js` edge cases (castling, en passant, promotion)
+- [completed] Add tests for `scoreBoardWithRule` (territory rule) and `getTerritoryMap`
+- [next] Add tests for `src/games/chess/rules.js` edge cases (castling, en passant, promotion)
 - [ ] Add tests for `src/games/xiangqi/rules.js` edge cases (palace, river crossing, piece-specific moves)
 - [ ] Add tests for `src/games/junqi/flip/rules.js` edge cases (capture legality, stalemate detection)
 - [ ] Add tests for `src/app/controllers/` (InteractionManager, GameController, LauncherController)
