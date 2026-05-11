@@ -2,17 +2,17 @@
 
 ## Goal
 
-Add JSDoc and section-heading coverage across the requested game state, app, UI, utility, service, audio, and entry files without changing runtime behavior.
+Expand test coverage for utility and service modules, starting with `src/utils/formatters.js` which had no tests.
 
 ## Phases
 
-- [completed] Create planning files and capture current findings
-- [completed] Patch `src/game/state.js`, `src/app/GomokuApp.js`, and controller files
-- [completed] Patch UI, utility, service, audio, and entry files
-- [completed] Run a quick syntax validation pass and summarize results
+- [completed] Add unit tests for `src/utils/formatters.js` (`getPlayerLabel`, `formatMove`)
+- [completed] Run `vitest run` and `npm run check` to validate
+- [next] Add tests for `src/utils/i18n.js` (translation keys, locale switching)
+- [ ] Add tests for `src/config/gameConfig.js` (constants, mode labels, direction arrays)
 
 ## Constraints
 
-- Limit edits to the files named in the request.
-- Preserve existing behavior; this is a documentation-only pass.
-- Do not revert unrelated user changes in the dirty worktree.
+- Preserve existing behavior; tests only, no runtime changes.
+- Mock `i18n` where needed to isolate pure logic.
+- Keep test files co-located with their source (`*.test.js` next to `*.js`).
