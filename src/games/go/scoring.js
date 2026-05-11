@@ -64,7 +64,7 @@ export function findEmptyRegions(board) {
 }
 
 /**
- * 计算数子法下的最终得分。
+ * 计算数子法（area scoring，中国规则）下的最终得分。
  * @param {Array<Array<string|null>>} board
  * @param {{ komi?: number }} [options]
  * @returns {{
@@ -81,6 +81,30 @@ export function findEmptyRegions(board) {
  * }}
  */
 export function scoreBoard(board, { komi = 6.5 } = {}) {
+    return scoreBoardWithRule(board, { komi, rule: 'area' });
+}
+
+/**
+ * 计算指定规则下的最终得分。
+ * - 'area'（中国数子法）：得分 = 盘上己方棋子数 + 领地 + komi
+ * - 'territory'（日本数目法）：得分 = 领地 + 提子数 + komi（棋子本身不计分）
+ *
+ * @param {Array<Array<string|null>>} board
+ * @param {{ komi?: number, rule?: 'area'|'territory', captures?: { black: number, white: number } }} [options]
+ * @returns {{
+ *   blackScore: number,
+ *   whiteScore: number,
+ *   blackTerritory: number,
+ *   whiteTerritory: number,
+ *   blackStones: number,
+ *   whiteStones: number,
+ *   dame: number,
+ *   komi: number,
+ *   winner: 'black'|'white'|null,
+ *   margin: number
+ * }}
+ */
+export function scoreBoardWithRule(board, { komi = 6.5, rule = 'area', captures = { black: 0, white: 0 } } = {}) {
     const size = board.length;
     let blackStones = 0;
     let whiteStones = 0;
@@ -108,8 +132,18 @@ export function scoreBoard(board, { komi = 6.5 } = {}) {
         }
     });
 
-    const blackScore = blackStones + blackTerritory;
-    const whiteScore = whiteStones + whiteTerritory + komi;
+    let blackScore;
+    let whiteScore;
+
+    if (rule === 'territory') {
+        // 日本数目法：领地 + 提子
+        blackScore = blackTerritory + captures.black;
+        whiteScore = whiteTerritory + captures.white + komi;
+    } else {
+        // 中国数子法：盘上棋子 + 领地
+        blackScore = blackStones + blackTerritory;
+        whiteScore = whiteStones + whiteTerritory + komi;
+    }
 
     let winner = null;
     let margin = 0;
@@ -137,3 +171,26 @@ export function scoreBoard(board, { komi = 6.5 } = {}) {
 
 // getOpponent 保留未使用的 re-export，便于测试文件从本模块直接导入工具。
 export { getOpponent };
+
+/**
+ * 返回领地坐标映射，用于 3D 可视化。
+ * @param {Array<Array<string|null>>} board
+ * @returns {{ blackTerritory: Array<[number,number]>, whiteTerritory: Array<[number,number]>, dame: Array<[number,number]> }}
+ */
+export function getTerritoryMap(board) {
+    const regions = findEmptyRegions(board);
+    const blackTerritory = [];
+    const whiteTerritory = [];
+    const dame = [];
+    regions.forEach(({ cells, borderColors }) => {
+        if (borderColors.size === 1) {
+            const [only] = borderColors;
+            if (only === 'black') blackTerritory.push(...cells);
+            else if (only === 'white') whiteTerritory.push(...cells);
+            else dame.push(...cells);
+        } else {
+            dame.push(...cells);
+        }
+    });
+    return { blackTerritory, whiteTerritory, dame };
+}

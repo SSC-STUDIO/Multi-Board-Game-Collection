@@ -28,6 +28,11 @@ const LINE_COLOR = '#1b1b1b';
 const STAR_COLOR = '#1b1b1b';
 const BASE_COLOR = '#2c1a0c';
 
+const LAST_MOVE_COLOR = 0x22cc44;
+const KO_MARKER_COLOR = 0xcc2222;
+const TERRITORY_BLACK = 0x1a1a1a;
+const TERRITORY_WHITE = 0xf0f0f0;
+
 /** 不同路数的星位。坐标是 (row, col)。 */
 export function getStarPoints(size) {
     if (size === 19) {
@@ -306,6 +311,103 @@ export class GoRenderer3D {
             group.remove(group.children[0]);
         }
         this._lastBoard = null;
+    }
+
+    /**
+     * 在最后一手棋子上显示高亮标记。
+     * @param {{row:number,col:number}|null} move - pass 或 null 时移除标记
+     */
+    highlightLastMove(move) {
+        this._removeMarkerGroup('go_last_move_marker');
+        if (!move || move.row == null) return;
+        const { x, z } = goBoardToWorld(move.row, move.col, this.boardSize, this.cellSize);
+        const { thickness } = this.sceneManager.config.board;
+        const marker = new THREE.Group();
+        marker.name = 'go_last_move_marker';
+        const ring = new THREE.Mesh(
+            new THREE.RingGeometry(0.25, 0.35, 24),
+            new THREE.MeshBasicMaterial({ color: LAST_MOVE_COLOR, side: THREE.DoubleSide })
+        );
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.set(x, thickness / 2 + 0.02, z);
+        marker.add(ring);
+        this.stoneBuilder.stonesGroup.add(marker);
+        this.sceneManager.needsRender = true;
+    }
+
+    /**
+     * 在 ko 禁着点显示标记。
+     * @param {{row:number,col:number}|null} ko
+     */
+    highlightKo(ko) {
+        this._removeMarkerGroup('go_ko_marker');
+        if (!ko) return;
+        const { x, z } = goBoardToWorld(ko.row, ko.col, this.boardSize, this.cellSize);
+        const { thickness } = this.sceneManager.config.board;
+        const marker = new THREE.Group();
+        marker.name = 'go_ko_marker';
+        const dot = new THREE.Mesh(
+            new THREE.CircleGeometry(0.12, 16),
+            new THREE.MeshBasicMaterial({ color: KO_MARKER_COLOR, side: THREE.DoubleSide })
+        );
+        dot.rotation.x = -Math.PI / 2;
+        dot.position.set(x, thickness / 2 + 0.02, z);
+        marker.add(dot);
+        this.stoneBuilder.stonesGroup.add(marker);
+        this.sceneManager.needsRender = true;
+    }
+
+    /**
+     * 终局时在领地交叉点上显示半透明标记。
+     * @param {Array<Array<string|null>>} board - 当前棋盘（用于计算尺寸）
+     * @param {{ blackTerritory: Array<[number,number]>, whiteTerritory: Array<[number,number]>, dame: Array<[number,number]> }} territoryMap
+     */
+    showTerritory(board, territoryMap) {
+        this._removeMarkerGroup('go_territory_markers');
+        if (!board) return;
+        const { thickness } = this.sceneManager.config.board;
+        const group = new THREE.Group();
+        group.name = 'go_territory_markers';
+        const markerGeo = new THREE.CircleGeometry(0.18, 6);
+        const blackMat = new THREE.MeshBasicMaterial({
+            color: TERRITORY_BLACK, transparent: true, opacity: 0.35, side: THREE.DoubleSide
+        });
+        const whiteMat = new THREE.MeshBasicMaterial({
+            color: TERRITORY_WHITE, transparent: true, opacity: 0.35, side: THREE.DoubleSide
+        });
+
+        for (const [row, col] of (territoryMap.blackTerritory || [])) {
+            const { x, z } = goBoardToWorld(row, col, this.boardSize, this.cellSize);
+            const m = new THREE.Mesh(markerGeo, blackMat);
+            m.rotation.x = -Math.PI / 2;
+            m.position.set(x, thickness / 2 + 0.02, z);
+            group.add(m);
+        }
+        for (const [row, col] of (territoryMap.whiteTerritory || [])) {
+            const { x, z } = goBoardToWorld(row, col, this.boardSize, this.cellSize);
+            const m = new THREE.Mesh(markerGeo, whiteMat);
+            m.rotation.x = -Math.PI / 2;
+            m.position.set(x, thickness / 2 + 0.02, z);
+            group.add(m);
+        }
+
+        this.stoneBuilder.stonesGroup.add(group);
+        this.sceneManager.needsRender = true;
+    }
+
+    /**
+     * 移除领地标记。
+     */
+    hideTerritory() {
+        this._removeMarkerGroup('go_territory_markers');
+    }
+
+    /** @private */
+    _removeMarkerGroup(name) {
+        const group = this.stoneBuilder?.stonesGroup;
+        if (!group) return;
+        const existing = group.getObjectByName(name);
+        if (existing) group.remove(existing);
     }
 
     show() {

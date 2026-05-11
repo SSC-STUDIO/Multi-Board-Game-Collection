@@ -10,7 +10,7 @@ import { i18n } from '../../utils/i18n.js';
 import { BoardGameApp } from '../../app/BoardGameApp.js';
 import { createGoState, createGoOptions } from './state.js';
 import { placeStone, isLegalMove, getOpponent } from './rules.js';
-import { scoreBoard } from './scoring.js';
+import { scoreBoardWithRule, getTerritoryMap } from './scoring.js';
 import { getGoAIMove, getGoAIDelay } from './ai.js';
 import { GoRenderer3D } from './render3d/GoRenderer3D.js';
 
@@ -58,6 +58,7 @@ export class GoApp extends BoardGameApp {
                 levelRow: root.getElementById('go-level-row'),
                 handicap: root.getElementById('go-handicap-options'),
                 handicapRow: root.getElementById('go-handicap-row'),
+                scoring: root.getElementById('go-scoring-options'),
                 start: root.getElementById('go-start-btn'),
                 backToLauncher: root.getElementById('go-back-to-launcher-btn')
             },
@@ -109,6 +110,9 @@ export class GoApp extends BoardGameApp {
         });
         this.bindOptionGroup(setup.handicap, 'handicap', (value) => {
             this.options.handicap = Number(value);
+        });
+        this.bindOptionGroup(setup.scoring, 'scoring', (value) => {
+            this.options.scoringRule = value;
         });
 
         setup.start?.addEventListener('click', () => {
@@ -197,12 +201,13 @@ export class GoApp extends BoardGameApp {
                 detail: i18n.t('goResignDetail')
             };
         }
+        const ruleSuffix = this.options.scoringRule === 'territory' ? 'Territory' : 'Area';
         return {
-            badge: i18n.t('goScoreBadge'),
+            badge: i18n.t(`goScoreBadge${ruleSuffix}`),
             title: res.winner
                 ? i18n.t('goScoreWinnerTitle', { player: playerLabel(res.winner), margin: res.margin.toFixed(1) })
                 : i18n.t('goScoreDrawTitle'),
-            detail: i18n.t('goScoreDetail', { komi: this.options.komi })
+            detail: i18n.t(`goScoreDetail${ruleSuffix}`, { komi: this.options.komi })
         };
     }
 
@@ -344,7 +349,11 @@ export class GoApp extends BoardGameApp {
     }
 
     finishByScoring() {
-        const score = scoreBoard(this.state.board, { komi: this.options.komi });
+        const score = scoreBoardWithRule(this.state.board, {
+            komi: this.options.komi,
+            rule: this.options.scoringRule || 'area',
+            captures: this.state.captures
+        });
         this.state.gameOver = true;
         this.state.result = {
             type: 'score',
@@ -354,6 +363,11 @@ export class GoApp extends BoardGameApp {
             margin: score.margin
         };
         this.sound.play('win');
+        // 3D 领地可视化
+        if (this.viewMode === '3d' && this.renderer3d) {
+            const tmap = getTerritoryMap(this.state.board);
+            this.renderer3d.showTerritory(this.state.board, tmap);
+        }
         this.renderBoard();
         this.renderStatus();
         this.showResult();
@@ -407,6 +421,12 @@ export class GoApp extends BoardGameApp {
             this.renderer3d.setBoardSize(this.options.size);
         }
         this.renderer3d.syncBoard(this.state.board);
+        this.renderer3d.highlightLastMove(this.state.lastMove);
+        this.renderer3d.highlightKo(this.state.koPoint);
+        // 非终局时清除领地标记
+        if (!this.state.gameOver) {
+            this.renderer3d.hideTerritory();
+        }
     }
 
     toggleView() {

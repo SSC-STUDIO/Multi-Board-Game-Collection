@@ -45,7 +45,7 @@ export const GAMES = [
         category: 'abstract',
         boardTopology: 'intersection',
         status: 'available',
-        capabilities: ['2d-scene'],
+        capabilities: ['3d-scene'],
         accent: '#8aa9b8',
         loadModule: () => import('./go/GoApp.js').then((m) => ({
             enter(root) {

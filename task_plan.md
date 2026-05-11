@@ -12,7 +12,13 @@ Expand test coverage across all game modules. The project has evolved from a sin
 - [completed] Add unit tests for `src/services/llmCoach.js`
 - [completed] Add unit tests for `src/audio/SoundManager.js`
 - [completed] Add unit tests for all 5 game state factories (`src/games/*/state.js`)
-- [next] Add tests for `src/games/chess/rules.js` edge cases (castling, en passant, promotion)
+- [completed] Fix Go registry: add '3d-scene' capability
+- [completed] Implement Japanese territory scoring (`scoreBoardWithRule` + `getTerritoryMap`)
+- [completed] Add last-move highlight and ko marker in GoRenderer3D
+- [completed] Add territory visualization in GoRenderer3D (scoring phase)
+- [completed] Add scoring rule selector (area/territory) to Go setup UI (HTML + i18n)
+- [next] Add tests for `scoreBoardWithRule` (territory rule) and `getTerritoryMap`
+- [ ] Add tests for `src/games/chess/rules.js` edge cases (castling, en passant, promotion)
 - [ ] Add tests for `src/games/xiangqi/rules.js` edge cases (palace, river crossing, piece-specific moves)
 - [ ] Add tests for `src/games/junqi/flip/rules.js` edge cases (capture legality, stalemate detection)
 - [ ] Add tests for `src/app/controllers/` (InteractionManager, GameController, LauncherController)
