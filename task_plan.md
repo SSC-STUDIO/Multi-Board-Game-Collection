@@ -2,14 +2,22 @@
 
 ## Goal
 
-Expand test coverage for utility and service modules, starting with `src/utils/formatters.js` which had no tests.
+Expand test coverage across all game modules. The project has evolved from a single Gomoku game into a multi-board-game platform with 5 games (Gomoku, Go, Chess, Xiangqi, Junqi/Flip). Focus on unit testing state factories, rule engines, and AI modules for each game.
 
 ## Phases
 
-- [completed] Add unit tests for `src/utils/formatters.js` (`getPlayerLabel`, `formatMove`)
-- [completed] Run `vitest run` and `npm run check` to validate
-- [next] Add tests for `src/utils/i18n.js` (translation keys, locale switching)
-- [ ] Add tests for `src/config/gameConfig.js` (constants, mode labels, direction arrays)
+- [completed] Add unit tests for `src/utils/formatters.js`
+- [completed] Add unit tests for `src/utils/i18n.js`
+- [completed] Add unit tests for `src/config/gameConfig.js`
+- [completed] Add unit tests for `src/services/llmCoach.js`
+- [completed] Add unit tests for `src/audio/SoundManager.js`
+- [completed] Add unit tests for all 5 game state factories (`src/games/*/state.js`)
+- [next] Add tests for `src/games/chess/rules.js` edge cases (castling, en passant, promotion)
+- [ ] Add tests for `src/games/xiangqi/rules.js` edge cases (palace, river crossing, piece-specific moves)
+- [ ] Add tests for `src/games/junqi/flip/rules.js` edge cases (capture legality, stalemate detection)
+- [ ] Add tests for `src/app/controllers/` (InteractionManager, GameController, LauncherController)
+- [ ] Add tests for `src/ui/render.js` (render helpers, DOM output)
+- [ ] Add tests for `src/app/GomokuApp.js` (game lifecycle, mode switching, undo flow)
 
 ## Constraints
 
