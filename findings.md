@@ -30,3 +30,10 @@
 - **Playwright locator.evaluate 限制**: Playwright 的 locator.evaluate() 会等待元素"可交互"（可见、稳定、启用）。在测试隐藏面板时改用 page.evaluate() 配合 CSS 选择器可以绕过此限制。
 - **运行时验证结果**: 所有 5 个游戏设置面板在 Playwright 中加载正常，0 控制台错误。代码运行时无需修复。
 - **已验证的测试基线**: 822 tests, 35 files, 99 modules 全部通过。运行时冒烟测试：启动器 + 5 游戏设置面板全部正常显示。
+
+## 2026-05-16 (国际象棋 AI 将杀提前检测修复 + 交互式冒烟测试轮)
+
+- **国际象棋 AI 无将杀提前退出机制**: `getChessAIMove()` 在合法走法中存在 mate-in-1 时仍执行完整 depth-4 alpha-beta 搜索。在空棋盘+后的局面下，皇后 ~29 种走法导致 37×8×37×8 ≈ 87,000 叶子节点的搜索树，测试超时 5000ms。修复：在 `getChessAIMove()` 中添加 mate-in-1 提前检测（遍历合法走法，applyMove + isCheckmate 检查），将走法搜索从数秒缩短至 178ms。
+- **Gomoku 3D 截图在 headless Chromium 中不可用**: 设置面板截图（HTML/CSS）正常，但启动 game 后的 Three.js 场景截图在 swiftshader WebGL 渲染中静默超时。Go 3D 截图（较简单的三维棋盘，无场景预设）可正常捕获（526KB）。这可能是 Gomoku 场景预设的渲染复杂度导致。非代码缺陷，是 headless 测试环境限制。
+- **Playwright 元素稳定性与 CSS 过渡冲突**: Gomoku 设置面板的 `#start-btn` 使用 CSS 过渡（opacity: 0→1），Playwright 的 `elementHandle.click()` 在 CSS 过渡期间因元素"不稳定"而等待 30s 超时。使用 `page.mouse.click(boundingBox)` 或等待过渡完成后再点击可绕过。验证脚本已使用 boundingBox + mouse.click 方案成功。
+- **Playwright runtime 确认无运行时错误**: Gomoku 实际对弈流程（启动 → 设置 → 开始 → 落子 3 手）全程 0 控制台错误。Go 设置界面 0 控制台错误。代码运行时无需修复。

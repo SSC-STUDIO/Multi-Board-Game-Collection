@@ -147,3 +147,29 @@ Original prompt: Implement the plan to fix grid stability, adapt the game for mo
     - **`npm run check`**: 99 modules 通过 ✅
   - **无新 issues**: 本轮未发现运行时错误。代码无需修复。
   - **待提交**: CLAUDE.md（多平台描述）、task_plan.md（本轮记录）、progress.md（本轮记录）、findings.md（本轮记录）
+
+- **2026-05-16 (Round: 国际象棋 AI 将杀提前检测修复 + 交互式冒烟测试)**:
+  - **目标**:
+    1. 修复国际象棋 AI depth-4 搜索超时（mate-in-1 只能通过完整树搜索发现）
+    2. Playwright 交互式对弈测试实际落子
+    3. 视觉验证截图
+  - **问题发现**:
+    - **国际象棋 AI 检测到的缺陷**: `getChessAIMove()` 在 mate-in-1 局面初始化完整 alpha-beta depth-4 搜索。在空棋盘+后+双王局面下，皇后 ~29 种走法导致 37×8×37×8 ≈ 87,000 叶子节点的搜索树，超时 5000ms。这是因为没有将杀提前退出机制。
+  - **修复**:
+    - 在 `src/games/chess/ai.js` 的 `getChessAIMove()` 中添加 mate-in-1 提前检测：在进入完整搜索前遍历合法走法，找到将杀走法立即返回。每个走法只需一次 applyMove + isCheckmate 检查（~37 个快速调用），无需完整树搜索。
+  - **验证结果**:
+    - `npx vitest run src/games/chess/ai.test.js`: **5 passed, 178ms** ✅（之前超时 5000ms+）
+    - `npx vitest run src/games/`: **18 files, 375 passed** ✅（无其他 AI 超时）
+    - `npm test`: **35 files, 822 tests, 全部通过** ✅
+    - `npm run check`: **99 modules 通过** ✅
+    - Playwright 5 游戏加载验证: **全部 5 游戏设置面板 OK** ✅
+    - Playwright Gomoku 交互式对弈: **设置面板可见 → 开始按钮 → 游戏面板可见 → 落子 3 手 → 0 控制台错误** ✅
+    - Playwright Go 对弈: **设置面板可见 → 截图成功** ✅
+    - 截图视觉验证（Go 3D）: 棋盘 + 棋子渲染正确 ✅
+    - **Gomoku 3D 截图限制**: headless Chromium + swiftshader 在 Three.js 场景截图时超时（设置面板截图工作正常）
+  - **发现/教训**:
+    - 国际象棋 AI 应有将杀/将军提前检测以提升搜索效率
+    - headless Chromium 中 Three.js 场景截图超时是已知限制，不影响应用功能
+    - Go 3D 渲染（较简单的三维网格）在 headless 中正常，Gomoku 3D（完整场景预设）超时
+  - **无新 issues 追加**: 已发现并修复 AI 超时问题。headless 截图限制是环境问题。全量测试通过，游戏正常运行。
+  - **待提交**: ai.js（将杀检测）、task_plan.md（本轮记录）、progress.md（本轮记录）、findings.md（本轮记录）

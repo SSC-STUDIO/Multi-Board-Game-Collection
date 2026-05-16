@@ -110,7 +110,38 @@ Expand test coverage across all game modules. The project has evolved from a sin
 
 ---
 
-## Current Round (2026-05-16): CLAUDE.md 更新 + 运行时冒烟测试
+## Current Round (2026-05-16): 国际象棋 AI 将杀提前检测修复 + 交互式冒烟测试
+
+### 目标
+1. **修复国际象棋 AI 测试超时** — `ai.test.js` 中 hard 模式的将杀在望检测需要完整 depth 4 搜索，在皇后+空棋盘局面下超时 5000ms
+2. **实际对弈冒烟测试** — 使用 Playwright 进入游戏并实际落子，不只停留在设置面板加载
+3. **视觉验证** — 截图检查游戏渲染
+
+### 发现的问题
+1. **国际象棋 AI 无将杀提前退出** — `getChessAIMove()` 在所有走法中执行 depth 4 alpha-beta 搜索，不先检查是否有一步将杀走法。在空棋盘+皇后+双王局面下，皇后有 ~29 种走法，导致搜索树过大超时
+2. **Gomoku 3D 截图在 headless Chromium 中超时** — 设置面板截图可正常捕获，但点击"开始游戏"启动 3D Three.js 场景后，`page.screenshot()` 在 swiftshader WebGL 渲染中超时
+3. **Go 3D 截图正常** — Go 的 3D 渲染（较简单的三维棋盘结构）在 headless 模式下截图正常（526KB）
+
+### 修复内容
+1. 在 `getChessAIMove()` 中添加将杀提前检测（mate-in-1）：在完整搜索前遍历所有合法走法，若有走法后对方被将死则立即返回，避免完整搜索
+
+### Agent Team 分工
+| Agent | 任务 | 预期产出 |
+|-------|------|----------|
+| Agent-Builder | 修复 AI 将杀检测 + 更新记录文件 | ai.js 修改、文件更新 |
+| Agent-Verifier | 运行全量测试 + Playwright 冒烟 + 截图验证 | 测试通过 + 截图 |
+
+### 实际验证方案
+1. `npm test` — 822 测试全部通过 ✅
+2. `npm run check` — 99 模块通过 ✅
+3. `npm run serve` 启动开发服务器
+4. Playwright 交互式对弈测试：进入 Gomoku 并实际落子
+5. Playwright 加载验证：全部 5 游戏可进入设置面板
+6. 截图视觉验证（Go 3D 截图可用）
+
+### 需要视觉验证的点
+- Go 3D 棋盘 + 棋子渲染（截图已捕获 ✅）
+- Gomoku gameplay 状态（headless 截图超时，但 0 控制台错误，棋子已落下）
 
 ### 目标
 1. **更新 CLAUDE.md** — 当前仍只描述"五子棋·Gomoku"，实际已是多游戏平台（Gomoku/Go/Chess/Xiangqi/Junqi），过时描述会误导开发者和 AI Agent

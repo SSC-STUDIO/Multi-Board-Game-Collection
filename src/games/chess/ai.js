@@ -210,6 +210,13 @@ export function getChessAIMove(state) {
     const legal = getLegalMoves(state.board, state);
     if (legal.length === 0) return null;
 
+    // 快速将杀检测（mate-in-1）：如果某步走法后对方被将死，立即返回
+    // 避免 depth 4 搜索在空棋盘+后局面下超时
+    for (const mv of legal) {
+        const { board: b2, state: s2 } = applyMove(state.board, state, mv);
+        if (isCheckmate(b2, s2)) return mv;
+    }
+
     const depth = depthForLevel(state.options?.level);
     const { move } = search(state.board, state, depth, -Infinity, Infinity);
     if (move) return move;
