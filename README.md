@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🎮 五子棋 · Gomoku
+# 🎮 多款棋盘游戏合集 / Multi-Board Game Collection
 
-**一款精致的五子棋游戏**
+**五子棋 · 围棋 · 国际象棋 · 中国象棋 · 军棋翻翻棋**
 
 [![Steam](https://img.shields.io/badge/Steam-即将推出-blue?logo=steam&logoColor=white)](https://store.steampowered.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -18,58 +18,82 @@
 
 ## 简体中文
 
-### 🎯 游戏简介
+### 游戏简介
 
-五子棋 · Gomoku 是一款现代化的五子棋游戏,为玩家提供沉浸式的对弈体验。无论是休闲娱乐还是策略竞技,都能满足您的需求。
+本项目是一个多款棋盘游戏合集，集成五子棋、围棋、国际象棋、中国象棋和军棋翻翻棋于一体。通过统一的启动器界面选择游戏，每款游戏拥有独立的规则引擎和应用模块，为玩家提供多样化的对弈体验。
 
-### ✨ 核心特性
+- **五子棋 (Gomoku)** — 连五即胜的经典棋类，支持禁手规则与智能AI
+- **围棋 (Go)** — 古老的策略游戏，围地取胜，支持中国规则与日本规则计分
+- **国际象棋 (Chess)** — 全球流行的棋类运动，完整的棋子走法与特殊规则
+- **中国象棋 (Xiangqi)** — 中国传统棋艺，楚河汉界两侧红黑对弈
+- **军棋翻翻棋 (Junqi/Flip)** — 基于运气的军事题材翻棋游戏，翻开棋子方可移动
 
-#### 🎮 多样化的游戏模式
-- **人人对战** - 与好友面对面博弈,享受真人对抗的乐趣
-- **人机对战** - 挑战智能AI,测试你的棋艺水平
-- **练习模式** - 轻松探索棋局变化,提升战术技巧
+### 核心特性
 
-#### 📋 灵活的规则选择
-- **经典规则** - 连五即胜,简单直接,适合新手入门
-- **禁手规则** - 黑方禁止三三、四四、长连,更具策略深度,适合高手竞技
+#### 多游戏支持
+- 统一的启动器界面，一键切换游戏
+- 游戏按需懒加载，优化启动性能
+- 每款游戏独立运行，互不干扰
 
-#### 🤖 智能AI系统
-- **轻松** - 适合新手练习,轻松获胜
-- **进阶** - 中等难度,需要一定技巧
-- **大师** - 高难度挑战,需要深思熟虑
+#### 丰富的对局模式
+- **人人对战** — 与好友面对面博弈，享受真人对抗的乐趣
+- **人机对战** — 挑战智能AI（五子棋支持三档难度）
+- **练习模式** — 自由探索棋局变化，提升战术技巧
 
-#### 💡 实用辅助功能
-- **悔棋** - 回退不当落子,重新思考策略
-- **提示** - AI推荐最佳落子位置
-- **换边** - 随时切换执子方
-- **认输** - 投子认负,快速结束对局
+#### 灵活的规则选择
+- 五子棋：经典规则与禁手规则（三三、四四、长连）
+- 围棋：中国规则与日本规则计分
+- 国际象棋：完整FIDE国际规则
+- 中国象棋：完整传统规则
+- 军棋翻翻棋：经典翻翻棋规则
 
-#### 🎨 精美的界面设计
-- 现代化UI设计,赏心悦目
-- 流畅的动画效果,丝滑体验
-- 实时局势分析,洞察棋局
-- 完整的棋谱记录,复盘学习
+#### 多渲染引擎
+- 2D渲染：国际象棋、中国象棋、军棋翻翻棋
+- 3D渲染：五子棋与围棋支持Three.js沉浸式3D场景
+- 五子棋3D场景预设：家、公园、比赛现场
+- 现代化UI设计，流畅动画效果
 
-#### 📊 丰富的统计信息
-- 实时手数统计
-- 当前玩家显示
-- 最后一手标记
-- 局势阶段分析
-- 对局节奏提示
+#### 实用辅助功能
+- 悔棋 — 回退不当落子，重新思考策略
+- 提示 — AI推荐最佳落子位置（部分游戏）
+- 换边 — 随时切换执子方
+- 认输 — 投子认负，快速结束对局
+- 完整棋谱记录 — 复盘学习
 
-### 🎮 游戏玩法
+### 项目结构
 
-#### 基本规则
-- 黑子先行,白子后手
-- 轮流落子,连成五子获胜
-- 可以横向、纵向、斜向连线
+```text
+.
+├── index.html              # 主入口（启动器）
+├── capacitor.config.json   # Capacitor Android 配置
+├── android                 # Android 原生工程
+├── src
+│   ├── main.js            # 应用入口，启动器初始化
+│   ├── app                # 应用层
+│   │   ├── GomokuApp.js   # 五子棋应用（向后兼容）
+│   │   └── controllers/   # 核心控制器
+│   ├── games              # 各游戏独立模块
+│   │   ├── registry.js    # 游戏注册表
+│   │   ├── gomoku/        # 五子棋（state/rules/ai）
+│   │   ├── go/            # 围棋（state/rules/ai/scoring）
+│   │   ├── chess/         # 国际象棋（state/rules/ai）
+│   │   ├── xiangqi/       # 中国象棋（state/rules/ai）
+│   │   └── junqi/         # 军棋翻翻棋（state/rules/ai）
+│   ├── ui                 # 表现层
+│   ├── render3d           # 3D渲染（Three.js）
+│   ├── utils              # 工具层
+│   ├── config             # 配置层
+│   ├── audio              # 音效
+│   ├── services           # 服务（LLM Coach）
+│   └── styles             # 样式文件
+├── assets                 # 游戏资源
+├── locales                # 本地化文件
+├── steam                  # Steam 配置
+├── tools                  # 构建工具脚本
+└── docs                   # 文档
+```
 
-#### 禁手规则(可选)
-- **三三禁手**: 黑方同时形成两个活三
-- **四四禁手**: 黑方同时形成两个四
-- **长连禁手**: 黑方形成六子或更多连线
-
-### 💻 系统要求
+### 系统要求
 
 #### 最低配置
 - **操作系统**: Windows 7 SP1 / macOS 10.13 / Linux (任意主流发行版)
@@ -85,15 +109,15 @@
 - **显卡**: 支持现代浏览器的独立显卡
 - **存储空间**: 200 MB 可用空间
 
-### 🚀 快速开始
+### 快速开始
 
 #### Web版本
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/gomoku.git
-cd gomoku
+git clone https://github.com/yourusername/board-games.git
+cd board-games
 
-# 安装依赖(可选)
+# 安装依赖（可选）
 npm install
 
 # 启动本地服务器
@@ -111,38 +135,20 @@ npm run android:build:debug
 
 可直接安装的 APK 输出到 `output/android/Gomoku-1.0.0-debug.apk`，原始 Gradle 产物在 `android/app/build/outputs/apk/debug/app-debug.apk`。LLM 本地服务地址说明见 [Android APK 文档](docs/ANDROID.md)。
 
-#### 桌面版本(Steam)
-1. 访问Steam商店页面(即将开放)
+#### 桌面版本（Steam）
+1. 访问Steam商店页面（即将开放）
 2. 购买并下载游戏
 3. 安装后即可开始游戏
 
-### 🛠️ 开发相关
+### 开发相关
 
 #### 技术栈
 - **前端**: 原生JavaScript (ES Modules)
 - **样式**: 原生CSS (CSS Variables)
+- **3D渲染**: Three.js ^0.164.0
+- **测试**: Vitest
 - **架构**: 分层模块化设计
 - **打包**: Capacitor (Android APK)、Electron (桌面版本)
-
-#### 项目结构
-```text
-.
-├── index.html              # 主入口
-├── capacitor.config.json   # Capacitor Android 配置
-├── android                 # Android 原生工程
-├── src
-│   ├── main.js            # 应用入口
-│   ├── app                # 应用层
-│   ├── game               # 游戏逻辑层
-│   ├── ui                 # 表现层
-│   ├── utils              # 工具层
-│   ├── config             # 配置层
-│   └── styles             # 样式文件
-├── assets                 # 游戏资源
-├── locales                # 本地化文件
-├── steam                  # Steam配置
-└── docs                   # 文档
-```
 
 #### 本地开发
 ```bash
@@ -151,6 +157,9 @@ npm run serve
 
 # 运行代码检查
 npm run check
+
+# 运行测试
+npm run test
 
 # 构建Web版本
 npm run build
@@ -161,130 +170,114 @@ npm run build:desktop
 
 详细开发文档请查看 [开发者指南](docs/DEVELOPER_GUIDE.md)。
 
-### 📝 更新日志
+### 更新日志
 
 查看 [CHANGELOG.md](CHANGELOG.md) 了解详细的版本更新历史。
 
 #### v1.0.0 (即将发布)
-- 🎮 完整的五子棋游戏核心
-- 👥 人人对战、人机对战、练习模式
-- 📋 经典规则和禁手规则
-- 🤖 三种AI难度等级
-- 🎨 现代化UI设计
-- 💡 完整的辅助功能
+- 多游戏启动器，支持五子棋、围棋、国际象棋、中国象棋、军棋翻翻棋
+- 人人对战、人机对战、练习模式
+- 五子棋经典规则和禁手规则，围棋中国规则和日本规则
+- 三种AI难度等级（五子棋）
+- 现代化UI设计
+- 完整的辅助功能
+- 跨平台支持（Web / Android / 桌面端）
 
-### 🤝 贡献指南
+### 贡献指南
 
-我们欢迎所有形式的贡献! 请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解如何:
+我们欢迎所有形式的贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解如何：
 
-- 🐛 报告Bug
-- 💡 提出新功能建议
-- 📝 改进文档
-- 🎨 设计游戏资源
-- 🔧 贡献代码
+- 报告Bug
+- 提出新功能建议
+- 改进文档
+- 设计游戏资源
+- 贡献代码
 
-### 📄 许可证
+### 许可证
 
 本项目采用 [MIT License](LICENSE) 开源协议。
 
-您可以自由地:
-- ✅ 商业使用
-- ✅ 修改代码
-- ✅ 分发副本
-- ✅ 私人使用
+您可以自由地：
+- 商业使用
+- 修改代码
+- 分发副本
+- 私人使用
 
 唯一的要求是保留原始版权声明。
 
-### 🎯 未来计划
+### 联系我们
 
-#### v1.1 (计划中)
-- 在线多人对战
-- 更多AI难度等级
-- 自定义主题
-- Steam成就系统
-
-#### v1.2 (计划中)
-- 对局回放系统
-- 棋谱导入导出
-- Steam排行榜
-- 音效系统
-
-#### v2.0 (远期计划)
-- 完整的在线竞技系统
-- 天梯排名系统
-- 赛季模式
-- 教学模式
-- 多语言支持
-
-### 🌟 游戏特色
-
-#### 为什么选择五子棋 · Gomoku?
-
-1. **零门槛上手** - 简单直观的界面,新手也能快速开始
-2. **深度策略** - 禁手规则让游戏更具竞技性
-3. **智能AI** - 多难度AI适合各级别玩家
-4. **完全免费** - Web版本永久免费,Steam版本同样免费
-5. **开源透明** - MIT许可证,代码完全开源
-6. **持续更新** - 定期添加新功能和优化
-
-### 📞 联系我们
-
-- **GitHub Issues**: [提交问题](https://github.com/yourusername/gomoku/issues)
-- **Steam社区**: (即将开放)
+- **GitHub Issues**: [提交问题](https://github.com/yourusername/board-games/issues)
 - **官方网站**: (即将开放)
 
-### 🙏 致谢
+### 致谢
 
-感谢所有为这个项目做出贡献的开发者、设计师和玩家!
+感谢所有为这个项目做出贡献的开发者、设计师和玩家！
 
-特别感谢:
-- 五子棋爱好者社区
-- Steam平台
-- Electron框架
+特别感谢：
+- 棋盘游戏爱好者社区
+- Three.js 框架
+- Electron 框架
 - 所有开源项目贡献者
 
 ---
 
 ## English
 
-### 🎯 About
+### About
 
-Gomoku is a modern five-in-a-row game that provides an immersive gaming experience. Whether for casual entertainment or strategic competition, it meets your needs.
+This is a multi-board game collection featuring Gomoku, Go, Chess, Xiangqi, and Junqi (Flip) in one unified launcher. Each game has its own independent rules engine and application module, providing diverse board game experiences.
 
-### ✨ Key Features
+- **Gomoku** — Classic five-in-a-row with Renju rule support and AI opponents
+- **Go** — Ancient territory-capturing strategy game with Chinese and Japanese scoring
+- **Chess** — Globally popular chess with complete piece movement and special rules
+- **Xiangqi** — Traditional Chinese chess with river-separated red/black gameplay
+- **Junqi (Flip)** — Luck-based military-themed flip chess
 
-#### 🎮 Multiple Game Modes
-- **Player vs Player** - Face-to-face competition with friends
-- **Player vs AI** - Challenge intelligent AI opponents
-- **Practice Mode** - Explore game variations freely
+### Key Features
 
-#### 📋 Flexible Rules
-- **Classic Rules** - Connect five to win, simple and direct
-- **Renju Rules** - Black forbidden from 3-3, 4-4, and overline, more strategic depth
+#### Multi-Game Support
+- Unified launcher interface, switch games with one click
+- Games are lazy-loaded on demand for optimal performance
+- Each game runs independently without interference
 
-#### 🤖 Intelligent AI System
-- **Easy** - Suitable for beginners
-- **Medium** - Requires some skill
-- **Master** - High difficulty challenge
+#### Game Modes
+- **Player vs Player** — Face-to-face competition with friends
+- **Player vs AI** — Challenge intelligent AI opponents (3 difficulty levels for Gomoku)
+- **Practice Mode** — Explore game variations freely
 
-#### 💡 Practical Assistance
-- **Undo** - Take back moves
-- **Hint** - AI recommends best moves
-- **Swap Sides** - Switch colors anytime
-- **Resign** - Concede the game
+#### Flexible Rules
+- Gomoku: Classic rules and Renju rules (3-3, 4-4, overline)
+- Go: Chinese and Japanese scoring rules
+- Chess: Complete FIDE international rules
+- Xiangqi: Complete traditional rules
+- Junqi: Classic flip chess rules
 
-#### 🎨 Beautiful UI Design
-- Modern UI design
-- Smooth animations
-- Real-time game analysis
-- Complete move history
+#### Multiple Render Engines
+- 2D rendering for Chess, Xiangqi, and Junqi
+- 3D rendering for Gomoku and Go using Three.js
+- Gomoku 3D scene presets: Home, Park, Competition
+- Modern UI design with smooth animations
 
-### 🚀 Quick Start
+#### Smart Assistance
+- Undo — Take back moves and rethink strategy
+- Hint — AI recommends best moves (select games)
+- Swap Sides — Switch colors anytime
+- Resign — Concede the game
+- Complete move history for review
+
+#### Cross-Platform
+- Web version (browser play)
+- Android APK
+- Desktop versions (Windows, macOS, Linux via Electron)
+- Steam platform (coming soon)
+
+### Quick Start
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/gomoku.git
-cd gomoku
+git clone https://github.com/yourusername/board-games.git
+cd board-games
 
 # Start local server
 npm run serve
@@ -304,7 +297,7 @@ The debug APK is generated at `android/app/build/outputs/apk/debug/app-debug.apk
 The side-load friendly copy is `output/android/Gomoku-1.0.0-debug.apk`.
 See [Android APK docs](docs/ANDROID.md) for install steps and LLM endpoint notes.
 
-### 💻 System Requirements
+### System Requirements
 
 #### Minimum
 - **OS**: Windows 7 SP1 / macOS 10.13 / Linux
@@ -318,21 +311,57 @@ See [Android APK docs](docs/ANDROID.md) for install steps and LLM endpoint notes
 - **Memory**: 4 GB RAM
 - **Storage**: 200 MB available space
 
-### 📝 Changelog
+### Development
+
+```bash
+# Run development server
+npm run serve
+
+# Run code checks
+npm run check
+
+# Run tests
+npm run test
+
+# Build for web
+npm run build
+
+# Build for desktop
+npm run build:desktop
+```
+
+#### Tech Stack
+- **Frontend**: Vanilla JavaScript (ES Modules)
+- **Styling**: Vanilla CSS (CSS Variables)
+- **3D Rendering**: Three.js ^0.164.0
+- **Testing**: Vitest
+- **Architecture**: Layered modular design
+- **Packaging**: Capacitor (Android APK), Electron (Desktop)
+
+### Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 
-### 🤝 Contributing
+#### v1.0.0 (Coming Soon)
+- Multi-game launcher supporting Gomoku, Go, Chess, Xiangqi, Junqi
+- Player vs Player, Player vs AI, Practice modes
+- Classic and Renju rules for Gomoku, Chinese and Japanese scoring for Go
+- Three AI difficulty levels (Gomoku)
+- Modern UI design
+- Complete assist features
+- Cross-platform support (Web / Android / Desktop)
+
+### Contributing
 
 We welcome all forms of contribution! Please see [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to:
 
-- 🐛 Report bugs
-- 💡 Suggest new features
-- 📝 Improve documentation
-- 🎨 Design game assets
-- 🔧 Contribute code
+- Report bugs
+- Suggest new features
+- Improve documentation
+- Design game assets
+- Contribute code
 
-### 📄 License
+### License
 
 This project is licensed under the [MIT License](LICENSE).
 
@@ -340,10 +369,10 @@ This project is licensed under the [MIT License](LICENSE).
 
 <div align="center">
 
-**如果喜欢这个项目,请给我们一个 ⭐️ Star!**
+**如果喜欢这个项目,请给我们一个 Star!**
 
-Made with ❤️ by [Your Name]
+Made with love by [Your Name]
 
-[Steam](https://store.steampowered.com/) | [GitHub](https://github.com/yourusername/gomoku) | [Documentation](docs/DEVELOPER_GUIDE.md)
+[Steam](https://store.steampowered.com/) | [GitHub](https://github.com/yourusername/board-games) | [Documentation](docs/DEVELOPER_GUIDE.md)
 
 </div>

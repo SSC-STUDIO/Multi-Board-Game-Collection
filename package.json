@@ -1,7 +1,7 @@
 {
-  "name": "gomoku",
+  "name": "board-games",
   "version": "1.0.0",
-  "description": "五子棋 · Gomoku - 一款精致的五子棋游戏",
+  "description": "多款棋盘游戏合集 / Multi-Board Game Collection - 五子棋、围棋、国际象棋、中国象棋、军棋翻翻棋",
   "private": true,
   "type": "module",
   "author": "Your Name",
@@ -33,11 +33,18 @@
   },
   "keywords": [
     "gomoku",
+    "go",
+    "chess",
+    "xiangqi",
+    "junqi",
     "五子棋",
+    "围棋",
+    "国际象棋",
+    "中国象棋",
+    "军棋",
     "board game",
     "strategy",
-    "game",
-    "chess"
+    "game"
   ],
   "dependencies": {
     "@capacitor/android": "^8.3.1",

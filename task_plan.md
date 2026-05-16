@@ -25,7 +25,27 @@ Expand test coverage across all game modules. The project has evolved from a sin
 - [completed] Add tests for `src/ui/render.js` — 31 tests passing
 - [completed] Add tests for `src/app/controllers/GameController.test.js`
 - [completed] Add tests for `src/app/controllers/SettingsController.test.js`
-- [ ] Add tests for `src/app/GomokuApp.js`
+- [completed] Add tests for `src/app/GomokuApp.js` — 22 tests covering constructor, initRenderer, delegation, hooks, dispose, viewport
+
+## Completed Round (2026-05-16): Critical Runtime Bug Fixes
+
+**目标**: 基于现有计划和代码分析，发现并修复真实用户遇到的致命错误。
+
+**发现的问题**:
+1. **CSS 完全不加载**: `main.js` 使用 `import './styles/main.css'`（ESM CSS 导入），但项目不使用 bundler。浏览器拒绝将 CSS 作为 JS 模块加载，导致 main.js 完全不执行、所有 CSS 不加载、整个应用无法运行。
+2. **Three.js 模块解析失败**: `import * as THREE from 'three'` 使用 bare specifier，但 HTML 缺少 import map，导致 gomoku 和 go 两个 3D 游戏加载失败。
+
+**修复内容**:
+1. 在 index.html 添加 `<link>` 标签加载所有 5 个 CSS 文件（base/main/layout/components/responsive）
+2. 移除 main.js 中错误的 `import './styles/main.css'`
+3. 在 index.html 添加 `<script type="importmap">` 映射 `three` → `node_modules/three/build/three.module.js` 和 `three/addons/` → `node_modules/three/examples/jsm/`
+
+**验证结果**:
+- Playwright 验证：所有 5 个游戏（gomoku/go/chess/xiangqi/junqi）均成功进入并返回启动器
+- 无控制台错误
+- 800 tests / 34 files 全部通过
+- 98 模块语法检查通过
+- 截图视觉验证：启动器、五子棋、围棋、国际象棋、中国象棋 UI 渲染正确
 
 ## Completed Round (2026-05-16)
 
@@ -50,3 +70,40 @@ Expand test coverage across all game modules. The project has evolved from a sin
 - Preserve existing behavior; tests only, no runtime changes.
 - Mock `i18n` where needed to isolate pure logic.
 - Keep test files co-located with their source (`*.test.js` next to `*.js`).
+
+---
+
+## Current Round (2026-05-16): GitHub Hosting Readiness
+
+### 目标
+准备代码库用于私有 GitHub 托管，重点修复用户可见的项目身份问题。
+
+### 发现的关键问题
+1. **README 完全过时** — 仍只描述五子棋（Gomoku），实际已是 5 游戏平台（Go/Gomoku/Chess/Xiangqi/Junqi）
+2. **package.json 名称/描述/关键词** — 仍为 `gomoku` 和 `五子棋 · Gomoku`
+3. **关键运行时修复未提交** — CSS 加载修复、Three.js import map、test-setup 增强
+4. **未跟踪文件混乱** — Playwright 输出、截图、tmp 脚本
+5. **GomokuApp 测试缺失** — task_plan 中最后一个测试缺口
+
+### Agent Team 分工
+
+| Agent | 任务 | 预期产出 |
+|-------|------|----------|
+| Agent-Builder-1 | 提交已修改文件的修复（index.html/src/main.js/src/test-setup.js）+ 更新 .gitignore | git commit + .gitignore 清理 |
+| Agent-Builder-2 | 更新 README.md 和 package.json 反映多游戏平台 | README、package.json 修改 |
+| Agent-Builder-3 | 添加 GomokuApp.test.js | 新测试文件 + 验证通过 |
+| Agent-Verifier | 运行全量验证 + 视觉检查 | 测试/检查/serve/Codex视觉报告 |
+
+### 实际验证方案
+1. `npm test` — 全部测试通过
+2. `npm run check` — 模块检查通过
+3. `npm run serve` 启动开发服务器
+4. Playwright 截图验证启动器和各游戏 UI
+5. Codex GPT-5.4-mini 视觉检查截图（如果 Playwright 可用）
+
+### 需要视觉验证的点
+- 启动器界面：5 个游戏按钮可见
+- 五子棋、围棋、国际象棋、中国象棋、军棋各游戏界面渲染
+- 3D 场景渲染（围棋有 Three.js 3D 渲染）
+- 语言切换功能
+- 移动端响应式布局

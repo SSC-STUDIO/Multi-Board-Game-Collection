@@ -11,3 +11,12 @@ dist/
 .idea/
 *.iml
 Thumbs.db
+.playwright-cli/
+.playwright-mcp/
+test-results/
+tmp-*.mjs
+tmp-*.spec.mjs
+go-3d-*.png
+mobile-setup.png
+output/
+docs/evaluation-plan.md

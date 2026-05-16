@@ -100,3 +100,29 @@ Original prompt: Implement the plan to fix grid stability, adapt the game for mo
 - 2026-05-16: Added 11 edge-case tests for `src/games/junqi/flip/rules.js`. New coverage areas: **canCapture defensive guards** (null attacker/victim), **cannon captures unrevealed pieces** (炮隔屏吃暗子, unrevealed screen), **true stalemate scenarios** (all pieces revealed + no legal moves, turn=null bypass), **board boundary positions** (corner 2-dir, edge 3-dir), **cloneBoard deep copy** (structural and mutation independence), **applyMove state preservation** (non-overwritten properties survive). Junqi flip rules tests grow from 37 to 48. `vitest run` passes 547 tests across 28 files (3 pre-existing AI timeout failures unchanged).
 
 - 2026-05-16: Fixed GameController.test.js (20 failures) and SettingsController.test.js (11 failures). Root cause: test mocks didn't match actual implementation — tests expected `app.showMessageKey`/`app.setAIThinking` mock calls, but actual `GameController` delegates to render module directly. Also fixed `_classes` vs `classList` confusion in settings mocks, sync setTimeout interference with transient CSS classes, missing `createResultSummary`/`querySelector` in mock elements, and `mockReturnValue` leakage across tests. `vitest run` now **800 tests, 34 files, all passing**. `node tools/check.mjs` passes 98 modules.
+
+- 2026-05-16 (Round: GitHub Hosting Readiness):
+  - **发现的问题**:
+    1. README 完全过时，仍只描述五子棋，实际是5游戏平台
+    2. package.json name="gomoku"，description="五子棋·Gomoku"
+    3. 关键运行时修复（CSS加载、import map、test-setup）未提交
+    4. Playwright/截图/tmp 脚本未跟踪，需 .gitignore 清理
+    5. GomokuApp.test.js 测试缺口
+  - **Agent 分工**:
+    - Agent-Builder-1: 提交运行时修复 + 更新 .gitignore
+    - Agent-Builder-2: 更新 README + package.json 为多游戏平台
+    - Agent-Builder-3: 添加 GomokuApp.test.js
+    - Agent-Verifier: 运行全量验证 + serve + 可视化检查
+  - **状态**: 规划完成，开始执行
+
+- 2026-05-16 (Round: GitHub Hosting Readiness — 执行完成):
+  - **Agent-Builder-1** ✅: 更新 .gitignore，追加 Playwright/截图/tmp 忽略模式
+  - **Agent-Builder-2** ✅: README 更新为多游戏平台（5游戏描述/项目结构/特性）、package.json 重命名为 board-games，关键词扩展
+  - **Agent-Builder-3** ⚠️: API 断开，GomokuApp.test.js 未完成。手动创建 22 测试用例
+  - **Verifier** ✅:
+    - `npm test`: **822 tests, 35 files, 全部通过**（+22 GomokuApp 测试）
+    - `npm run check`: **99 modules 通过**（+1 GomokuApp.test.js）
+    - HTTP serve 验证: HTML 含正确 CSS links + import map，返回 200
+    - Playwright 截图验证: 启动器 + 设置面板渲染正确，0 控制台错误
+    - 视觉验证: 通过（自行读图确认，Codex GPT-5.4-mini 本地不可用）
+  - **待提交**: index.html（CSS links + import map）、src/main.js（移除CSS ESM导入）、src/test-setup.js（增强mock DOM）、task_plan.md（本轮记录）、.gitignore（新增忽略模式）、README.md（多游戏）、package.json（改名）、src/app/GomokuApp.test.js（新测试文件）

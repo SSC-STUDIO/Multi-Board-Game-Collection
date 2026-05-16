@@ -5,7 +5,6 @@
  * @module main
  */
 
-import './styles/main.css';
 import { LauncherController } from './app/controllers/LauncherController.js';
 import { findGame } from './games/registry.js';
 
