@@ -141,6 +141,25 @@ npx vitest run src/games/go/rules.test.js
 1. **LLM Coach 网络错误处理**：`llmCoach.js` 依赖外部 API，网络异常处理需加强
 2. **3D 移动端性能**：低端设备上 Three.js 场景可能卡顿，PixelRatio 已有限制但仍需优化
 3. **Electron 在 WSL 中不可用**：需要 Windows 原生环境构建和测试
+4. **Gomoku 3D 截图在 headless Chromium 中不可用**：Three.js 场景使用 SwiftShader 渲染时 `page.screenshot()` 超时（已知 Playwright + headless 限制）。Go 3D 渲染（较简单结构）可正常截图。不影响真实用户。
+5. **`.setup-panel` 使用 `position: fixed`**：Gomoku 设置面板 `#setup` 的 `position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%)` 导致 `offsetParent` 恒为 null。Playwright 中需用 `!el.classList.contains('hidden')` 而非 `offsetParent !== null` 检测可见性。
+
+## Playwright 冒烟测试注意事项
+
+运行 `node tmp-playwright-smoke.mjs` 前需确保 `npm run serve` 已在 `http://127.0.0.1:4173` 运行。
+
+### 关键技巧
+- **每游戏独立 page**: 每个游戏测试使用独立的 page（`browser.newPage()`），测试后 `page.close()`。避免 activeGames Map 状态干扰。
+- **使用 `page.evaluate(() => element.click())`**: 替代 Playwright 的 `locator.click()`。在 headless 模式中，`locator.click()` 可能在 "performing click action" 阶段挂起。
+- **`!el.classList.contains('hidden')` 检测可见性**: 替代 `offsetParent !== null`。`.setup-panel` 使用 `position: fixed` 导致 `offsetParent` 恒为 null。
+- **模块加载时间**: headless Chromium 中动态 `import()` 需要 3-8 秒。使用 `waitForSelector`/`waitForFunction` 显式等待，避免 `waitForTimeout`。
+- **截图超时**: headless Chromium + Three.js 3D 场景的 `page.screenshot()` 可能超时（30s）。使用 try/catch 包裹，标记为已知限制。
+- **字体加载**: `fullPage: true` 截图可能因等待字体加载而超时。使用默认 `fullPage: false` 或加长超时。
+
+### 测试流程
+```
+page.goto → 等待启动器网格 → 点击游戏卡片 → 等待设置面板 → 截图 → 点击开始 → 等待游戏面板 → 截图 → 执行落子操作 → 截图 → page.close
+```
 
 ## 版本信息
 
