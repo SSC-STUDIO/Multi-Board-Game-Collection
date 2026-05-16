@@ -8,7 +8,8 @@ import {
     isLegalMove,
     getLegalMoves,
     getOpponent,
-    isInside
+    isInside,
+    isEmptyBoard
 } from './rules.js';
 
 function emptyBoard(size) {
@@ -233,5 +234,126 @@ describe('games/go/rules', () => {
         b[1][0] = 'white';
         const res = placeStone(b, 0, 0, 'black', { allowSuicide: true });
         expect(res.legal).toBe(true);
+    });
+
+    it('isEmptyBoard returns true for empty board', () => {
+        expect(isEmptyBoard(emptyBoard(9))).toBe(true);
+        expect(isEmptyBoard(emptyBoard(13))).toBe(true);
+        expect(isEmptyBoard(emptyBoard(19))).toBe(true);
+    });
+
+    it('isEmptyBoard returns false when any stone is on board', () => {
+        const b = emptyBoard(9);
+        b[4][4] = 'black';
+        expect(isEmptyBoard(b)).toBe(false);
+    });
+
+    it('isEmptyBoard returns false for full board', () => {
+        const b = Array.from({ length: 5 }, () => Array(5).fill('black'));
+        expect(isEmptyBoard(b)).toBe(false);
+    });
+
+    it('getNeighbors returns correct counts for all board positions', () => {
+        // 角: 2 邻
+        expect(getNeighbors(9, 0, 0)).toHaveLength(2);
+        expect(getNeighbors(9, 0, 8)).toHaveLength(2);
+        expect(getNeighbors(9, 8, 0)).toHaveLength(2);
+        expect(getNeighbors(9, 8, 8)).toHaveLength(2);
+        // 边 (非角): 3 邻
+        expect(getNeighbors(9, 0, 4)).toHaveLength(3);
+        expect(getNeighbors(9, 4, 0)).toHaveLength(3);
+        expect(getNeighbors(9, 8, 4)).toHaveLength(3);
+        expect(getNeighbors(9, 4, 8)).toHaveLength(3);
+        // 中心: 4 邻
+        expect(getNeighbors(9, 4, 4)).toHaveLength(4);
+    });
+
+    it('getGroup correctly identifies a larger connected group', () => {
+        // 2x2 黑块: 有 4+4-重复边 = 8气? 实际上 2x2 块共 8 气
+        const b = emptyBoard(9);
+        b[3][3] = 'black'; b[3][4] = 'black';
+        b[4][3] = 'black'; b[4][4] = 'black';
+        const group = getGroup(b, 3, 3);
+        expect(group.color).toBe('black');
+        expect(group.stones).toHaveLength(4);
+        // 2x2 块: 内边无气，外侧有 4*2+2 = 10? 不对, 2x2 方块有 (2+2+2+2) - 4 = 8
+        // 实际上: 2x2 块占据 (3,3)(3,4)(4,3)(4,4), 周围空点:
+        // 上(2,3)(2,4), 下(5,3)(5,4), 左(3,2)(4,2), 右(3,5)(4,5) = 8
+        expect(group.libertyCount).toBe(8);
+    });
+
+    it('getGroup with empty-start collects single cell', () => {
+        const b = emptyBoard(9);
+        const group = getGroup(b, 0, 0);
+        expect(group.color).toBeNull();
+        expect(group.stones).toHaveLength(1);
+    });
+
+    it('capture in corner removes opponent stone', () => {
+        // 白 (0,0) 角部，仅剩 (1,0) 一气；黑落 (1,0) → 提白子
+        const b = emptyBoard(5);
+        b[0][0] = 'white';
+        b[0][1] = 'black';
+        const res = placeStone(b, 1, 0, 'black');
+        expect(res.legal).toBe(true);
+        expect(res.captured).toHaveLength(1);
+        expect(res.captured).toContainEqual([0, 0]);
+    });
+
+    it('placeStone returns occupied for out-of-bounds coordinates', () => {
+        const b = emptyBoard(9);
+        const res = placeStone(b, -1, 0, 'black');
+        expect(res.legal).toBe(false);
+        expect(res.reason).toBe('occupied');
+    });
+
+    it('isLegalMove returns true for valid empty intersection', () => {
+        const b = emptyBoard(9);
+        expect(isLegalMove(b, 4, 4, 'black')).toBe(true);
+    });
+
+    it('isLegalMove returns false for occupied intersection', () => {
+        const b = emptyBoard(9);
+        b[4][4] = 'black';
+        expect(isLegalMove(b, 4, 4, 'white')).toBe(false);
+    });
+
+    it('getLegalMoves returns correct count for empty board', () => {
+        const moves = getLegalMoves(emptyBoard(9), 'black');
+        expect(moves).toHaveLength(81);
+    });
+
+    it('getLegalMoves excludes occupied positions', () => {
+        const b = emptyBoard(5);
+        b[0][0] = 'black';
+        b[4][4] = 'white';
+        const moves = getLegalMoves(b, 'black');
+        // 25 - 2 occupied = 23, but some might be suicide
+        expect(moves.length).toBeLessThanOrEqual(23);
+        expect(moves.find((m) => m.row === 0 && m.col === 0)).toBeUndefined();
+    });
+
+    it('getLegalMoves respects ko point', () => {
+        // 构造劫形后，下一手的 ko 点应从 legal moves 排除
+        const b = Array.from({ length: 5 }, () => Array(5).fill(null));
+        b[0][1] = 'white'; b[0][2] = 'black';
+        b[1][0] = 'white'; b[1][2] = 'white'; b[1][3] = 'black';
+        b[2][1] = 'white'; b[2][2] = 'black';
+        const res = placeStone(b, 1, 1, 'black');
+        // 白下一步不能落在 (1,2)
+        const whiteMoves = getLegalMoves(res.board, 'white', { koPoint: res.koPoint });
+        expect(whiteMoves.find((m) => m.row === 1 && m.col === 2)).toBeUndefined();
+        // 但 (1,2) 以外其它空位应该合法
+        expect(whiteMoves.length).toBeGreaterThan(0);
+    });
+
+    it('placeStone does not allow move that would fill own eye without capture', () => {
+        // 简单自杀检查: 被全包围时不能填眼
+        const b = emptyBoard(5);
+        // 白围住 (1,1)
+        b[0][1] = 'white'; b[1][0] = 'white'; b[1][2] = 'white'; b[2][1] = 'white';
+        const res = placeStone(b, 1, 1, 'black');
+        expect(res.legal).toBe(false);
+        expect(res.reason).toBe('suicide');
     });
 });

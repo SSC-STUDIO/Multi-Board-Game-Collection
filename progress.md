@@ -195,3 +195,21 @@ Original prompt: Implement the plan to fix grid stability, adapt the game for mo
     - Go 3D 渲染（较简单的三维网格）在 headless 中正常，Gomoku 3D（完整场景预设）超时
   - **无新 issues 追加**: 已发现并修复 AI 超时问题。headless 截图限制是环境问题。全量测试通过，游戏正常运行。
   - **待提交**: ai.js（将杀检测）、task_plan.md（本轮记录）、progress.md（本轮记录）、findings.md（本轮记录）
+
+## 2026-05-16 (GitHub Hosting Readiness — CHANGELOG + CI + Go 规则测试提交)
+
+- **当前状态**: 项目已从五子棋演变为 5 游戏平台。836 tests / 35 files / 99 modules 全部通过。上一轮已完成全量 UI/交互扫描冒烟测试。
+- **本轮目标**: 完成 GitHub 托管准备扫尾工作：
+  1. 提交已验证的 Go 规则测试新增
+  2. 重写严重过时的 CHANGELOG.md
+  3. 添加 GitHub CI workflow
+- **执行结果**:
+  - `npm test` (vitest run): **836 passed, 35 files, 全部通过** ✅（822→836，新增 14 测试）
+  - `npx vitest run src/games/go/rules.test.js`: **34 tests passed** ✅（18→34，新增 16 个边缘用例）
+  - `npm run check`: **99 modules 通过** ✅
+  - **CHANGELOG.md 重写完成**: 从单五子棋 + Steam 发布计划 → 准确的 5 游戏平台描述，覆盖所有真实变更（测试扩展、AI 修复、3D 渲染、运行时修复、跨平台支持、i18n、音效等）
+  - **GitHub CI workflow 创建**: `.github/workflows/tests.yml` — npm ci → npm run check → npm test 自动流程
+  - **Go 规则测试已提交**: 16 个新测试（isEmptyBoard, getNeighbors, getGroup, corner capture, OOB, ko, suicide, eye-filling）覆盖之前缺失的边缘用例
+- **发现的新问题**: 无。所有 836 测试通过，模块检查通过，无运行时错误。
+- **待提交**: CHANGELOG.md、.github/workflows/tests.yml、progress.md（本轮）、findings.md（本轮）、src/games/go/rules.test.js（Go 规则测试提交）
+

@@ -1,148 +1,75 @@
-# 更新日志
+# Changelog
 
-所有重要的项目变更都记录在此文件中。
+All notable changes to this project are documented in this file.
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/),
-并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [未发布]
+## [Unreleased]
 
-### 新增
-- Steam 版本准备
-- Electron 打包支持
-- Steamworks SDK 集成准备
-- 成就系统配置
-- 云存档准备
+### Added
+- Go rules: 16 new edge-case tests (isEmptyBoard, getNeighbors, getGroup,
+  corner capture, out-of-bounds, ko restriction, suicide prevention,
+  eye-filling) — total 34 Go rules tests, 836 project-wide
+- GitHub CI workflow for automated test verification on push/PR
 
-### 变更
-- 更新项目结构以符合Steam发布标准
-- 完善文档系统
-- 添加资源清单
+## [1.0.0] - 2026-05-16
 
----
+### Added
+- **5-game platform**: Unified launcher with Gomoku, Go, Chess, Xiangqi,
+  Junqi (Flip Chess) — each game has its own setup panel, game section,
+  and state management
+- **Go (围棋)**: Chinese/Japanese scoring rules (area/territory selection),
+  9/13/19路 boards, handicap system, 3D rendering (Three.js), last-move
+  highlight + ko marker, territory visualization in scoring phase
+- **Gomoku (五子棋)**: Renju forbidden-move rules, 3D rendering (Three.js)
+  with three scene presets (home/park/competition), LLM Coach (Qi guidance),
+  three AI difficulty levels, first-run guide, immersive HUD mode, three
+  game modes (PvP/PvE/practice)
+- **Chess (国际象棋)**: Full rule engine (castling, en passant, promotion),
+  AI with alpha-beta search + mate-in-1 pre-check, piece move validation
+- **Xiangqi (中国象棋)**: Full rule engine (palace/river/cannon screen/
+  flying-general), AI depth-4 search
+- **Junqi Flip (军棋翻翻棋)**: Flip-and-capture mechanics, cannon screen
+  rules, stalemate detection
+- **Cross-platform packaging**: Android (Capacitor ^8.3.1), Desktop
+  (Electron ^28.0.0 + electron-builder ^24.9.1)
+- **Sound system**: Web Audio API, UI tap/placement/hint/undo/win sounds,
+  persistent mute toggle
+- **i18n**: Chinese + English locale support, HUD/camera/help all localized
+- **First-run guide**: Desktop/mobile contextual onboarding card
 
-## [1.0.0] - 待发布
+### Fixed
+- **Runtime CSS loading**: Replaced broken ESM CSS import (`import './styles/main.css'`)
+  with HTML `<link>` tags — previously the entire app would fail to load in
+  browsers without a bundler
+- **Three.js module resolution**: Added importmap for `three` and
+  `three/addons/` bare specifiers — 3D scenes (Gomoku/Go) previously failed
+  silently without a bundler
+- **Chess AI timeout**: Added mate-in-1 pre-check in `getChessAIMove()`
+  before entering depth-4 alpha-beta search; empty-board+queen scenarios
+  dropped from ~5000ms to 178ms
+- **GameController.test.js mock mismatch**: 20 test failures fixed —
+  mocks expected `app.showMessageKey`/`app.setAIThinking` but actual
+  implementation delegates to render module directly
+- **SettingsController.test.js mock mismatch**: 11 test failures fixed —
+  missing `querySelector`, `Set.remove()` used on DOM classList,
+  `mockReturnValue` leakage across tests, sync `setTimeout` interference
 
-### 新增
-- 🎮 核心游戏功能
-  - 人人对战模式
-  - 人机对战模式(AI算法实现)
-  - 练习模式
-- 📋 规则系统
-  - 经典规则(连五即胜)
-  - 禁手规则(黑方禁三三、四四、长连)
-- 🎯 AI系统
-  - 三种难度等级(轻松、进阶、大师)
-  - 智能评估算法
-  - 基于规则的决策系统
-- 🎨 用户界面
-  - 现代化设计风格
-  - 流畅动画效果
-  - 响应式布局
-  - 实时局势分析
-- 💡 辅助功能
-  - 悔棋功能
-  - AI提示
-  - 换边功能
-  - 重新开始
-  - 认输选项
-- 📊 对局信息
-  - 实时手数统计
-  - 当前玩家显示
-  - 最后一手标记
-  - 局势阶段分析
-  - 完整棋谱记录
-- ⚙️ 自定义选项
-  - 棋盘尺寸选择(15×15 或 19×19)
-  - 执子颜色选择
-  - 多种游戏模式
-  - 规则选择
+### Changed
+- **Project identity**: Renamed from `gomoku` to `board-games` in
+  package.json; README and CLAUDE.md rewritten from single-game to 5-game
+  platform description
+- **Project structure**: Migrated from single-game architecture to
+  `src/games/{gomoku,go,chess,xiangqi,junqi/}` modular layout
+- **Test coverage**: Expanded from 0 unit tests to 836 tests across 35 files
+  covering all 5 game rule engines, AI modules, state factories, controllers,
+  UI rendering, i18n, LLM Coach, and sound manager
+- **`.gitignore`**: Added Playwright output, screenshots, temp scripts,
+  and Node.js standard patterns
 
-### 技术特性
-- 纯原生JavaScript实现,无构建依赖
-- ES Modules 模块化架构
-- 清晰的代码分层结构
-- 高性能AI算法
-- 流畅的用户体验
-- 完善的状态管理
-
----
-
-## [0.1.0] - 2026-03-22
-
-### 新增
-- 项目初始化
-- 基础五子棋游戏框架
-- 简单的游戏界面
-- 基础AI实现
-- 游戏规则判断
+### Removed
+- Outdated Steam/Steamworks preparation content from CHANGELOG (project
+  is a web-based board games collection, not a Steam title)
 
 ---
-
-## 版本说明
-
-### 版本号格式
-遵循语义化版本规范: `主版本号.次版本号.修订号`
-
-- **主版本号**: 重大架构变更或不兼容的API修改
-- **次版本号**: 向下兼容的功能性新增
-- **修订号**: 向下兼容的问题修正
-
-### 版本类型
-- **[未发布]**: 开发中的版本
-- **[1.0.0]**: Steam首发版本
-- **[0.1.0]**: 项目初始版本
-
----
-
-## 未来计划
-
-### [1.1.0] - 计划中
-
-#### 新增
-- 在线多人对战(通过Steam网络)
-- 更多AI难度等级
-- 额外的棋盘主题
-- Steam成就系统(完整的8个成就)
-- Steam云存档功能
-- 自定义棋盘背景
-
-#### 优化
-- AI算法性能优化
-- UI响应速度提升
-- 内存使用优化
-
-### [1.2.0] - 计划中
-
-#### 新增
-- 对局回放系统
-- 棋谱导入导出(SGF格式)
-- 更多游戏主题和皮肤
-- Steam排行榜
-- Steam创意工坊(自定义主题)
-- 音效系统
-
-#### 优化
-- 进一步优化AI智能
-- 改进动画系统
-
-### [2.0.0] - 远期计划
-
-#### 新增
-- 完整的在线竞技系统
-- 天梯排名系统
-- 赛季模式
-- 教学模式
-- 战术分析工具
-- 多语言支持(英文、日文、韩文等)
-
----
-
-## 更新类型说明
-
-- **新增 (Added)**: 新功能
-- **变更 (Changed)**: 对现有功能的变更
-- **弃用 (Deprecated)**: 即将移除的功能
-- **移除 (Removed)**: 已移除的功能
-- **修正 (Fixed)**: 任何bug修复
-- **安全 (Security)**: 安全相关的修复

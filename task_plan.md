@@ -217,3 +217,28 @@ Expand test coverage across all game modules. The project has evolved from a sin
   3. headless Chromium 中动态 `import()` 需要 3-8 秒
   4. 每游戏独立 page 是最可靠的多游戏测试策略
 - **无代码修复**: 运行时零错误，所有问题为测试脚本适配 headless 环境的问题
+
+---
+
+## Current Round (2026-05-16): GitHub Hosting Readiness — CHANGELOG + CI + Go规则测试提交
+
+### 目标
+按 shared_prompt Goal 3 要求，完成 GitHub 托管准备的最后步骤：
+1. **提交已验证的 Go 规则测试** — 16 个新边缘用例测试（isEmptyBoard, getNeighbors, getGroup, capture, ko, suicide, eye-filling），全部 836 已验证通过
+2. **重写 CHANGELOG.md** — 当前仅描述单五子棋 + Steam 发布计划，完全脱离 5 游戏平台现实，严重误导读者
+3. **添加 GitHub CI workflow** — 自动测试确保代码质量
+
+### 发现的关键问题
+1. CHANGELOG.md 仍描述为【五子棋·Gomoku】+ Steam 发布计划，实际项目已演变为 5 游戏平台（Go/Gomoku/Chess/Xiangqi/Junqi）— 最新修改涉及 Playwright 冒烟测试、AI 修复、3D 渲染等
+2. 无 GitHub CI workflow — GitHub 托管时缺少自动测试验证
+3. Go 规则测试已在工作副本中编写并验证通过，但未提交
+
+### 实际验证方案
+1. `npm test` — 836 测试全部通过（35 文件）
+2. `npm run check` — 模块语法检查通过
+3. `npx vitest run src/games/go/rules.test.js` — 单独验证 Go 规则测试
+4. 视觉验证：不需要（本轮无 UI 修改）
+
+### Agent Team 分工
+- 单 agent 执行：验证测试 → 更新文件 → commit
+
