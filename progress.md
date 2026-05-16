@@ -213,3 +213,16 @@ Original prompt: Implement the plan to fix grid stability, adapt the game for mo
 - **发现的新问题**: 无。所有 836 测试通过，模块检查通过，无运行时错误。
 - **待提交**: CHANGELOG.md、.github/workflows/tests.yml、progress.md（本轮）、findings.md（本轮）、src/games/go/rules.test.js（Go 规则测试提交）
 
+- **2026-05-16 (Round: App-level tests for ChessApp/XiangqiApp/JunqiApp)**:
+  - **目标**: 补齐 3 个缺少 App 级测试的游戏应用（ChessApp、XiangqiApp、JunqiApp）+ 提交未跟踪的 GoApp.test.js
+  - **新增 ChessApp.test.js**: 24 测试 — 构造、生命周期、handleSquareClick、升变覆盖层、describeMove（王车易位、兵升变、吃子）、formatResult（5种结果）、setup 可见性、dispose、__reenter
+  - **新增 XiangqiApp.test.js**: 19 测试 — 构造、startGame、isHumanTurn、handleCellClick、formatResult（将死/认输/困毙）、refreshSetupVisibility、dispose
+  - **新增 JunqiApp.test.js**: 18 测试 — 构造、variant/fourKingdom 选择、first-flip turn 处理、formatResult（三种结局/认输/全歼/困毙）、refreshSetupVisibility、dispose
+  - **GoApp.test.js 已存在**: 24 测试覆盖全部 GoApp 方法（已通过 860 tests）
+  - **全量验证结果**:
+    - `npm test`: **923 tests, 39 files, 全部通过** ✅（860→923，+63 新测试）
+    - `npm run check`: **100 modules 通过** ✅
+  - **CHANGELOG 更新**: [Unreleased] 区域添加 App 级测试条目 + 更新测试计数
+  - **本轮无 UI/运行时修改**: 纯测试文件创建，无需视觉验证
+  - **发现问题**: JunqiApp.test.js 在构造后直接修改 `app.state.turn` 但 state 为 null（构造函数仅在 startGame 时调用 createInitialState）。修复为先 startGame()。1 次修复后全通过。
+

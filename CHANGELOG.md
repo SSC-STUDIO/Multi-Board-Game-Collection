@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   corner capture, out-of-bounds, ko restriction, suicide prevention,
   eye-filling) — total 34 Go rules tests, 836 project-wide
 - GitHub CI workflow for automated test verification on push/PR
+- App-level tests: GoApp (24 tests covering constructor, lifecycle,
+  panel switching, star points, formatResult, commitMove), ChessApp
+  (24 tests covering promotion overlay, describeMove, formatResult,
+  setup visibility, lifecycle), XiangqiApp (19 tests covering same
+  lifecycle and result formatting), JunqiApp (18 tests covering
+  variant selector, first-flip turn handling, formatResult,
+  refreshSetupVisibility)
+- **Test suite**: 923 tests across 39 files, all passing
 
 ## [1.0.0] - 2026-05-16
 

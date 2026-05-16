@@ -220,25 +220,28 @@ Expand test coverage across all game modules. The project has evolved from a sin
 
 ---
 
-## Current Round (2026-05-16): GitHub Hosting Readiness — CHANGELOG + CI + Go规则测试提交
+## Current Round (2026-05-16): App-level test coverage for Chess/Xiangqi/Junqi
 
 ### 目标
-按 shared_prompt Goal 3 要求，完成 GitHub 托管准备的最后步骤：
-1. **提交已验证的 Go 规则测试** — 16 个新边缘用例测试（isEmptyBoard, getNeighbors, getGroup, capture, ko, suicide, eye-filling），全部 836 已验证通过
-2. **重写 CHANGELOG.md** — 当前仅描述单五子棋 + Steam 发布计划，完全脱离 5 游戏平台现实，严重误导读者
-3. **添加 GitHub CI workflow** — 自动测试确保代码质量
+补齐 3 个游戏 App 的应用级测试（ChessApp/XiangqiApp/JunqiApp），消除与 GoApp 和 GomokuApp 的测试覆盖差距。
 
 ### 发现的关键问题
-1. CHANGELOG.md 仍描述为【五子棋·Gomoku】+ Steam 发布计划，实际项目已演变为 5 游戏平台（Go/Gomoku/Chess/Xiangqi/Junqi）— 最新修改涉及 Playwright 冒烟测试、AI 修复、3D 渲染等
-2. 无 GitHub CI workflow — GitHub 托管时缺少自动测试验证
-3. Go 规则测试已在工作副本中编写并验证通过，但未提交
+1. ChessApp/XiangqiApp/JunqiApp 完全没有 App 级测试，而 GoApp.test.js（24 tests）已存在但未提交
+2. GoApp.test.js 作为未跟踪文件存在于工作目录中
+
+### 执行结果
+- **新增 ChessApp.test.js**: 24 测试覆盖构造、生命周期、升变覆盖层、走法描述、formatResult、setup 可见性
+- **新增 XiangqiApp.test.js**: 19 测试覆盖构造、生命周期、formatResult（将死/困毙/认输）、setup 可见性
+- **新增 JunqiApp.test.js**: 18 测试覆盖构造、翻棋变体选择、formatResult（三种结局）、setup 可见性
+- **GoApp.test.js（已有）**: 24 测试覆盖构造、star point、formatResult、commitMove
+- **全量测试**: 923 tests, 39 files, 全部通过
+- **模块检查**: 100 modules 通过
+- **CHANGELOG.md 更新**: [Unreleased] 区添加 App 级测试条目，更新测试计数从 836→923
 
 ### 实际验证方案
-1. `npm test` — 836 测试全部通过（35 文件）
-2. `npm run check` — 模块语法检查通过
-3. `npx vitest run src/games/go/rules.test.js` — 单独验证 Go 规则测试
-4. 视觉验证：不需要（本轮无 UI 修改）
+1. `npm test` — 923 tests / 39 files 全部通过 ✅
+2. `npm run check` — 100 modules 通过 ✅
 
-### Agent Team 分工
-- 单 agent 执行：验证测试 → 更新文件 → commit
+### 视觉验证
+本轮无 UI 修改，不需要视觉验证。
 

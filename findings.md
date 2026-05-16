@@ -48,9 +48,12 @@
 - **每游戏独立 page 策略**: 在每个游戏测试之间使用 `page.close()` + 新 `page.goto()` 消除了游戏间状态干扰（activeGames Map 共享、上一游戏的 setup panel 残留等），是最可靠的跨游戏测试方案。
 - **视觉验证确认**: 4 款游戏（Go/Chess/Xiangqi/Junqi）的设置界面、游戏界面、落子后界面均渲染正确，无遮挡/错位/空白/不可读文字。Dark 主题一致，HUD 元素正确。Gomoku UI 在真实浏览器中已验证工作正常，headless 截图限制不影响实际用户。
 
-## 2026-05-16 (GitHub Hosting Readiness — CHANGELOG + CI + Go 规则测试提交轮)
+## 2026-05-16 (App-level tests for Chess/Xiangqi/Junqi)
 
-- **CHANGELOG.md 过时问题发现**: 项目从五子棋演变为 5 游戏平台后，CHANGELOG.md 仍描述为单五子棋 + Steam 发布计划，包含大量不相关/不准确内容（Steamworks SDK、Steam 成就系统、云存档等）。这个过时的 CHANGELOG 会严重误导读者对项目范围和状态的判断。已重写为准确反映 5 游戏平台所有真实变更。
+- **ChessApp 测试要点**: 与国际象棋特有功能对应的测试包括 promo overlay（showPromotion/hidePromotion）、describeMove（王车易位 O-O/O-O-O、兵升变 =Q、吃子 x）、formatResult 的 5 种结果类型（将杀/认输/逼和/50步/无子可动）。handleSquareClick 需处理 gameOver 和 aiThinking 两种阻断条件。
+- **XiangqiApp 测试要点**: formatResult 的将死/认输/困毙三种结果分别使用 xiangqiCheckmateBadge、resultResignBadge、xiangqiStalemateBadge 三个不同的 i18n key。refreshSetupVisibility 同时控制 levelRow 和 colorRow 两个元素。
+- **JunqiApp 测试要点**: 构造后 `app.state === null`（BoardGameApp 构造函数不调用 createInitialState），所有需要 state 的测试必须先 startGame()。formatResult 包含三种结局（resign 对应 resultResignBadge、annihilation 对应 junqiAnnihilationBadge、stalemate 对应 junqiStalemateBadge）。variant 选择器控制着四个王国变体的的 comingSoon 消息。turn=null 是 JunqiApp 特有的首翻状态。
+- **923 tests / 39 files / 100 modules 全部通过**: 项目从 0 个测试增长到 923 个。覆盖全部 5 个游戏的 state/rule/AI/App 层。本轮新增 63 个测试（3 新文件）。- **CHANGELOG.md 过时问题发现**: 项目从五子棋演变为 5 游戏平台后，CHANGELOG.md 仍描述为单五子棋 + Steam 发布计划，包含大量不相关/不准确内容（Steamworks SDK、Steam 成就系统、云存档等）。这个过时的 CHANGELOG 会严重误导读者对项目范围和状态的判断。已重写为准确反映 5 游戏平台所有真实变更。
 - **CI workflow 配置选择**: 使用 ubuntu-latest runner + Node.js 20 + npm ci + vitest。触发条件包括 push 到 main/master/codex/ai-** 分支以及 pull_request。含 workflow_dispatch 支持手动触发。
 - **Go 规则测试新增 16 个边缘用例**: 覆盖 isEmptyBoard (3), getNeighbors (1), getGroup (2), corner capture (1), out-of-bounds (1), isLegalMove (2), getLegalMoves (3), suicide (1), eye-filling (1)。Go 规则测试从 18 增至 34。
 
