@@ -13,7 +13,8 @@ import {
     applyMove,
     checkWinner,
     countAlive,
-    inBounds
+    inBounds,
+    cloneBoard
 } from './rules.js';
 
 function emptyBoard() {
@@ -350,5 +351,104 @@ describe('games/junqi/flip/rules — 扩展边界', () => {
         expect(RANK_LEVEL.N).toBe(3);
         expect(RANK_LEVEL.C).toBe(2);
         expect(RANK_LEVEL.P).toBe(1);
+    });
+});
+
+describe('games/junqi/flip/rules — 附加: canCapture 防御', () => {
+    it('null 攻击者返回 false', () => {
+        expect(canCapture(null, piece('b', 'K'))).toBe(false);
+    });
+
+    it('null 目标返回 false', () => {
+        expect(canCapture(piece('r', 'R'), null)).toBe(false);
+    });
+});
+
+describe('games/junqi/flip/rules — 附加: 炮吃未翻开子', () => {
+    it('炮可隔炮架吃未翻开的子', () => {
+        const board = emptyBoard();
+        board[0][0] = piece('r', 'C');
+        board[0][2] = piece('b', 'N'); // 炮架（已翻开）
+        board[0][5] = piece('b', 'R', false); // 未翻开目标
+        const moves = generatePieceMoves(board, 0, 0);
+        expect(moves.some((m) => m.kind === 'capture' && m.to[0] === 0 && m.to[1] === 5)).toBe(true);
+    });
+
+    it('炮以未翻开子为炮架仍可隔子吃', () => {
+        const board = emptyBoard();
+        board[0][0] = piece('r', 'C');
+        board[0][2] = piece('b', 'N', false); // 未翻开的炮架
+        board[0][5] = piece('b', 'K');
+        const moves = generatePieceMoves(board, 0, 0);
+        expect(moves.some((m) => m.kind === 'capture' && m.to[0] === 0 && m.to[1] === 5)).toBe(true);
+    });
+});
+
+describe('games/junqi/flip/rules — 附加: 困毙检测', () => {
+    it('所有子已翻开且当前方无合法走法 → 困毙', () => {
+        const board = emptyBoard();
+        // 红方仅有一个兵 (P=1)，被黑方高级别子包围无法动弹
+        board[1][1] = piece('r', 'P');
+        board[0][1] = piece('b', 'R'); // R=4 > P=1 → 不能吃
+        board[2][1] = piece('b', 'R');
+        board[1][0] = piece('b', 'N'); // N=3 > P=1 → 不能吃
+        board[1][2] = piece('b', 'N');
+        expect(getLegalMoves(board, 'r')).toHaveLength(0);
+        expect(checkWinner(board, { turn: 'r' })).toEqual({ winner: 'b', reason: 'stalemate' });
+    });
+
+    it('翻阶段 (turn=null) 时 checkWinner 不检查困毙', () => {
+        const board = emptyBoard();
+        board[0][0] = piece('r', 'N', false);
+        board[3][7] = piece('b', 'K', false); // 黑方也有一子避免 annihilation
+        expect(checkWinner(board, { turn: null })).toBeNull();
+    });
+});
+
+describe('games/junqi/flip/rules — 附加: 棋盘边界位置', () => {
+    it('角格棋子只有 2 个移动方向', () => {
+        const board = emptyBoard();
+        board[0][0] = piece('r', 'R');
+        const moves = generatePieceMoves(board, 0, 0);
+        expect(moves.filter((m) => m.kind === 'move')).toHaveLength(2);
+    });
+
+    it('边格棋子只有 3 个移动方向', () => {
+        const board = emptyBoard();
+        board[0][3] = piece('r', 'R');
+        const moves = generatePieceMoves(board, 0, 3);
+        expect(moves.filter((m) => m.kind === 'move')).toHaveLength(3);
+    });
+});
+
+describe('games/junqi/flip/rules — 附加: cloneBoard 深拷贝', () => {
+    it('克隆棋盘与原棋盘独立', () => {
+        const board = emptyBoard();
+        board[0][0] = piece('r', 'N');
+        const cloned = cloneBoard(board);
+        cloned[0][0] = null;
+        expect(board[0][0]).toEqual(piece('r', 'N'));
+    });
+
+    it('克隆棋盘内棋子修改不影响原棋盘', () => {
+        const board = emptyBoard();
+        board[0][0] = piece('r', 'N');
+        const cloned = cloneBoard(board);
+        cloned[0][0].color = 'b';
+        expect(board[0][0].color).toBe('r');
+    });
+});
+
+describe('games/junqi/flip/rules — 附加: applyMove 状态保留', () => {
+    it('非覆盖属性在 applyMove 后被保留', () => {
+        const board = emptyBoard();
+        board[0][0] = piece('r', 'N');
+        const state = { turn: 'r', moveCount: 5, custom: 'hello' };
+        const { state: after } = applyMove(board, state, {
+            kind: 'move', from: [0, 0], to: [1, 0]
+        });
+        expect(after.moveCount).toBe(5);
+        expect(after.custom).toBe('hello');
+        expect(after.turn).toBe('b');
     });
 });

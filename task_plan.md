@@ -18,9 +18,9 @@ Expand test coverage across all game modules. The project has evolved from a sin
 - [completed] Add territory visualization in GoRenderer3D (scoring phase)
 - [completed] Add scoring rule selector (area/territory) to Go setup UI (HTML + i18n)
 - [completed] Add tests for `scoreBoardWithRule` (territory rule) and `getTerritoryMap`
-- [next] Add tests for `src/games/chess/rules.js` edge cases (castling, en passant, promotion)
-- [ ] Add tests for `src/games/xiangqi/rules.js` edge cases (palace, river crossing, piece-specific moves)
-- [ ] Add tests for `src/games/junqi/flip/rules.js` edge cases (capture legality, stalemate detection)
+- [completed] Add tests for `src/games/chess/rules.js` edge cases (castling, en passant, promotion)
+- [completed] Add tests for `src/games/xiangqi/rules.js` edge cases (palace, river crossing, piece-specific moves)
+- [completed] Add tests for `src/games/junqi/flip/rules.js` edge cases (capture legality, stalemate detection)
 - [ ] Add tests for `src/app/controllers/` (InteractionManager, GameController, LauncherController)
 - [ ] Add tests for `src/ui/render.js` (render helpers, DOM output)
 - [ ] Add tests for `src/app/GomokuApp.js` (game lifecycle, mode switching, undo flow)
