@@ -1,21 +1,23 @@
-# 五子棋 · Gomoku
+# Board Games 合集 · 多款棋盘游戏
 
 ## 项目概述
 
-五子棋 · Gomoku 是一款现代化的五子棋游戏，采用原生 JavaScript + Three.js 构建，支持 Web、Android (Capacitor) 和桌面端 (Electron) 多平台发布。
+Board Games 是一款多款棋盘游戏合集，采用原生 JavaScript + Three.js 构建，集成五子棋、围棋、国际象棋、中国象棋和军棋翻翻棋于一体。支持 Web、Android (Capacitor) 和桌面端 (Electron) 多平台发布。
 
 **核心特性**：
-- 多种游戏模式：人人对战 (PvP)、人机对战 (PvE)、练习模式、QI 指导 (LLM Coach)
-- 规则支持：经典规则、禁手规则 (Renju)
-- 智能AI：三档难度 (轻松/进阶/大师)
-- 3D 渲染：Three.js 沉浸式场景 (家、公园、比赛现场)
+- 5 款游戏：五子棋、围棋、国际象棋、中国象棋、军棋翻翻棋
+- 统一启动器：从启动器选择任意游戏进入
+- 多种游戏模式：PvP、PvE（AI）、练习模式
+- 围棋：中国规则/日本规则计分、让子、3D 渲染（Three.js）
+- 五子棋：禁手规则（Renju）、3D 渲染（Three.js）三档 AI 难度、QI 指导（LLM Coach）
+- 3D 场景：Three.js 沉浸式场景（家/公园/比赛现场），支持场景切换
 - LLM Coach：可选接入外部 LLM API 获取智能建议
 
 ## 技术栈
 
 - **前端框架**：原生 JavaScript (ES Modules)
 - **样式**：原生 CSS (CSS Variables)
-- **3D 渲染**：Three.js ^0.164.0
+- **3D 渲染**：Three.js ^0.164.0 (五子棋/围棋)
 - **跨平台打包**：
   - Android: Capacitor ^8.3.1
   - 桌面端: Electron ^28.0.0 + electron-builder ^24.9.1
@@ -23,34 +25,29 @@
 
 ## 架构说明
 
-项目采用分层模块化设计，代码组织清晰：
+项目采用分层模块化设计，代码按游戏和功能分层：
 
 ```
 src/
-├── main.js              # 应用入口 (DOMContentLoaded 初始化)
-├── app/
-│   └── GomokuApp.js     # 应用层主类，协调各模块
-├── game/                 # 游戏逻辑层 (纯逻辑，无 UI 依赖)
-│   ├── state.js         # 状态管理：棋盘、历史、游戏选项
-│   ├── rules.js         # 规则引擎：胜负判定、禁手检测
-│   └── ai.js            # AI 算法：评分函数、决策逻辑
+├── main.js              # 应用入口 (DOMContentLoaded → 启动器)
+├── app/                  # 应用层
+│   ├── GomokuApp.js     # 应用主类，协调各模块
+│   └── controllers/     # 控制器模块
+├── game/                 # 五子棋游戏逻辑 (遗留，games/gomoku 为重构版)
+├── games/                # 各游戏独立模块
+│   ├── gomoku/           # 五子棋 (state.js, rules.js, ai.js)
+│   ├── go/               # 围棋 (state.js, rules.js, 含计分+3D渲染)
+│   ├── chess/            # 国际象棋 (state.js, rules.js)
+│   ├── xiangqi/          # 中国象棋 (state.js, rules.js)
+│   └── junqi/flip/       # 军棋翻翻棋 (state.js, rules.js)
 ├── ui/                   # 表现层 (DOM 操作、渲染)
 │   ├── dom.js           # DOM 引用获取、事件绑定
 │   └── render.js        # UI 渲染、状态同步
 ├── render3d/             # 3D 渲染模块 (Three.js)
-│   ├── index.js         # 模块导出入口
-│   ├── GomokuRenderer3D.js  # 主渲染器封装
-│   ├── SceneManager.js  # 场景生命周期
-│   ├── BoardBuilder.js  # 棋盘网格构建
-│   ├── StoneBuilder.js  # 棋子几何体与材质
-│   ├── CameraController.js  # 相机控制
-│   ├── LightingSetup.js # 光照系统
-│   ├── AnimationManager.js  # 动画管理
-│   ├── InteractionHandler.js # 鼠标/触摸交互
-│   ├── EnvironmentBuilder.js # 环境装饰
-│   ├── MaterialFactory.js # 材质工厂
-│   ├── ParticleSystem.js # 粒子效果
-│   └── scenes/          # 场景预设 (home/park/competition)
+│   ├── GomokuRenderer3D.js  # 五子棋 3D 渲染器
+│   ├── scenes/          # 场景预设 (home/park/competition)
+│   └── ...               # SceneManager, CameraController 等
+├── render3d/go/          # 围棋 3D 渲染模块 (Three.js)
 ├── config/               # 配置层
 │   ├── gameConfig.js    # 游戏常量、默认选项、模式标签
 │   ├── sceneConfig.js   # 3D 场景配置
@@ -62,8 +59,8 @@ src/
 ├── audio/
 │   └── SoundManager.js  # 音效管理 (Web Audio API)
 ├── services/
-│   └── llmCoach.js      # LLM Coach 服务 (可选外部 API)
-└── styles/               # CSS 样式文件
+│   └── llmCoach.js      # LLM Coach 服务 (可选外部 API，仅五子棋)
+└── styles/               # CSS 样式
     ├── main.css         # 主样式入口
     ├── base.css         # 基础样式、变量
     ├── layout.css       # 布局
@@ -72,9 +69,9 @@ src/
 ```
 
 **模块依赖关系**：
-- `app/` 依赖 `game/`、`ui/`、`render3d/`、`audio/`、`services/`
-- `game/` 纯逻辑层，仅依赖 `config/` 和 `utils/`
-- `ui/` 依赖 `game/` (状态) 和 `render3d/` (3D 渲染)
+- `games/` 纯逻辑层，仅依赖 `config/` 和 `utils/`
+- `app/` 依赖 `games/`、`ui/`、`render3d/`、`audio/`、`services/`
+- `ui/` 依赖 `game/`（或 `games/`）和 `render3d/`
 - `render3d/` 依赖 `config/` 和 Three.js
 
 ## 开发命令
@@ -86,82 +83,64 @@ npm install
 # 启动本地开发服务器 (http://localhost:4173)
 npm run serve
 
-# 代码检查
+# 运行全部测试 (Vitest)
+npm test
+
+# 代码检查 (ESM 模块语法检查)
 npm run check
 
 # 构建 Web 版本
 npm run build
 
 # Electron 桌面应用
-npm run start          # 启动 Electron
-npm run start:dev      # 开发模式启动 Electron
+npm run start          # 启动 Electron (开发)
 npm run build:win      # 构建 Windows 版本
-npm run build:mac      # 构建 macOS 版本
 npm run build:linux    # 构建 Linux 版本
-npm run build:all      # 构建全平台
 
 # Android APK
-npm run android:sync       # 同步 Web 资源到 Android 工程
-npm run android:open       # 打开 Android Studio
-npm run android:build:debug  # 构建调试 APK
-# 输出：output/android/Gomoku-1.0.0-debug.apk
+npm run android:sync        # 同步 Web 资源到 Android
+npm run android:build:debug # 构建调试 APK
 
 # 清理构建产物
 npm run clean
 ```
 
+## 测试
+
+项目使用 Vitest 进行单元测试，测试文件与源代码同目录（`*.test.js`）。
+
+```bash
+# 运行全部测试
+npm test
+
+# 运行特定测试文件
+npx vitest run src/games/go/rules.test.js
+
+# 测试数量 (2026-05-16): 822 tests, 35 files
+```
+
+### 覆盖范围
+- 各游戏规则引擎：胜负判定、特殊规则、边界条件
+- 各游戏状态工厂：默认值、初始化、边界
+- 应用控制器：GameController, SettingsController 等
+- 工具函数：i18n、格式化、棋盘坐标
+- 服务层：LLM Coach 配置、超时
+- 音效系统：状态管理、音频上下文
+- 应用主类：GomokuApp 构造/初始化/委托/销毁
+
 ## 代码约定
 
-### 命名规范
-- 文件名：PascalCase (类文件如 `GomokuApp.js`) 或 camelCase (模块文件如 `state.js`)
-- 类名：PascalCase (`GomokuApp`, `SoundManager`)
-- 函数/变量：camelCase (`getBestMove`, `createGameState`)
-- 常量：UPPER_SNAKE_CASE (`DEFAULT_OPTIONS`, `DIRECTIONS`)
-- CSS 变量：kebab-case (`--cell-size`, --board-color`)
+- **命名规范**：PascalCase (类) / camelCase (函数/变量) / UPPER_SNAKE_CASE (常量) / kebab-case (CSS 变量)
+- **模块风格**：ES Modules，显式 `export`，避免 `export default`
+- **测试文件**：`<module>.test.js` 与源文件同目录
+- **状态管理**：`create<Game>State()` 创建不可变状态快照，`GomokuApp` 集中更新
+- **持久化**：localStorage（语言/音效/LLM 设置）
 
-### 模块风格
-- 使用 ES Modules (`import`/`export`)
-- 每个 `export` 显式声明，避免 `export default`
-- 工具函数使用纯函数，无副作用
+## 已知问题
 
-### 状态管理
-- `createGameState()` 创建不可变状态快照
-- 状态更新通过 `GomokuApp` 方法集中处理
-- 使用 localStorage 持久化用户偏好 (语言、音效、LLM 设置)
-
-### AI 算法
-- 基于评分函数的启发式搜索
-- 三档难度通过 `getBestMove()` 参数控制随机性
-- 禁手检测在 `rules.js` 中实现
-
-## 已知问题与改进建议
-
-### 待改进项
-
-1. **缺少测试框架**
-   - 项目当前无测试文件
-   - 建议添加：
-     - 单元测试：`game/rules.js` (胜负判定、禁手检测)
-     - 单元测试：`game/ai.js` (AI 评分逻辑)
-     - 集成测试：`app/GomokuApp.js` (游戏流程)
-   - 推荐框架：Vitest (ESM 原生支持) 或 Jest
-
-2. **类型安全**
-   - 项目使用纯 JavaScript，无类型检查
-   - 可选：迁移到 TypeScript 或添加 JSDoc 类型注解
-
-3. **构建优化**
-   - 当前构建工具为自定义脚本
-   - 可考虑迁移到 Vite 以获得更好的开发体验 (HMR、依赖预构建)
-
-4. **LLM Coach 错误处理**
-   - `llmCoach.js` 依赖外部 API，网络异常处理需加强
-   - 建议添加重试机制和更详细的错误提示
-
-### 文档资源
-- 详细开发文档：`docs/DEVELOPER_GUIDE.md`
-- Android 文档：`docs/ANDROID.md`
-- 更新日志：`CHANGELOG.md`
+1. **LLM Coach 网络错误处理**：`llmCoach.js` 依赖外部 API，网络异常处理需加强
+2. **3D 移动端性能**：低端设备上 Three.js 场景可能卡顿，PixelRatio 已有限制但仍需优化
+3. **Electron 在 WSL 中不可用**：需要 Windows 原生环境构建和测试
 
 ## 版本信息
 

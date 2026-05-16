@@ -22,3 +22,11 @@
   - `window.removeEventListener` 在 test-setup.js 中缺失，需在测试中补充
   - `getViewportProfile` 在 1024x768 下返回 `desktop-compact`（`width < 1280` 条件），不是 `desktop`
   - `sections.game.classList.contains('hidden')` mock 默认返回 `false`，导致 `getDebugState().screen = 'game'`；应返回 `true` 模拟初始设置界面
+
+## 2026-05-16 (CLAUDE.md 更新 + 运行时冒烟测试轮)
+
+- **CLAUDE.md 过时问题**: 项目从五子棋演变为5游戏平台后，CLAUDE.md 仍描述为"五子棋·Gomoku"。开发者/AI Agent 无法准确理解项目范围。已更新为完整5游戏平台描述。
+- **架构发现**: 各游戏使用独立的 setup 和 game section（gomoku: `#setup`/`#game`; go: `#go-setup`/`#go-game`; chess: `#chess-setup`/`#chess-game`; xiangqi: `#xiangqi-setup`/`#xiangqi-game`; junqi: `#junqi-setup`/`#junqi-game`）。这个设计使得游戏之间完全解耦，不共享 setup 逻辑。
+- **Playwright locator.evaluate 限制**: Playwright 的 locator.evaluate() 会等待元素"可交互"（可见、稳定、启用）。在测试隐藏面板时改用 page.evaluate() 配合 CSS 选择器可以绕过此限制。
+- **运行时验证结果**: 所有 5 个游戏设置面板在 Playwright 中加载正常，0 控制台错误。代码运行时无需修复。
+- **已验证的测试基线**: 822 tests, 35 files, 99 modules 全部通过。运行时冒烟测试：启动器 + 5 游戏设置面板全部正常显示。

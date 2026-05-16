@@ -107,3 +107,42 @@ Expand test coverage across all game modules. The project has evolved from a sin
 - 3D 场景渲染（围棋有 Three.js 3D 渲染）
 - 语言切换功能
 - 移动端响应式布局
+
+---
+
+## Current Round (2026-05-16): CLAUDE.md 更新 + 运行时冒烟测试
+
+### 目标
+1. **更新 CLAUDE.md** — 当前仍只描述"五子棋·Gomoku"，实际已是多游戏平台（Gomoku/Go/Chess/Xiangqi/Junqi），过时描述会误导开发者和 AI Agent
+2. **Playwright 运行时冒烟测试** — 实际验证所有 5 个游戏可加载、启动器正常、无控制台错误
+3. **视觉验证** — 截图检查各游戏 UI 渲染正确
+4. **统一问题记录** — 遇到 API/socket/运行时/视觉问题时追加到 issues.md
+
+### 发现的关键问题
+1. **CLAUDE.md 完全过时** — 项目描述仍为"五子棋·Gomoku"，项目架构只列了 gomoku 相关模块，完全未反映多游戏平台现状
+2. **运行时冒烟测试未完成** — 上一轮虽然计划了 Playwright 验证但未实际执行冒烟脚本
+3. **缺少游戏间切换的实际验证** — 从启动器进入每个游戏再返回的功能未验证
+
+### Agent Team 分工
+| Agent | 任务 | 预期产出 |
+|-------|------|----------|
+| Agent-Builder-1 | 更新 CLAUDE.md 为多游戏平台 | CLAUDE.md 修改 |
+| Agent-Builder-2 | 运行 Playwright 冒烟测试 | 截图 + 控制台错误报告 |
+| Agent-Verifier | 全量测试 + 视觉验证 | 测试通过确认 + 截图视觉检查 |
+
+### 实际验证方案
+1. `npm test` — 822 测试通过 ✅
+2. `npm run check` — 99 模块通过 ✅  
+3. `npm run serve` 启动开发服务器
+4. Playwright 脚本访问启动器并截取各游戏界面
+5. 视觉检查截图（通过 Read tool + Codex 视觉能力）
+6. 记录任何运行时错误到 issues.md
+
+### 需要视觉验证的点
+- 启动器界面：5 个游戏按钮可见
+- 五子棋设置界面
+- 围棋设置界面（含计分规则选择器）
+- 国际象棋设置界面
+- 中国象棋设置界面
+- 军棋翻翻棋设置界面
+- 无控制台错误

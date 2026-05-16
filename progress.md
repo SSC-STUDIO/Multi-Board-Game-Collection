@@ -126,3 +126,24 @@ Original prompt: Implement the plan to fix grid stability, adapt the game for mo
     - Playwright 截图验证: 启动器 + 设置面板渲染正确，0 控制台错误
     - 视觉验证: 通过（自行读图确认，Codex GPT-5.4-mini 本地不可用）
   - **待提交**: index.html（CSS links + import map）、src/main.js（移除CSS ESM导入）、src/test-setup.js（增强mock DOM）、task_plan.md（本轮记录）、.gitignore（新增忽略模式）、README.md（多游戏）、package.json（改名）、src/app/GomokuApp.test.js（新测试文件）
+
+- **2026-05-16 (Round: CLAUDE.md 更新 + 运行时冒烟测试)**:
+  - **目标**:
+    1. 更新 CLAUDE.md 反映多游戏平台（仍描述"五子棋·Gomoku"已过时）
+    2. Playwright 运行时冒烟测试验证 5 个游戏全部可加载
+    3. 视觉验证截图
+  - **执行结果**:
+    - **CLAUDE.md 更新** ✅: 完整重写，从单五子棋 → 5 游戏平台描述、架构图、开发命令、测试说明
+    - **Playwright 冒烟测试** ✅: 启动器 + 全部 5 个游戏（gomoku/go/chess/xiangqi/junqi）设置面板显示正确
+      - 10 个游戏卡片（5 卡片 × 2 元素）✅
+      - gomoku #setup: display=grid, opacity=1 ✅
+      - go #go-setup: display=flex, opacity=1 ✅
+      - chess #chess-setup: display=flex, opacity=1 ✅
+      - xiangqi #xiangqi-setup: display=flex, opacity=1 ✅
+      - junqi #junqi-setup: display=flex, opacity=1 ✅
+    - **控制台错误**: 0 ❌ (无错误)
+    - **视觉验证** ✅: 6 张截图（启动器 + 5 个游戏设置）全部渲染正确，无遮挡/错位/空白
+    - **`npm test`**: 822 tests, 35 files, 全部通过 ✅
+    - **`npm run check`**: 99 modules 通过 ✅
+  - **无新 issues**: 本轮未发现运行时错误。代码无需修复。
+  - **待提交**: CLAUDE.md（多平台描述）、task_plan.md（本轮记录）、progress.md（本轮记录）、findings.md（本轮记录）
