@@ -226,3 +226,15 @@ Original prompt: Implement the plan to fix grid stability, adapt the game for mo
   - **本轮无 UI/运行时修改**: 纯测试文件创建，无需视觉验证
   - **发现问题**: JunqiApp.test.js 在构造后直接修改 `app.state.turn` 但 state 为 null（构造函数仅在 startGame 时调用 createInitialState）。修复为先 startGame()。1 次修复后全通过。
 
+
+## 2026-05-16 (Current Round: LLM Coach error feedback + CoachController test coverage)
+
+### 状态摘要
+- **测试基线**: 923 tests / 39 files 全部通过 ✅
+- **模块检查**: 103 modules 通过 ✅
+- **git 状态**: 干净 ✅
+- **本轮目标**:
+  1. 修复 LLM Coach `requestLlmCoachGuidance` 错误时无用户提示的问题
+  2. 新增 i18n 键 `coachLlmRequestFailed`
+  3. 补齐 CoachController 13 个方法的测试覆盖
+  4. Playwright 冒烟 + 截图视觉验证

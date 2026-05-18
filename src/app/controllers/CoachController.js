@@ -191,6 +191,8 @@ export class CoachController {
 
             this.app.state.coachLlmStatus = 'unavailable';
             this.app.render();
+            const reason = error?.message || error?.code || 'unknown';
+            this.app.showMessageKey('coachLlmRequestFailed', { reason });
             this.pushLlmRequestLog({
                 endpoint: 'coachAdvice',
                 startedAt,

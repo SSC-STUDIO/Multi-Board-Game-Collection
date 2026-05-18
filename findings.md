@@ -57,3 +57,9 @@
 - **CI workflow 配置选择**: 使用 ubuntu-latest runner + Node.js 20 + npm ci + vitest。触发条件包括 push 到 main/master/codex/ai-** 分支以及 pull_request。含 workflow_dispatch 支持手动触发。
 - **Go 规则测试新增 16 个边缘用例**: 覆盖 isEmptyBoard (3), getNeighbors (1), getGroup (2), corner capture (1), out-of-bounds (1), isLegalMove (2), getLegalMoves (3), suicide (1), eye-filling (1)。Go 规则测试从 18 增至 34。
 
+
+## 2026-05-16 (LLM Coach error feedback + CoachController test coverage)
+
+- **LLM Coach `requestLlmCoachGuidance` 错误处理无用户提示**: 当 LLM 请求因网络/超时/API 错误失败时，CoachController 的 catch 块仅设置 `coachLlmStatus = 'unavailable'` 并渲染，不调用 `showMessageKey` 给用户任何解释。对比 `handleImageUpload` 的 catch 块调用了 `showMessageKey('coachAnalyzeFailed')`——同一控制器内行为不一致。
+- **CoachController 测试覆盖缺口**: 当前 399 行测试仅覆盖 5/18 个方法（orderImportedStones, importAnalyzedBoard, openPreviewEdit/togglePreviewCell/closePreviewEdit, cancelImageAnalysis, pushLlmRequestLog）。`clearCoachState`, `refreshCoachGuidance`, `requestLlmCoachGuidance`, `normalizeLlmAdvice`, `normalizeCoachPoint`, `normalizeCoachText`, `normalizeConfidence`, `isLegalCoachMove`, `getPositionKey`, `focusCoachCandidate` 共 10 个方法无测试。`requestLlmCoachGuidance` 的 error path 也无测试。
+- **CoachController 测试 mock 限制**: CoachController 内部依赖 `requestLlmCoachAdvice`（从 llmCoach.js 导入），而 `requestLlmCoachGuidance` 是异步方法。测试需要 mock `requestLlmCoachAdvice` 为 `vi.fn()` 并控制 resolve/reject 以测试 success/error 路径。

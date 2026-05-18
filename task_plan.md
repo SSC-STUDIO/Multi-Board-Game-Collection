@@ -245,3 +245,42 @@ Expand test coverage across all game modules. The project has evolved from a sin
 ### 视觉验证
 本轮无 UI 修改，不需要视觉验证。
 
+
+---
+
+## Current Round (2026-05-16): LLM Coach User Feedback + CoachController 测试覆盖
+
+### 目标
+1. **修复 LLM Coach 错误反馈缺失** — `requestLlmCoachGuidance` 在网络/超时/API 错误时仅设置 `coachLlmStatus = 'unavailable'`，不显示用户可见消息。用户不知道 LLM 请求为何失败。
+2. **新增 i18n 错误消息键** — `coachLlmRequestFailed` 中英翻译
+3. **补齐 CoachController 测试覆盖** — 当前测试仅覆盖 orderImportedStones/importAnalyzedBoard/openPreviewEdit/cancelImageAnalysis/pushLlmRequestLog，缺失以下关键路径：
+   - `clearCoachState` (带/不带 preserveFeedback)
+   - `refreshCoachGuidance` (guided/non-guided/gameOver/AIthinking)
+   - `requestLlmCoachGuidance` 错误处理 (network_error/timeout/bad_response)
+   - `normalizeLlmAdvice` (valid/invalid recommended/missing keys)
+   - `normalizeCoachPoint` (valid/invalid/null inputs)
+   - `normalizeCoachText` (empty/trimmed/long text)
+   - `normalizeConfidence` (valid/invalid/out-of-range)
+   - `isLegalCoachMove` (inside/outside/existing stone/forbidden)
+   - `getPositionKey` (different states produce different keys)
+   - `focusCoachCandidate` (valid/invalid moves)
+4. **实际运行时验证** — Playwright 冒烟测试确认应用正常，截图视觉验证
+5. **无 UI 重排** — 本轮不修改视觉布局，只改进错误反馈
+
+### 发现的关键问题
+1. **LLM 请求失败无用户提示** — CoachController.requestLlmCoachGuidance 的 catch 块只设 `coachLlmStatus = 'unavailable'` 并渲染，不调用 `showMessageKey`。对比 handleImageUpload 的 catch 块调用了 `showMessageKey('coachAnalyzeFailed')`——行为不一致。
+2. **CoachController 测试覆盖缺口** — 13 个方法完全没有测试覆盖（`clearCoachState`, `refreshCoachGuidance`, `normalizeLlmAdvice`, `normalizeCoachPoint`, `normalizeCoachText`, `normalizeConfidence`, `isLegalCoachMove`, `getPositionKey`, `focusCoachCandidate`），`requestLlmCoachGuidance` 的 error path 也无测试。
+
+### 实际验证方案
+1. `npm test` — 基线确认后新增测试，确保新增测试全部通过
+2. `npm run check` — 模块检查
+3. `npm run serve` 启动开发服务器
+4. Playwright 加载验证（启动器 + 各游戏正常）
+5. 截图视觉验证（通过 Read tool 读图能力）
+
+### 需要视觉验证的点
+- 启动器：5 张游戏卡片正确显示
+- Gomoku 设置界面
+- Go 设置界面
+- 国际象棋设置界面
+- 中国象棋/军棋设置界面（可选：本轮无 UI 修改）
