@@ -14,6 +14,16 @@ export class ChessRenderer3D extends BoardGameRenderer3D {
             cellSize: 0.82,
             cameraHeightScale: 1.36,
             cameraDistanceScale: 1.46,
+            tileHeight: 0.095,
+            bevelRadius: 0.1,
+            pieceStyle: {
+                radiusTop: 0.29,
+                radiusBottom: 0.36,
+                height: 0.34,
+                labelSize: 0.52,
+                metalness: 0.14,
+                roughness: 0.36
+            },
             theme: {
                 base: 0x17110b,
                 board: 0xd7c19a,

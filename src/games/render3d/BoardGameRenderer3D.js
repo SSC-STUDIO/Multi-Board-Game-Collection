@@ -18,6 +18,17 @@ const DEFAULT_THEME = {
     hidden: 0x6c5731
 };
 
+const DEFAULT_PIECE_STYLE = {
+    radiusTop: 0.34,
+    radiusBottom: 0.38,
+    height: 0.24,
+    labelSize: 0.58,
+    lift: 0,
+    bevel: true,
+    metalness: 0.08,
+    roughness: 0.42
+};
+
 function disposeMaterial(material) {
     if (!material) return;
     if (Array.isArray(material)) {
@@ -71,6 +82,29 @@ function createLineBetween(a, b, color, thickness = 0.035, y = 0.035) {
     return mesh;
 }
 
+function createRoundedBox(width, height, depth, radius = 0.08, smoothness = 3) {
+    const shape = new THREE.Shape();
+    const x = -width / 2;
+    const y = -depth / 2;
+    shape.moveTo(x + radius, y);
+    shape.lineTo(x + width - radius, y);
+    shape.quadraticCurveTo(x + width, y, x + width, y + radius);
+    shape.lineTo(x + width, y + depth - radius);
+    shape.quadraticCurveTo(x + width, y + depth, x + width - radius, y + depth);
+    shape.lineTo(x + radius, y + depth);
+    shape.quadraticCurveTo(x, y + depth, x, y + depth - radius);
+    shape.lineTo(x, y + radius);
+    shape.quadraticCurveTo(x, y, x + radius, y);
+    return new THREE.ExtrudeGeometry(shape, {
+        depth: height,
+        bevelEnabled: true,
+        bevelSegments: smoothness,
+        bevelSize: Math.min(radius * 0.42, height * 0.36),
+        bevelThickness: Math.min(radius * 0.42, height * 0.36),
+        curveSegments: 8
+    }).rotateX(Math.PI / 2).translate(0, height / 2, 0);
+}
+
 export class BoardGameRenderer3D {
     constructor(container, options = {}) {
         if (!BoardGameRenderer3D.isAvailable()) {
@@ -83,6 +117,13 @@ export class BoardGameRenderer3D {
         this.cellSize = options.cellSize || 1;
         this.viewConfig = this.createViewConfig(options);
         this.theme = { ...DEFAULT_THEME, ...(options.theme || {}) };
+        this.pieceStyle = { ...DEFAULT_PIECE_STYLE, ...(options.pieceStyle || {}) };
+        this.boardStyle = {
+            tileHeight: options.tileHeight ?? 0.075,
+            baseHeight: options.baseHeight ?? 0.28,
+            bevelRadius: options.bevelRadius ?? 0.075,
+            surfaceInset: options.surfaceInset ?? 0.04
+        };
         this.labelPiece = options.labelPiece || ((piece) => piece || '');
         this.pieceSide = options.pieceSide || (() => 'light');
         this.isCellEnabled = options.isCellEnabled || (() => true);
@@ -132,6 +173,7 @@ export class BoardGameRenderer3D {
         this.sceneManager = new SceneManager(this.container);
         this.sceneManager.scene.fog = new THREE.FogExp2(0x10141a, 0.025);
         this.applyViewConfig();
+        this.addPresentationEnvironment();
 
         this.lightingSetup = new LightingSetup(this.sceneManager, this.sceneManager.config);
         this.lightingSetup.setPresentationMode('game');
@@ -157,6 +199,25 @@ export class BoardGameRenderer3D {
         this.sceneManager.controls.maxPolarAngle = maxPolarAngle;
         this.sceneManager.controls.update();
         this.sceneManager.setNeedsRender();
+    }
+
+    addPresentationEnvironment() {
+        const extent = Math.max(this.rows, this.cols) * this.cellSize;
+        const glow = new THREE.Mesh(
+            new THREE.CircleGeometry(extent * 0.92, 96),
+            new THREE.MeshBasicMaterial({ color: 0xf0c984, transparent: true, opacity: 0.08, depthWrite: false })
+        );
+        glow.rotation.x = -Math.PI / 2;
+        glow.position.y = -0.31;
+        this.sceneManager.scene.add(glow);
+
+        const rim = new THREE.DirectionalLight(0xffd7a0, 1.2);
+        rim.position.set(-extent * 0.7, extent * 1.1, -extent * 0.4);
+        this.sceneManager.scene.add(rim);
+
+        const coolFill = new THREE.DirectionalLight(0x88b5ff, 0.45);
+        coolFill.position.set(extent * 0.8, extent * 0.7, extent * 0.8);
+        this.sceneManager.scene.add(coolFill);
     }
 
     coord(row, col) {
@@ -192,6 +253,7 @@ export class BoardGameRenderer3D {
         this.flipped = options.flipped ?? this.flipped;
         this.segments = options.segments ?? this.segments;
         this.theme = options.theme ? { ...DEFAULT_THEME, ...options.theme } : this.theme;
+        this.pieceStyle = options.pieceStyle ? { ...DEFAULT_PIECE_STYLE, ...options.pieceStyle } : this.pieceStyle;
         this.labelPiece = options.labelPiece ?? this.labelPiece;
         this.pieceSide = options.pieceSide ?? this.pieceSide;
         this.isCellEnabled = options.isCellEnabled ?? this.isCellEnabled;
@@ -213,13 +275,32 @@ export class BoardGameRenderer3D {
         const width = (this.cols + 0.85) * this.cellSize;
         const depth = (this.rows + 0.85) * this.cellSize;
         const base = new THREE.Mesh(
-            new THREE.BoxGeometry(width, 0.24, depth),
-            new THREE.MeshStandardMaterial({ color: this.theme.base, roughness: 0.76, metalness: 0.04 })
+            createRoundedBox(width, this.boardStyle.baseHeight, depth, this.boardStyle.bevelRadius * 1.5, 4),
+            new THREE.MeshStandardMaterial({
+                color: this.theme.base,
+                roughness: 0.62,
+                metalness: 0.08,
+                envMapIntensity: 0.55
+            })
         );
-        base.position.y = -0.16;
+        base.position.y = -0.2;
         base.receiveShadow = true;
         base.castShadow = false;
         this.boardGroup.add(base);
+
+        const bevelLip = new THREE.Mesh(
+            createRoundedBox(width * 0.985, 0.055, depth * 0.985, this.boardStyle.bevelRadius, 3),
+            new THREE.MeshStandardMaterial({
+                color: this.theme.boardAlt || this.theme.base,
+                roughness: 0.52,
+                metalness: 0.12,
+                transparent: true,
+                opacity: 0.42
+            })
+        );
+        bevelLip.position.y = -0.025;
+        bevelLip.receiveShadow = true;
+        this.boardGroup.add(bevelLip);
 
         if (this.layout === 'square') {
             this.buildSquareBoard();
@@ -232,19 +313,27 @@ export class BoardGameRenderer3D {
     }
 
     buildSquareBoard() {
-        const geom = new THREE.BoxGeometry(this.cellSize * 0.96, 0.06, this.cellSize * 0.96);
+        const geom = createRoundedBox(
+            this.cellSize * (0.96 - this.boardStyle.surfaceInset),
+            this.boardStyle.tileHeight,
+            this.cellSize * (0.96 - this.boardStyle.surfaceInset),
+            this.cellSize * 0.035,
+            2
+        );
         for (let row = 0; row < this.rows; row += 1) {
             for (let col = 0; col < this.cols; col += 1) {
                 const light = (row + col) % 2 === 0;
                 const mat = new THREE.MeshStandardMaterial({
                     color: light ? this.theme.board : this.theme.boardAlt,
-                    roughness: 0.65,
-                    metalness: 0.03
+                    roughness: light ? 0.54 : 0.6,
+                    metalness: 0.04,
+                    envMapIntensity: 0.32
                 });
                 const mesh = new THREE.Mesh(geom, mat);
                 const { x, z } = this.coord(row, col);
-                mesh.position.set(x, 0, z);
+                mesh.position.set(x, 0.005, z);
                 mesh.receiveShadow = true;
+                mesh.castShadow = true;
                 this.boardGroup.add(mesh);
             }
         }
@@ -253,42 +342,48 @@ export class BoardGameRenderer3D {
     buildIntersectionBoard() {
         const min = this.coord(0, 0);
         const max = this.coord(this.rows - 1, this.cols - 1);
+        const surface = new THREE.Mesh(
+            createRoundedBox(Math.abs(max.x - min.x) + 0.86, 0.08, Math.abs(max.z - min.z) + 0.86, 0.08, 3),
+            new THREE.MeshStandardMaterial({
+                color: this.theme.board,
+                roughness: 0.58,
+                metalness: 0.06,
+                envMapIntensity: 0.4
+            })
+        );
+        surface.position.y = -0.025;
+        surface.receiveShadow = true;
+        surface.castShadow = true;
+        this.boardGroup.add(surface);
         for (let row = 0; row < this.rows; row += 1) {
             const a = this.coord(row, 0);
             const b = this.coord(row, this.cols - 1);
-            this.boardGroup.add(createLineBetween(a, b, this.theme.line, 0.035));
+            this.boardGroup.add(createLineBetween(a, b, this.theme.line, 0.035, 0.058));
         }
         for (let col = 0; col < this.cols; col += 1) {
             const a = this.coord(0, col);
             const b = this.coord(this.rows - 1, col);
-            this.boardGroup.add(createLineBetween(a, b, this.theme.line, 0.035));
+            this.boardGroup.add(createLineBetween(a, b, this.theme.line, 0.035, 0.058));
         }
-        const surface = new THREE.Mesh(
-            new THREE.BoxGeometry(Math.abs(max.x - min.x) + 0.8, 0.045, Math.abs(max.z - min.z) + 0.8),
-            new THREE.MeshStandardMaterial({ color: this.theme.board, roughness: 0.7, metalness: 0.02 })
-        );
-        surface.position.y = -0.045;
-        surface.receiveShadow = true;
-        this.boardGroup.add(surface);
         if (this.riverBetween != null) {
             const a = this.coord(this.riverBetween, 0);
             const b = this.coord(this.riverBetween + 1, this.cols - 1);
             const river = new THREE.Mesh(
-                new THREE.BoxGeometry(Math.abs(b.x - a.x) + 0.7, 0.026, this.cellSize * 0.46),
-                new THREE.MeshStandardMaterial({ color: 0x587a8d, roughness: 0.58, metalness: 0.02 })
+                createRoundedBox(Math.abs(b.x - a.x) + 0.7, 0.034, this.cellSize * 0.46, 0.025, 2),
+                new THREE.MeshStandardMaterial({ color: 0x587a8d, roughness: 0.46, metalness: 0.08, transparent: true, opacity: 0.82 })
             );
-            river.position.set(0, 0.005, (a.z + b.z) / 2);
+            river.position.set(0, 0.076, (a.z + b.z) / 2);
             this.boardGroup.add(river);
         }
     }
 
     buildJunqiBoard() {
-        const tileGeom = new THREE.CylinderGeometry(0.23, 0.25, 0.055, 32);
+        const tileGeom = new THREE.CylinderGeometry(0.24, 0.27, 0.075, 40);
         for (const segment of this.segments) {
             const color = segment.type === 'rail' ? this.theme.rail : this.theme.road;
             const a = this.coord(segment.from[0], segment.from[1]);
             const b = this.coord(segment.to[0], segment.to[1]);
-            this.boardGroup.add(createLineBetween(a, b, color, segment.type === 'rail' ? 0.06 : 0.03, 0.02));
+            this.boardGroup.add(createLineBetween(a, b, color, segment.type === 'rail' ? 0.088 : 0.04, 0.052));
         }
         for (let row = 0; row < this.rows; row += 1) {
             for (let col = 0; col < this.cols; col += 1) {
@@ -298,11 +393,12 @@ export class BoardGameRenderer3D {
                         : this.isHeadquartersCell(row, col) ? this.theme.hq
                             : this.isFrontlineCell(row, col) ? this.theme.rail
                                 : this.theme.board;
-                const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.68, metalness: 0.03 });
+                const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.56, metalness: 0.07, envMapIntensity: 0.35 });
                 const tile = new THREE.Mesh(tileGeom, mat);
                 const { x, z } = this.coord(row, col);
-                tile.position.set(x, 0.03, z);
+                tile.position.set(x, 0.075, z);
                 tile.receiveShadow = true;
+                tile.castShadow = true;
                 this.boardGroup.add(tile);
             }
         }
@@ -383,11 +479,12 @@ export class BoardGameRenderer3D {
     addMarker(row, col, color, radius, height) {
         if (!this.isCellEnabled(row, col)) return;
         const marker = new THREE.Mesh(
-            new THREE.CylinderGeometry(radius, radius, height, 36),
-            new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.62 })
+            new THREE.TorusGeometry(radius, Math.max(height, 0.012), 10, 52),
+            new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.78, depthWrite: false })
         );
         const { x, z } = this.coord(row, col);
-        marker.position.set(x, 0.08, z);
+        marker.rotation.x = -Math.PI / 2;
+        marker.position.set(x, 0.15, z);
         this.markerGroup.add(marker);
     }
 
@@ -399,14 +496,34 @@ export class BoardGameRenderer3D {
                     : side === 'hidden' ? this.theme.hidden
                         : this.theme.pieceLight;
         const group = new THREE.Group();
+        const style = this.pieceStyle;
         const body = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.34, 0.37, 0.22, 42),
-            new THREE.MeshStandardMaterial({ color, roughness: 0.45, metalness: 0.08 })
+            new THREE.CylinderGeometry(style.radiusTop, style.radiusBottom, style.height, 56, 1, false),
+            new THREE.MeshStandardMaterial({
+                color,
+                roughness: style.roughness,
+                metalness: style.metalness,
+                envMapIntensity: 0.58
+            })
         );
-        body.position.y = 0.18;
+        body.position.y = 0.18 + style.lift;
         body.castShadow = true;
         body.receiveShadow = true;
         group.add(body);
+
+        const rim = new THREE.Mesh(
+            new THREE.TorusGeometry(style.radiusTop * 0.82, style.radiusTop * 0.035, 10, 56),
+            new THREE.MeshStandardMaterial({
+                color: side === 'dark' || side === 'black' || side === 'hidden' ? 0xf0d7a2 : 0xffffff,
+                roughness: 0.35,
+                metalness: 0.18,
+                transparent: true,
+                opacity: side === 'hidden' ? 0.36 : 0.48
+            })
+        );
+        rim.rotation.x = -Math.PI / 2;
+        rim.position.y = 0.18 + style.height / 2 + 0.006 + style.lift;
+        group.add(rim);
 
         const label = this.labelPiece(piece, row, col, options);
         const texture = createLabelTexture(label, {
@@ -414,11 +531,11 @@ export class BoardGameRenderer3D {
             font: options.labelFont || 'bold 118px serif'
         });
         const labelMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.58, 0.58),
+            new THREE.PlaneGeometry(style.labelSize, style.labelSize),
             new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide })
         );
         labelMesh.rotation.x = -Math.PI / 2;
-        labelMesh.position.y = 0.296;
+        labelMesh.position.y = 0.18 + style.height / 2 + 0.016 + style.lift;
         group.add(labelMesh);
 
         const { x, z } = this.coord(row, col);

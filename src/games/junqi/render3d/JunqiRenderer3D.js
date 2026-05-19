@@ -33,6 +33,16 @@ export class JunqiRenderer3D extends BoardGameRenderer3D {
                 cols: 8,
                 layout: 'square',
                 cellSize: 0.84,
+                tileHeight: 0.085,
+                bevelRadius: 0.09,
+                pieceStyle: {
+                    radiusTop: 0.31,
+                    radiusBottom: 0.36,
+                    height: 0.23,
+                    labelSize: 0.55,
+                    metalness: 0.1,
+                    roughness: 0.42
+                },
                 theme: {
                     base: 0x202a21,
                     board: 0x526344,
@@ -50,7 +60,20 @@ export class JunqiRenderer3D extends BoardGameRenderer3D {
             rows: CLASSIC_ROWS,
             cols: CLASSIC_COLS,
             layout: 'junqi',
-            cellSize: 0.67,
+            cellSize: 0.72,
+            cameraHeightScale: 1.04,
+            cameraDistanceScale: 1.34,
+            cameraTargetZ: 0.2,
+            tileHeight: 0.07,
+            bevelRadius: 0.1,
+            pieceStyle: {
+                radiusTop: 0.29,
+                radiusBottom: 0.34,
+                height: 0.22,
+                labelSize: 0.52,
+                metalness: 0.08,
+                roughness: 0.44
+            },
             segments: BOARD_SEGMENTS,
             isCellEnabled: isPlayable,
             isCampCell: isCamp,

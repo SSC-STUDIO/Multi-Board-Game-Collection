@@ -13,6 +13,16 @@ export class XiangqiRenderer3D extends BoardGameRenderer3D {
             layout: 'intersection',
             cellSize: 0.78,
             riverBetween: 4,
+            tileHeight: 0.075,
+            bevelRadius: 0.115,
+            pieceStyle: {
+                radiusTop: 0.34,
+                radiusBottom: 0.39,
+                height: 0.2,
+                labelSize: 0.58,
+                metalness: 0.06,
+                roughness: 0.48
+            },
             theme: {
                 base: 0x5c3319,
                 board: 0xd7a55f,
