@@ -131,6 +131,7 @@ export class BoardGameRenderer3D {
         this.isHeadquartersCell = options.isHeadquartersCell || (() => false);
         this.isMountainCell = options.isMountainCell || (() => false);
         this.isFrontlineCell = options.isFrontlineCell || (() => false);
+        this.coordinateLabels = options.coordinateLabels || null;
         this.segments = options.segments || [];
         this.riverBetween = options.riverBetween ?? null;
         this.flipped = Boolean(options.flipped);
@@ -261,6 +262,7 @@ export class BoardGameRenderer3D {
         this.isHeadquartersCell = options.isHeadquartersCell ?? this.isHeadquartersCell;
         this.isMountainCell = options.isMountainCell ?? this.isMountainCell;
         this.isFrontlineCell = options.isFrontlineCell ?? this.isFrontlineCell;
+        this.coordinateLabels = options.coordinateLabels ?? this.coordinateLabels;
         this.riverBetween = options.riverBetween ?? this.riverBetween;
         this.viewConfig = this.createViewConfig(options);
         this.applyViewConfig();
@@ -450,6 +452,7 @@ export class BoardGameRenderer3D {
         this.clearGroup(this.markerGroup);
         this.flipped = options.flipped ?? this.flipped;
         this.addMarkers(options);
+        this.addCoordinateLabels(options);
         if (!Array.isArray(board)) {
             this.sceneManager.setNeedsRender();
             return;
@@ -466,26 +469,81 @@ export class BoardGameRenderer3D {
 
     addMarkers(options) {
         const selected = options.selected;
-        if (selected) this.addMarker(selected[0], selected[1], 0x4aa3ff, 0.32, 0.026);
+        if (selected) this.addMarker(selected[0], selected[1], 0x4aa3ff, 0.39, 0.032, 0.28);
         for (const move of options.moves || []) {
             const [row, col] = move.to || move;
-            this.addMarker(row, col, move.capture || move.kind === 'capture' ? 0xff564a : 0x52d37f, 0.24, 0.018);
+            const isCapture = move.capture || move.kind === 'capture';
+            this.addMarker(row, col, isCapture ? 0xff564a : 0x52d37f, isCapture ? 0.32 : 0.29, 0.024, isCapture ? 0.34 : 0.24);
         }
         const last = options.lastMove;
-        if (last?.from) this.addMarker(last.from[0], last.from[1], 0xf4ce5b, 0.18, 0.014);
-        if (last?.to) this.addMarker(last.to[0], last.to[1], 0xf4ce5b, 0.22, 0.016);
+        if (last?.from) this.addMarker(last.from[0], last.from[1], 0xf4ce5b, 0.25, 0.02, 0.2);
+        if (last?.to) this.addMarker(last.to[0], last.to[1], 0xf4ce5b, 0.31, 0.024, 0.26);
     }
 
-    addMarker(row, col, color, radius, height) {
+    addMarker(row, col, color, radius, height, fillOpacity = 0.24) {
         if (!this.isCellEnabled(row, col)) return;
+        const { x, z } = this.coord(row, col);
+        const disc = new THREE.Mesh(
+            new THREE.CircleGeometry(radius * 0.86, 56),
+            new THREE.MeshBasicMaterial({
+                color,
+                transparent: true,
+                opacity: fillOpacity,
+                depthWrite: false,
+                side: THREE.DoubleSide
+            })
+        );
+        disc.rotation.x = -Math.PI / 2;
+        disc.position.set(x, 0.151, z);
+        this.markerGroup.add(disc);
+
         const marker = new THREE.Mesh(
             new THREE.TorusGeometry(radius, Math.max(height, 0.012), 10, 52),
-            new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.78, depthWrite: false })
+            new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.94, depthWrite: false })
         );
-        const { x, z } = this.coord(row, col);
         marker.rotation.x = -Math.PI / 2;
-        marker.position.set(x, 0.15, z);
+        marker.position.set(x, 0.158, z);
         this.markerGroup.add(marker);
+    }
+
+    addCoordinateLabels(options = {}) {
+        const labels = options.coordinateLabels || this.coordinateLabels;
+        if (!labels) return;
+        const files = labels.files || [];
+        const ranks = labels.ranks || [];
+        const offset = (labels.edgeOffset ?? 0.62) * this.cellSize;
+        const size = labels.size ?? 0.32;
+        const y = labels.y ?? 0.18;
+        const fill = labels.fill || '#f8e4b7';
+        const font = labels.font || 'bold 100px Georgia, serif';
+        const shadow = labels.shadow || 'rgba(0,0,0,0.55)';
+
+        files.forEach((label, col) => {
+            if (label == null || col >= this.cols) return;
+            const { x, z } = this.coord(this.rows - 1, col);
+            this.addBoardLabel(label, x, z + offset, y, size, { fill, font, shadow });
+        });
+        ranks.forEach((label, row) => {
+            if (label == null || row >= this.rows) return;
+            const { x, z } = this.coord(row, 0);
+            this.addBoardLabel(label, x - offset, z, y, size, { fill, font, shadow });
+        });
+    }
+
+    addBoardLabel(label, x, z, y, size, textureOptions) {
+        const texture = createLabelTexture(label, textureOptions);
+        const mesh = new THREE.Mesh(
+            new THREE.PlaneGeometry(size, size),
+            new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true,
+                depthWrite: false,
+                side: THREE.DoubleSide
+            })
+        );
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(x, y, z);
+        this.markerGroup.add(mesh);
     }
 
     addPiece(piece, row, col, options = {}) {

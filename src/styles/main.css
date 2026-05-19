@@ -5262,7 +5262,7 @@ body.launcher-open .hud-bottom {
 
 .chess-root {
     position: relative;
-    width: min(1120px, calc(100vw - 24px));
+    width: min(1500px, calc(100vw - 40px));
     margin: 24px auto;
     display: flex;
     flex-direction: column;
@@ -5322,6 +5322,7 @@ body.launcher-open .hud-bottom {
 }
 
 .chess-game {
+    --board-3d-size: min(920px, calc(100vh - 270px), calc(100vw - 120px));
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -5397,8 +5398,8 @@ body.launcher-open .hud-bottom {
 }
 
 .board-game-3d {
-    width: min(720px, 84vmin);
-    height: min(720px, 84vmin);
+    width: var(--board-3d-size, min(760px, 84vmin));
+    height: var(--board-3d-size, min(760px, 84vmin));
     min-width: 300px;
     min-height: 300px;
     position: relative;
@@ -5545,9 +5546,12 @@ body.launcher-open .hud-bottom {
     .chess-board {
         --chess-cell: 40px;
     }
+    .chess-game,
+    .xiangqi-game,
+    .junqi-game {
+        --board-3d-size: min(92vw, 560px);
+    }
     .board-game-3d {
-        width: min(92vw, 560px);
-        height: min(92vw, 560px);
         min-width: 280px;
         min-height: 280px;
     }
@@ -5573,7 +5577,7 @@ body.launcher-open .hud-bottom {
 
 .xiangqi-root {
     position: relative;
-    width: min(1120px, calc(100vw - 24px));
+    width: min(1500px, calc(100vw - 40px));
     margin: 24px auto;
     display: flex;
     flex-direction: column;
@@ -5633,6 +5637,7 @@ body.launcher-open .hud-bottom {
 }
 
 .xiangqi-game {
+    --board-3d-size: min(900px, calc(100vh - 270px), calc(100vw - 120px));
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -5915,7 +5920,7 @@ body.launcher-open .hud-bottom {
 
 .junqi-root {
     position: relative;
-    width: min(1080px, calc(100vw - 24px));
+    width: min(1480px, calc(100vw - 40px));
     margin: 24px auto;
     display: flex;
     flex-direction: column;
@@ -5975,6 +5980,7 @@ body.launcher-open .hud-bottom {
 }
 
 .junqi-game {
+    --board-3d-size: min(900px, calc(100vh - 245px), calc(100vw - 120px));
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -6063,6 +6069,90 @@ body.launcher-open .hud-bottom {
     grid-template-columns: repeat(5, var(--junqi-cell));
     grid-template-rows: repeat(13, var(--junqi-cell));
     gap: 4px;
+}
+
+@media (min-width: 1180px) and (min-height: 820px) {
+    .chess-root,
+    .xiangqi-root,
+    .junqi-root {
+        width: min(1480px, calc(100vw - 440px));
+        min-width: min(1180px, calc(100vw - 40px));
+    }
+
+    .chess-game,
+    .xiangqi-game,
+    .junqi-game {
+        --board-3d-size: min(900px, calc(100vh - 96px), calc(100vw - 560px));
+        display: grid;
+        grid-template-columns: minmax(250px, 340px) minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        align-items: stretch;
+        gap: 14px 20px;
+    }
+
+    .chess-hud,
+    .xiangqi-hud,
+    .junqi-hud {
+        grid-column: 1;
+        grid-row: 1;
+        align-items: stretch;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .chess-hud-cluster,
+    .xiangqi-hud-cluster,
+    .junqi-hud-cluster,
+    .chess-controls,
+    .xiangqi-controls,
+    .junqi-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .chess-hud-chip,
+    .xiangqi-hud-chip,
+    .junqi-hud-chip,
+    .chess-hud-chip.chess-hud-last,
+    .xiangqi-hud-chip.xiangqi-hud-last,
+    .junqi-hud-chip.junqi-hud-last,
+    .chess-controls .control-btn,
+    .xiangqi-controls .control-btn,
+    .junqi-controls .control-btn,
+    .chess-hud .ghost-btn,
+    .xiangqi-hud .ghost-btn,
+    .junqi-hud .ghost-btn {
+        width: 100%;
+    }
+
+    .chess-message,
+    .xiangqi-message,
+    .junqi-message,
+    #chess-message,
+    #xiangqi-message,
+    #junqi-message,
+    .junqi-hint {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: start;
+    }
+
+    .chess-stage,
+    .xiangqi-stage,
+    .junqi-stage {
+        grid-column: 2;
+        grid-row: 1 / 4;
+        min-height: calc(100vh - 48px);
+        padding: 0;
+    }
+
+    .chess-controls,
+    .xiangqi-controls,
+    .junqi-controls {
+        grid-column: 1;
+        grid-row: 3;
+        align-self: end;
+    }
 }
 
 .junqi-cell {

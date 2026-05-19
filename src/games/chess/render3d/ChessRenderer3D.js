@@ -31,6 +31,12 @@ export class ChessRenderer3D extends BoardGameRenderer3D {
                 pieceLight: 0xf3ead5,
                 pieceDark: 0x20242f
             },
+            coordinateLabels: {
+                files: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+                ranks: ['8', '7', '6', '5', '4', '3', '2', '1'],
+                edgeOffset: 0.68,
+                size: 0.32
+            },
             labelPiece: (piece) => PIECE_LABELS[piece] || '',
             pieceSide: (piece) => piece?.[0] === 'b' ? 'dark' : 'light',
             ...options
