@@ -162,6 +162,7 @@ export class GoRenderer3D {
         this.cameraController.setScenePreset('competition');
         this.cameraController.setPresentationMode('game');
         this.cameraController.fitToBoard(this.boardSize, false);
+        this.applyGoCameraFrame(false);
 
         this._setupInteraction();
     }
@@ -254,6 +255,24 @@ export class GoRenderer3D {
         this.clearStones();
         this.buildBoard();
         this.cameraController?.fitToBoard(size, false);
+        this.applyGoCameraFrame(false);
+    }
+
+    applyGoCameraFrame(animate = false) {
+        if (!this.cameraController) return;
+        const span = (this.boardSize - 1) * this.cellSize;
+        const distance = Math.max(span * 1.18, 16);
+        const target = new THREE.Vector3(0, this.sceneManager.config.board.thickness / 2, -span * 0.06);
+        const position = new THREE.Vector3(distance * 0.34, distance * 0.78, distance * 0.92);
+        this.cameraController.defaultTarget.copy(target);
+        this.cameraController.defaultPosition.copy(position);
+        this.cameraController.controls.minPolarAngle = THREE.MathUtils.degToRad(24);
+        this.cameraController.controls.maxPolarAngle = THREE.MathUtils.degToRad(68);
+        this.cameraController.controls.minDistance = Math.max(span * 0.72, 10);
+        this.cameraController.controls.maxDistance = Math.max(span * 1.85, 28);
+        this.cameraController.controls.enablePan = true;
+        this.cameraController.controls.panSpeed = 0.24;
+        this.cameraController.applyView(position, target, animate ? 0.45 : 0);
     }
 
     /**

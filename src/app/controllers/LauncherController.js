@@ -23,10 +23,15 @@ const CATEGORY_I18N_KEYS = {
     'imperfect-info': 'launcherCategoryImperfectInfo'
 };
 const CAPABILITY_I18N_KEYS = {
-    '2d-scene': 'launcherCapability2D',
     '3d-scene': 'launcherCapability3D',
     'llm-coach': 'launcherCapabilityCoach',
     'image-import': 'launcherCapabilityImport'
+};
+
+const PREVIEW_DOTS_BY_TOPOLOGY = {
+    grid: 16,
+    intersection: 25,
+    unique: 18
 };
 
 export class LauncherController {
@@ -98,19 +103,26 @@ export class LauncherController {
     renderGrid() {
         if (!this.grid) return;
         const fragment = document.createDocumentFragment();
-        listGames().forEach((game) => {
-            fragment.appendChild(this.buildCard(game));
+        listGames().forEach((game, index) => {
+            fragment.appendChild(this.buildCard(game, index));
         });
         this.grid.replaceChildren(fragment);
     }
 
-    buildCard(game) {
+    buildCard(game, index = 0) {
         const card = document.createElement('article');
         card.className = `launcher-card launcher-card-${game.id} status-${game.status}`;
         card.setAttribute('role', 'listitem');
+        card.tabIndex = game.status === 'available' ? 0 : -1;
         card.dataset.gameId = game.id;
+        card.dataset.topology = game.boardTopology || 'grid';
+        card.dataset.category = game.category || 'strategy';
+        card.dataset.index = String(index);
         card.style.setProperty('--launcher-accent', game.accent || '#e6b15b');
         card.style.setProperty('--launcher-accent-alt', game.accentAlt || game.accent || '#6f4b25');
+        card.style.setProperty('--launcher-card-index', String(index));
+        card.style.setProperty('--launcher-card-offset', `${(index - 2) * 4}px`);
+        card.style.setProperty('--launcher-card-yaw', `${(2 - index) * 1.2}deg`);
 
         const badge = document.createElement('span');
         badge.className = 'launcher-card-badge';
@@ -124,6 +136,9 @@ export class LauncherController {
         glyph.setAttribute('aria-hidden', 'true');
         glyph.textContent = game.glyph || i18n.t(game.titleKey).slice(0, 1);
         card.appendChild(glyph);
+
+        const preview = this.buildBoardPreview(game);
+        card.appendChild(preview);
 
         const body = document.createElement('div');
         body.className = 'launcher-card-body';
@@ -170,6 +185,24 @@ export class LauncherController {
         card.appendChild(action);
 
         return card;
+    }
+
+    buildBoardPreview(game) {
+        const topology = game.boardTopology || 'grid';
+        const preview = document.createElement('div');
+        preview.className = `launcher-card-board launcher-card-board-${topology}`;
+        preview.setAttribute('aria-hidden', 'true');
+        const dotCount = PREVIEW_DOTS_BY_TOPOLOGY[topology] || PREVIEW_DOTS_BY_TOPOLOGY.grid;
+        const cols = topology === 'intersection' ? 5 : 4;
+        for (let i = 0; i < dotCount; i += 1) {
+            const dot = document.createElement('span');
+            dot.className = 'launcher-card-board-dot';
+            dot.style.setProperty('--dot-index', String(i));
+            dot.style.setProperty('--dot-x', `${(i % cols) - (cols - 1) / 2}`);
+            dot.style.setProperty('--dot-y', `${Math.floor(i / cols) - 2}`);
+            preview.appendChild(dot);
+        }
+        return preview;
     }
 
     handleGridClick(event) {

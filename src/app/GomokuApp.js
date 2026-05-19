@@ -92,12 +92,14 @@ export class GomokuApp {
         // 启动器桥接：首次选中时已由 main.js new 出来；如果用户切回 launcher 再回到 Gomoku，
         // __reenter 会被调用以保证 setup 面板可见、画面不是黑屏。
         this.__reenter = () => {
+            this.exposeTestHooks();
             this.game.enterSetup();
             if (this.renderer3d) {
                 this.renderer3d.resize();
             }
         };
         this.enterSetupQuiet = () => {
+            this.exposeTestHooks();
             this.game.enterSetup();
         };
         // 隐藏 Gomoku 所有面板（用于切换到其他游戏时）

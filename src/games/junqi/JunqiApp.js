@@ -19,13 +19,7 @@ import {
     checkWinner as checkClassicWinner,
     getLegalMoves as getClassicLegalMoves,
     generatePieceMoves as generateClassicPieceMoves,
-    CLASSIC_ROWS,
-    CLASSIC_COLS,
-    isPlayable,
-    isCamp,
-    isHeadquarters,
-    isMountain,
-    isFrontline
+    isPlayable
 } from './classic/rules.js';
 import { getClassicAIMove, getClassicAIDelay } from './classic/ai.js';
 import { JunqiRenderer3D } from './render3d/JunqiRenderer3D.js';
@@ -429,99 +423,8 @@ export class JunqiApp extends BoardGameApp {
     }
 
     renderBoard() {
-        const board = this.dom.game?.board;
-        if (!board || !this.state) return;
+        this.dom.game?.board?.classList.add('hidden');
         this.render3DIfActive();
-        if (this.use3D && this.renderer3d) {
-            board.classList.add('hidden');
-            return;
-        }
-        board.classList.remove('hidden');
-        if (this.variant === 'classic') this.renderClassicBoard(board);
-        else this.renderFlipBoard(board);
-    }
-
-    renderClassicBoard(board) {
-        board.className = 'junqi-board junqi-classic-board';
-        board.replaceChildren();
-        const frag = document.createDocumentFragment();
-        const moveDests = new Set(this.highlightMoves.map((mv) => `${mv.to[0]},${mv.to[1]}`));
-        const captureDests = new Set(this.highlightMoves.filter((mv) => mv.kind === 'capture').map((mv) => `${mv.to[0]},${mv.to[1]}`));
-        const lastMove = this.state.moveHistory[this.state.moveHistory.length - 1];
-        const playerColor = this.options.playerColor || 'r';
-
-        for (let row = 0; row < CLASSIC_ROWS; row += 1) {
-            for (let col = 0; col < CLASSIC_COLS; col += 1) {
-                const cell = document.createElement('div');
-                cell.className = 'junqi-cell junqi-classic-cell';
-                cell.dataset.row = String(row);
-                cell.dataset.col = String(col);
-                cell.setAttribute('role', 'gridcell');
-                if (!isPlayable(row, col)) cell.classList.add('junqi-cell-blocked');
-                if (isCamp(row, col)) cell.classList.add('junqi-cell-camp');
-                if (isHeadquarters(row, col)) cell.classList.add('junqi-cell-hq');
-                if (isMountain(row, col)) cell.classList.add('junqi-cell-mountain');
-                if (isFrontline(row, col)) cell.classList.add('junqi-cell-frontline');
-                this.applyCellHighlights(cell, row, col, moveDests, captureDests, lastMove);
-                const piece = this.state.board[row][col];
-                if (piece) {
-                    const disc = document.createElement('div');
-                    const hidden = piece.color !== playerColor && !piece.revealed;
-                    disc.className = `junqi-piece ${hidden ? 'junqi-piece-back' : `junqi-piece-${piece.color} junqi-piece-face`}`;
-                    disc.textContent = hidden ? '' : (CLASSIC_RANK_GLYPH[piece.rank] || '?');
-                    cell.appendChild(disc);
-                }
-                frag.appendChild(cell);
-            }
-        }
-        board.appendChild(frag);
-    }
-
-    renderFlipBoard(board) {
-        board.className = 'junqi-board';
-        board.replaceChildren();
-        const frag = document.createDocumentFragment();
-        const moveDests = new Set(this.highlightMoves.map((mv) => `${mv.to[0]},${mv.to[1]}`));
-        const captureDests = new Set(this.highlightMoves.filter((mv) => mv.kind === 'capture').map((mv) => `${mv.to[0]},${mv.to[1]}`));
-        const lastMove = this.state.moveHistory[this.state.moveHistory.length - 1];
-
-        for (let row = 0; row < FLIP_ROWS; row += 1) {
-            for (let col = 0; col < FLIP_COLS; col += 1) {
-                const cell = document.createElement('div');
-                cell.className = 'junqi-cell';
-                cell.dataset.row = String(row);
-                cell.dataset.col = String(col);
-                cell.setAttribute('role', 'gridcell');
-                this.applyCellHighlights(cell, row, col, moveDests, captureDests, lastMove);
-                const piece = this.state.board[row][col];
-                if (piece) {
-                    const disc = document.createElement('div');
-                    disc.className = 'junqi-piece';
-                    if (piece.revealed) {
-                        disc.classList.add(`junqi-piece-${piece.color}`, 'junqi-piece-face');
-                        disc.textContent = FLIP_RANK_GLYPH[piece.rank]?.[piece.color] || '?';
-                    } else {
-                        disc.classList.add('junqi-piece-back');
-                    }
-                    cell.appendChild(disc);
-                }
-                frag.appendChild(cell);
-            }
-        }
-        board.appendChild(frag);
-    }
-
-    applyCellHighlights(cell, row, col, moveDests, captureDests, lastMove) {
-        if (this.selected && this.selected[0] === row && this.selected[1] === col) cell.classList.add('junqi-selected');
-        const k = `${row},${col}`;
-        if (moveDests.has(k)) cell.classList.add('junqi-move-dest');
-        if (captureDests.has(k)) cell.classList.add('junqi-capture-dest');
-        if (lastMove && (
-            (lastMove.from?.[0] === row && lastMove.from?.[1] === col)
-            || (lastMove.to?.[0] === row && lastMove.to?.[1] === col)
-        )) {
-            cell.classList.add('junqi-last-move');
-        }
     }
 
     apply3DView() {
@@ -544,10 +447,13 @@ export class JunqiApp extends BoardGameApp {
             this.rendererVariant = this.variant;
             this.renderer3d.onCellClick(({ row, col }) => this.handleCellClick(row, col));
         } catch (err) {
-            console.warn('[JunqiApp] 3D renderer unavailable, using 2D board.', err);
-            this.use3D = false;
+            console.warn('[JunqiApp] 3D renderer unavailable.', err);
+            this.use3D = true;
+            this.renderer3d = null;
+            this.rendererVariant = null;
             this.dom.game.board3d?.classList.add('hidden');
-            this.dom.game.board?.classList.remove('hidden');
+            this.dom.game.board?.classList.add('hidden');
+            this.showMessage(i18n.t('renderer3DRequired'), 'error');
         }
     }
 

@@ -376,62 +376,8 @@ export class ChessApp extends BoardGameApp {
     // === Rendering ===
 
     renderBoard() {
-        const board = this.dom.game?.board;
-        if (!board) return;
+        this.dom.game?.board?.classList.add('hidden');
         this.render3DIfActive();
-        if (this.use3D && this.renderer3d) {
-            board.classList.add('hidden');
-            return;
-        }
-        board.classList.remove('hidden');
-        board.replaceChildren();
-        const frag = document.createDocumentFragment();
-        const flip = this.options.mode === 'pve' && this.options.playerColor === 'b';
-        const moveDests = new Set(this.highlightMoves.map((mv) => `${mv.to[0]},${mv.to[1]}`));
-        const captureDests = new Set(
-            this.highlightMoves.filter((mv) => mv.capture).map((mv) => `${mv.to[0]},${mv.to[1]}`)
-        );
-        const lastMove = this.state.moveHistory[this.state.moveHistory.length - 1];
-
-        const rows = flip ? [...Array(8).keys()].reverse() : [...Array(8).keys()];
-        const cols = flip ? [...Array(8).keys()].reverse() : [...Array(8).keys()];
-        for (const row of rows) {
-            for (const col of cols) {
-                const sq = document.createElement('div');
-                sq.className = 'chess-square';
-                sq.classList.add((row + col) % 2 === 0 ? 'chess-light' : 'chess-dark');
-                sq.dataset.row = String(row);
-                sq.dataset.col = String(col);
-                sq.setAttribute('role', 'gridcell');
-                sq.setAttribute('aria-label', squareName(row, col));
-
-                if (this.selected && this.selected[0] === row && this.selected[1] === col) {
-                    sq.classList.add('chess-selected');
-                }
-                if (lastMove && (
-                    (lastMove.from[0] === row && lastMove.from[1] === col)
-                    || (lastMove.to[0] === row && lastMove.to[1] === col)
-                )) {
-                    sq.classList.add('chess-last-move');
-                }
-                const key = `${row},${col}`;
-                if (moveDests.has(key)) sq.classList.add('chess-move-dest');
-                if (captureDests.has(key)) sq.classList.add('chess-capture-dest');
-
-                const piece = this.state.board[row][col];
-                if (piece) {
-                    const glyph = document.createElement('span');
-                    glyph.className = `chess-piece chess-piece-${piece[0]}`;
-                    glyph.textContent = PIECE_GLYPH[piece] || '?';
-                    sq.appendChild(glyph);
-                    if (piece[1] === 'K' && piece[0] === this.state.turn && isInCheck(this.state.board, piece[0])) {
-                        sq.classList.add('chess-check');
-                    }
-                }
-                frag.appendChild(sq);
-            }
-        }
-        board.appendChild(frag);
     }
 
     apply3DView() {
@@ -450,10 +396,12 @@ export class ChessApp extends BoardGameApp {
             this.renderer3d = new ChessRenderer3D(this.dom.game.board3d);
             this.renderer3d.onCellClick(({ row, col }) => this.handleSquareClick(row, col));
         } catch (err) {
-            console.warn('[ChessApp] 3D renderer unavailable, using 2D board.', err);
-            this.use3D = false;
+            console.warn('[ChessApp] 3D renderer unavailable.', err);
+            this.use3D = true;
+            this.renderer3d = null;
             this.dom.game.board3d?.classList.add('hidden');
-            this.dom.game.board?.classList.remove('hidden');
+            this.dom.game.board?.classList.add('hidden');
+            this.showMessage(i18n.t('renderer3DRequired'), 'error');
         }
     }
 

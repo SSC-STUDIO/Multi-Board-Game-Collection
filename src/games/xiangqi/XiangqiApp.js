@@ -298,84 +298,8 @@ export class XiangqiApp extends BoardGameApp {
     // === Rendering ===
 
     renderBoard() {
-        const board = this.dom.game?.board;
-        if (!board) return;
+        this.dom.game?.board?.classList.add('hidden');
         this.render3DIfActive();
-        if (this.use3D && this.renderer3d) {
-            board.classList.add('hidden');
-            return;
-        }
-        board.classList.remove('hidden');
-        board.replaceChildren();
-        const flip = this.options.mode === 'pve' && this.options.playerColor === 'b';
-        const rows = flip ? [...Array(10).keys()].reverse() : [...Array(10).keys()];
-        const cols = flip ? [...Array(9).keys()].reverse() : [...Array(9).keys()];
-        const moveDests = new Set(this.highlightMoves.map((mv) => `${mv.to[0]},${mv.to[1]}`));
-        const captureDests = new Set(
-            this.highlightMoves.filter((mv) => mv.capture).map((mv) => `${mv.to[0]},${mv.to[1]}`)
-        );
-        const lastMove = this.state.moveHistory[this.state.moveHistory.length - 1];
-        const checkedColor = isInCheck(this.state.board, this.state.turn) ? this.state.turn : null;
-
-        const frag = document.createDocumentFragment();
-        for (const row of rows) {
-            for (const col of cols) {
-                const cell = document.createElement('div');
-                cell.className = 'xiangqi-cell';
-                cell.dataset.row = String(row);
-                cell.dataset.col = String(col);
-                cell.setAttribute('role', 'gridcell');
-
-                if (row === 0) cell.classList.add('xiangqi-top-edge');
-                if (row === 9) cell.classList.add('xiangqi-bottom-edge');
-                if (col === 0) cell.classList.add('xiangqi-left-edge');
-                if (col === 8) cell.classList.add('xiangqi-right-edge');
-
-                if (row === 4) cell.classList.add('xiangqi-river-top');
-                if (row === 5) cell.classList.add('xiangqi-river-bottom');
-
-                const inRedPalace = row >= 7 && row <= 9 && col >= 3 && col <= 5;
-                const inBlackPalace = row >= 0 && row <= 2 && col >= 3 && col <= 5;
-                if (inRedPalace || inBlackPalace) {
-                    cell.classList.add('xiangqi-palace');
-                    if ((row === 7 && col === 3) || (row === 0 && col === 3)) {
-                        cell.classList.add('xiangqi-palace-diag-tl');
-                    }
-                    if ((row === 7 && col === 4) || (row === 0 && col === 4)) {
-                        cell.classList.add('xiangqi-palace-diag-tl', 'xiangqi-palace-diag-tr');
-                    }
-                    if ((row === 7 && col === 5) || (row === 0 && col === 5)) {
-                        cell.classList.add('xiangqi-palace-diag-tr');
-                    }
-                }
-
-                if (this.selected && this.selected[0] === row && this.selected[1] === col) {
-                    cell.classList.add('xiangqi-selected');
-                }
-                const key = `${row},${col}`;
-                if (moveDests.has(key)) cell.classList.add('xiangqi-move-dest');
-                if (captureDests.has(key)) cell.classList.add('xiangqi-capture-dest');
-                if (lastMove && (
-                    (lastMove.from[0] === row && lastMove.from[1] === col)
-                    || (lastMove.to[0] === row && lastMove.to[1] === col)
-                )) {
-                    cell.classList.add('xiangqi-last-move');
-                }
-
-                const piece = this.state.board[row][col];
-                if (piece) {
-                    const disc = document.createElement('div');
-                    disc.className = `xiangqi-piece xiangqi-piece-${piece[0]}`;
-                    disc.textContent = PIECE_GLYPH[piece] || '?';
-                    cell.appendChild(disc);
-                    if (checkedColor && piece[0] === checkedColor && piece[1] === 'K') {
-                        cell.classList.add('xiangqi-check');
-                    }
-                }
-                frag.appendChild(cell);
-            }
-        }
-        board.appendChild(frag);
     }
 
     apply3DView() {
@@ -394,10 +318,12 @@ export class XiangqiApp extends BoardGameApp {
             this.renderer3d = new XiangqiRenderer3D(this.dom.game.board3d);
             this.renderer3d.onCellClick(({ row, col }) => this.handleCellClick(row, col));
         } catch (err) {
-            console.warn('[XiangqiApp] 3D renderer unavailable, using 2D board.', err);
-            this.use3D = false;
+            console.warn('[XiangqiApp] 3D renderer unavailable.', err);
+            this.use3D = true;
+            this.renderer3d = null;
             this.dom.game.board3d?.classList.add('hidden');
-            this.dom.game.board?.classList.remove('hidden');
+            this.dom.game.board?.classList.add('hidden');
+            this.showMessage(i18n.t('renderer3DRequired'), 'error');
         }
     }
 
