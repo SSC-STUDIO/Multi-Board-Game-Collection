@@ -46,10 +46,13 @@
         const longestEdge = Math.max(width, height);
         const orientation = width >= height ? 'landscape' : 'portrait';
         const aspectRatio = width / Math.max(height, 1);
+        const phoneLikeViewport = shortestEdge <= 520 || (orientation === 'portrait' && width <= 640);
 
         let deviceForm = 'desktop';
         if (touchLike) {
             deviceForm = longestEdge >= 1024 && shortestEdge >= 720 ? 'tablet' : 'mobile';
+        } else if (phoneLikeViewport) {
+            deviceForm = 'mobile';
         } else if (width < 1280 || height < 760) {
             deviceForm = 'desktop-compact';
         }
@@ -931,6 +934,7 @@
                 <div id="chess-message" class="message glass-panel hidden" role="alert"></div>
                 <main class="chess-stage">
                     <div id="chess-board-shell" class="chess-board-shell glass-panel">
+                        <div id="chess-board-3d" class="board-game-3d"></div>
                         <div id="chess-board" class="chess-board" role="grid" aria-label="国际象棋棋盘"></div>
                     </div>
                 </main>
@@ -1027,6 +1031,7 @@
                     <div id="xiangqi-board-shell" class="xiangqi-board-shell glass-panel">
                         <div class="xiangqi-river-label xiangqi-river-left" data-i18n="xiangqiRiverLeft">楚 河</div>
                         <div class="xiangqi-river-label xiangqi-river-right" data-i18n="xiangqiRiverRight">汉 界</div>
+                        <div id="xiangqi-board-3d" class="board-game-3d"></div>
                         <div id="xiangqi-board" class="xiangqi-board" role="grid" aria-label="中国象棋棋盘"></div>
                     </div>
                 </main>
@@ -1056,14 +1061,22 @@
                 <header class="junqi-setup-header">
                     <span class="launcher-kicker" data-i18n="gameJunqiTitle">军棋</span>
                     <h2 id="junqi-setup-heading" class="junqi-setup-title" data-i18n="junqiSetupTitle">开始一局军棋</h2>
-                    <p class="junqi-setup-subtitle" data-i18n="junqiSetupSubtitle">选择变体：翻翻棋已可游玩；四国军棋敬请期待。</p>
+                    <p class="junqi-setup-subtitle" data-i18n="junqiSetupSubtitle">默认二人陆战棋：上下布阵、铁路行营、PVE 数字裁判；也可切换军棋翻翻棋。</p>
                 </header>
                 <div class="junqi-setup-options">
                     <div class="option-row">
                         <label class="option-label" data-i18n="junqiVariant">变体</label>
                         <div class="option-buttons" id="junqi-variant-options" role="radiogroup">
-                            <button class="option-btn active" type="button" data-variant="flip" role="radio" aria-checked="true" data-i18n="junqiVariantFlip">翻翻棋</button>
-                            <button class="option-btn" type="button" data-variant="fourKingdom" role="radio" aria-checked="false" data-i18n="junqiVariantFourKingdomSoon">四国（敬请期待）</button>
+                            <button class="option-btn active" type="button" data-variant="classic" role="radio" aria-checked="true" data-i18n="junqiVariantClassic">二人陆战棋</button>
+                            <button class="option-btn" type="button" data-variant="flip" role="radio" aria-checked="false" data-i18n="junqiVariantFlip">翻翻棋</button>
+                        </div>
+                    </div>
+                    <div class="option-row" id="junqi-template-row">
+                        <label class="option-label" data-i18n="junqiTemplate">布阵</label>
+                        <div class="option-buttons" id="junqi-template-options" role="radiogroup">
+                            <button class="option-btn active" type="button" data-template="0" role="radio" aria-checked="true" data-i18n="junqiTemplateBalanced">均衡阵</button>
+                            <button class="option-btn" type="button" data-template="1" role="radio" aria-checked="false" data-i18n="junqiTemplateAttack">进攻阵</button>
+                            <button class="option-btn" type="button" data-template="2" role="radio" aria-checked="false" data-i18n="junqiTemplateRail">铁路阵</button>
                         </div>
                     </div>
                     <div class="option-row">
@@ -1110,6 +1123,7 @@
                 <div id="junqi-hint" class="junqi-hint">提示</div>
                 <main class="junqi-stage">
                     <div id="junqi-board-shell" class="junqi-board-shell glass-panel">
+                        <div id="junqi-board-3d" class="board-game-3d"></div>
                         <div id="junqi-board" class="junqi-board" role="grid" aria-label="军棋棋盘"></div>
                     </div>
                 </main>
