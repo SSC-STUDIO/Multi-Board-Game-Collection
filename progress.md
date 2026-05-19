@@ -1,5 +1,7 @@
 Original prompt: Implement the plan to fix grid stability, adapt the game for mobile, add transitions and camera motion, and add a QI guidance play mode.
 
+- 2026-05-19: Added a generated multi-board-game panorama asset for the launcher shell only (`assets/illustrations/multi-board-panorama.png`). The panorama is intentionally a non-interactive ambience layer; chess/xiangqi/junqi/go/gomoku boards remain driven by their own WebGL/Three renderers. Validation passed with `npm run check`, `npm test` (972 tests), desktop launcher screenshot, chess WebGL canvas check, and 390px mobile overflow/crop check. The shared `develop-web-game` Playwright client could not run because its local `playwright` package is missing, so MCP Playwright/browser checks were used instead.
+
 - 2026-05-18: Resumed from user request to continue development on `codex` branch for `SSC-STUDIO/multi-board-game-collection` and improve the UI now that the app has evolved from standalone Go/Gomoku into a multi-board-game collection.
 - 2026-05-18: GitHub repository access is restored through `gh api`, but `git clone`/`ls-remote` still fails intermittently with GitHub HTTPS connection resets. Downloaded the `codex` branch zipball via GitHub API and initialized a local working tree.
 - 2026-05-18: Moved active working tree to `D:\EliuaK_Csy\Working-Paper\My-Program\multi-board-game-collection` per user instruction. Target UI work will focus on launcher branding, game selection cards, app metadata, and responsive presentation without changing game rules.

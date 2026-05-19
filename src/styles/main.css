@@ -4466,12 +4466,60 @@ body.coach-preview-active .board {
     pointer-events: none;
 }
 
+.launcher-panorama {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+.launcher-panorama::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+        linear-gradient(90deg, rgba(6, 10, 17, 0.98) 0%, rgba(6, 10, 17, 0.72) 36%, rgba(6, 10, 17, 0.2) 70%),
+        linear-gradient(180deg, rgba(6, 10, 17, 0.1), rgba(6, 10, 17, 0.78));
+}
+
+.launcher-panorama::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+        radial-gradient(circle at 66% 20%, rgba(255, 216, 153, 0.2), transparent 38%),
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: auto, 46px 46px, 46px 46px;
+    mix-blend-mode: screen;
+    opacity: 0.58;
+}
+
+.launcher-panorama-image {
+    position: absolute;
+    inset: -9% -4% -12% auto;
+    width: min(1060px, 78vw);
+    height: 112%;
+    object-fit: cover;
+    object-position: 62% 48%;
+    opacity: 0.64;
+    filter: saturate(1.08) contrast(1.04);
+    transform: perspective(1200px) rotateY(-5deg) translate3d(22px, 0, 0);
+    transform-origin: right center;
+}
+
 @keyframes launcherReveal {
     from { opacity: 0; transform: translateY(16px) scale(0.985); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 .launcher-header {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px 28px;
@@ -4508,6 +4556,8 @@ body.coach-preview-active .board {
 }
 
 .launcher-grid {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 16px;
@@ -4736,6 +4786,19 @@ body.launcher-open .hud-bottom {
     .launcher-panel::after {
         inset: auto 8% -28% 8%;
     }
+    .launcher-panorama-image {
+        inset: 0 -28% 0 auto;
+        width: 132%;
+        height: 420px;
+        opacity: 0.34;
+        object-position: 62% 42%;
+        transform: none;
+    }
+    .launcher-panorama::before {
+        background:
+            linear-gradient(180deg, rgba(6, 10, 17, 0.42), rgba(6, 10, 17, 0.9) 56%, rgba(6, 10, 17, 0.98)),
+            linear-gradient(90deg, rgba(6, 10, 17, 0.84), rgba(6, 10, 17, 0.08));
+    }
     .launcher-header {
         grid-template-columns: 1fr;
     }
@@ -4751,6 +4814,13 @@ body.launcher-open .hud-bottom {
 }
 
 @media (min-width: 641px) and (max-width: 1120px) {
+    .launcher-panorama-image {
+        inset: -4% -18% auto auto;
+        width: min(960px, 112vw);
+        height: 62%;
+        opacity: 0.44;
+        transform: none;
+    }
     .launcher-header {
         grid-template-columns: 1fr;
     }
