@@ -50,8 +50,8 @@
 ### 克隆项目
 
 ```bash
-git clone https://github.com/yourusername/gomoku.git
-cd gomoku
+git clone https://github.com/SSC-STUDIO/Multi-Board-Game-Collection.git
+cd Multi-Board-Game-Collection
 ```
 
 ### 运行项目

@@ -34,7 +34,7 @@ export class ImmersiveHudManager {
     isDesktopHoverUi() {
         const coarsePointer = window.matchMedia?.('(pointer: coarse)').matches ?? false;
         const hoverless = window.matchMedia?.('(hover: none)').matches ?? false;
-        return !coarsePointer && !hoverless;
+        return !coarsePointer && !hoverless && window.innerWidth > 960;
     }
 
     /**

@@ -182,7 +182,7 @@ describe('GoApp', () => {
             expect(app.options.size).toBe(9);
             expect(app.options.mode).toBe('pvp');
             expect(app.options.komi).toBe(6.5);
-            expect(app.viewMode).toBe('2d');
+            expect(app.viewMode).toBe('3d');
             expect(app.renderer3d).toBeNull();
         });
 
@@ -208,7 +208,7 @@ describe('GoApp', () => {
 
     describe('startGame', () => {
         it('should switch panels and create state', () => {
-            // board.style.setProperty needed by renderBoard2D called via startGameImpl->applyViewMode
+            // board.style.setProperty kept for mock compatibility with the hidden DOM board.
             app.dom.game.board.style.setProperty = vi.fn();
             app.startGame();
             expect(app.dom.setup.panel.classList.add).toHaveBeenCalledWith('hidden');
@@ -264,14 +264,14 @@ describe('GoApp', () => {
     });
 
     describe('toggleView and applyViewMode', () => {
-        it('should toggle between 2D and 3D', () => {
+        it('should keep Go in 3D-only mode', () => {
             app.dom.game.board.style.setProperty = vi.fn();
             app.startGame();
-            expect(app.viewMode).toBe('2d');
+            expect(app.viewMode).toBe('3d');
             app.toggleView();
             expect(app.viewMode).toBe('3d');
             app.toggleView();
-            expect(app.viewMode).toBe('2d');
+            expect(app.viewMode).toBe('3d');
         });
     });
 

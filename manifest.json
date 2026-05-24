@@ -1,7 +1,7 @@
 {
-  "name": "五子棋 · Gomoku",
-  "short_name": "五子棋",
-  "description": "一款精致的五子棋游戏，支持人人对战、人机对战、练习模式和 AI 指导",
+  "name": "多棋类合集 · Board Games",
+  "short_name": "棋类合集",
+  "description": "五子棋、围棋、国际象棋、中国象棋和军棋翻翻棋合一的多棋类游戏平台。",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#07111d",

@@ -390,6 +390,21 @@ describe('GomokuApp', () => {
             expect(profile.orientation).toBe('landscape');
         });
 
+        it('should return mobile for narrow portrait viewport without touch media', () => {
+            const originalMatchMedia = window.matchMedia;
+            window.matchMedia = vi.fn(() => ({ matches: false }));
+            Object.defineProperty(window, 'innerWidth', { value: 390, configurable: true });
+            Object.defineProperty(window, 'innerHeight', { value: 844, configurable: true });
+
+            const profile = app.getViewportProfile();
+
+            expect(profile.deviceForm).toBe('mobile');
+            expect(profile.screenShape).toBe('tall');
+            window.matchMedia = originalMatchMedia;
+            Object.defineProperty(window, 'innerWidth', { value: 1024, configurable: true });
+            Object.defineProperty(window, 'innerHeight', { value: 768, configurable: true });
+        });
+
         it('should return portrait when height > width', () => {
             Object.defineProperty(window, 'innerWidth', { value: 400, configurable: true });
             Object.defineProperty(window, 'innerHeight', { value: 800, configurable: true });

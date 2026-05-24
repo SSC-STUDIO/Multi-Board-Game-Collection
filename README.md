@@ -114,8 +114,8 @@
 #### Web版本
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/board-games.git
-cd board-games
+git clone https://github.com/SSC-STUDIO/Multi-Board-Game-Collection.git
+cd Multi-Board-Game-Collection
 
 # 安装依赖（可选）
 npm install
@@ -133,7 +133,7 @@ npm install
 npm run android:build:debug
 ```
 
-可直接安装的 APK 输出到 `output/android/Gomoku-1.0.0-debug.apk`，原始 Gradle 产物在 `android/app/build/outputs/apk/debug/app-debug.apk`。LLM 本地服务地址说明见 [Android APK 文档](docs/ANDROID.md)。
+可直接安装的 APK 输出到 `output/android/BoardGames-1.0.0-debug.apk`，原始 Gradle 产物在 `android/app/build/outputs/apk/debug/app-debug.apk`。LLM 本地服务地址说明见 [Android APK 文档](docs/ANDROID.md)。
 
 #### 桌面版本（Steam）
 1. 访问Steam商店页面（即将开放）
@@ -207,7 +207,7 @@ npm run build:desktop
 
 ### 联系我们
 
-- **GitHub Issues**: [提交问题](https://github.com/yourusername/board-games/issues)
+- **GitHub Issues**: [提交问题](https://github.com/SSC-STUDIO/Multi-Board-Game-Collection/issues)
 - **官方网站**: (即将开放)
 
 ### 致谢
@@ -276,8 +276,8 @@ This is a multi-board game collection featuring Gomoku, Go, Chess, Xiangqi, and 
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/board-games.git
-cd board-games
+git clone https://github.com/SSC-STUDIO/Multi-Board-Game-Collection.git
+cd Multi-Board-Game-Collection
 
 # Start local server
 npm run serve
@@ -294,7 +294,7 @@ npm run android:build:debug
 ```
 
 The debug APK is generated at `android/app/build/outputs/apk/debug/app-debug.apk`.
-The side-load friendly copy is `output/android/Gomoku-1.0.0-debug.apk`.
+The side-load friendly copy is `output/android/BoardGames-1.0.0-debug.apk`.
 See [Android APK docs](docs/ANDROID.md) for install steps and LLM endpoint notes.
 
 ### System Requirements
@@ -373,6 +373,6 @@ This project is licensed under the [MIT License](LICENSE).
 
 Made with love by [Your Name]
 
-[Steam](https://store.steampowered.com/) | [GitHub](https://github.com/yourusername/board-games) | [Documentation](docs/DEVELOPER_GUIDE.md)
+[Steam](https://store.steampowered.com/) | [GitHub](https://github.com/SSC-STUDIO/Multi-Board-Game-Collection) | [Documentation](docs/DEVELOPER_GUIDE.md)
 
 </div>

@@ -35,14 +35,11 @@ export class GoApp extends BoardGameApp {
         super(root, createGoOptions());
         this.renderer3d = null;
         this.viewMode = GoApp._readStoredViewMode();
+        this.exposeTestHooks();
     }
 
     static _readStoredViewMode() {
-        try {
-            return window.localStorage?.getItem(VIEW_MODE_STORAGE_KEY) === '3d' ? '3d' : '2d';
-        } catch (_err) {
-            return '2d';
-        }
+        return '3d';
     }
 
     // === Hooks ===
@@ -377,42 +374,8 @@ export class GoApp extends BoardGameApp {
 
     renderBoard() {
         const board = this.dom.game?.board;
-        if (board && this.viewMode !== '3d') {
-            this.renderBoard2D(board);
-        }
+        board?.classList.add('hidden');
         this.render3DIfActive();
-    }
-
-    renderBoard2D(board) {
-        const size = this.options.size;
-        board.replaceChildren();
-        board.style.setProperty('--go-size', String(size));
-
-        const last = this.state.lastMove;
-        const frag = document.createDocumentFragment();
-        for (let row = 0; row < size; row += 1) {
-            for (let col = 0; col < size; col += 1) {
-                const cell = document.createElement('div');
-                cell.className = 'go-cell';
-                cell.dataset.row = String(row);
-                cell.dataset.col = String(col);
-                if (this.isStarPoint(row, col)) cell.classList.add('go-star');
-                const stoneColor = this.state.board[row][col];
-                if (stoneColor) {
-                    const stone = document.createElement('div');
-                    stone.className = `go-stone ${stoneColor}`;
-                    if (last && !last.pass && last.row === row && last.col === col) {
-                        stone.classList.add('go-stone-last');
-                    }
-                    cell.appendChild(stone);
-                }
-                if (this.state.koPoint && this.state.koPoint.row === row && this.state.koPoint.col === col) {
-                    cell.classList.add('go-cell-ko');
-                }
-                frag.appendChild(cell);
-            }
-        }
-        board.appendChild(frag);
     }
 
     render3DIfActive() {
@@ -430,7 +393,7 @@ export class GoApp extends BoardGameApp {
     }
 
     toggleView() {
-        this.viewMode = this.viewMode === '3d' ? '2d' : '3d';
+        this.viewMode = '3d';
         this.applyViewMode();
         try {
             window.localStorage?.setItem(VIEW_MODE_STORAGE_KEY, this.viewMode);
@@ -440,19 +403,13 @@ export class GoApp extends BoardGameApp {
     applyViewMode() {
         const { game } = this.dom;
         if (!game) return;
-        const is3D = this.viewMode === '3d';
-        game.viewToggle?.setAttribute('aria-pressed', is3D ? 'true' : 'false');
-        if (is3D) {
-            this.ensureRenderer3D();
-            game.board?.classList.add('hidden');
-            this.renderer3d?.show();
-            this.render3DIfActive();
-        } else {
-            game.board?.classList.remove('hidden');
-            this.renderer3d?.hide();
-            // 从 3D 切回 2D 时，2D 棋盘可能已过期，需补渲染
-            if (game.board) this.renderBoard2D(game.board);
-        }
+        this.viewMode = '3d';
+        game.viewToggle?.setAttribute('aria-pressed', 'true');
+        game.viewToggle?.classList.add('hidden');
+        game.board?.classList.add('hidden');
+        this.ensureRenderer3D();
+        this.renderer3d?.show();
+        this.render3DIfActive();
     }
 
     ensureRenderer3D() {
@@ -461,10 +418,12 @@ export class GoApp extends BoardGameApp {
             this.renderer3d = new GoRenderer3D(this.dom.game.board3d, { boardSize: this.options.size });
             this.renderer3d.onCellClick(({ row, col }) => this.handleCellClick(row, col));
         } catch (err) {
-            console.warn('[GoApp] 3D renderer init failed, staying in 2D.', err);
-            this.viewMode = '2d';
-            this.dom.game.viewToggle?.setAttribute('aria-pressed', 'false');
-            this.showMessage(i18n.t('go3DUnavailable'), 'error');
+            console.warn('[GoApp] 3D renderer init failed.', err);
+            this.renderer3d = null;
+            this.viewMode = '3d';
+            this.dom.game.board?.classList.add('hidden');
+            this.dom.game.board3d?.classList.add('hidden');
+            this.showMessage(i18n.t('renderer3DRequired'), 'error');
         }
     }
 

@@ -188,4 +188,24 @@ describe('BoardGameApp', () => {
         expect(soundSpy).toHaveBeenCalled();
         expect(app.dom.root.classList.contains('hidden')).toBe(true);
     });
+    it('exposes render_game_to_text for the active board game', () => {
+        const app = new TestApp();
+        app.startGame();
+        const payload = JSON.parse(window.render_game_to_text());
+        expect(payload.game).toBe('test');
+        expect(payload.screen).toBe('game');
+        expect(payload.moveCount).toBe(0);
+    });
+
+    it('dispose only clears hooks owned by this app', () => {
+        const app = new TestApp();
+        app.showRoot();
+        app.dispose();
+        expect(window.render_game_to_text).toBeUndefined();
+
+        const otherHook = () => '{}';
+        window.render_game_to_text = otherHook;
+        app.dispose();
+        expect(window.render_game_to_text).toBe(otherHook);
+    });
 });

@@ -44,6 +44,8 @@ export class BoardGameApp {
         this.highlightMoves = [];
         this.options = options;
         this.state = null;
+        this._renderGameToText = null;
+        this._advanceTime = null;
         this.dom = this.queryDom(root);
         this.bindSetupEvents();
         this.bindGameEvents();
@@ -69,13 +71,28 @@ export class BoardGameApp {
 
     // === Launcher bridges ===
 
-    __reenter() { this.enterSetup(); }
-    enterSetupQuiet() { this.enterSetup(); }
+    __reenter() {
+        this.exposeTestHooks();
+        this.enterSetup();
+    }
+    enterSetupQuiet() {
+        this.exposeTestHooks();
+        this.enterSetup();
+    }
 
     dispose() {
         this.clearAITimer();
         this.sound?.dispose?.();
         this.hideRoot();
+        if (window.render_game_to_text === this._renderGameToText) {
+            delete window.render_game_to_text;
+        }
+        if (window.advanceTime === this._advanceTime) {
+            delete window.advanceTime;
+        }
+        if (window.boardGameApp === this) {
+            delete window.boardGameApp;
+        }
     }
 
     // === Panel switching ===
@@ -90,6 +107,7 @@ export class BoardGameApp {
     }
 
     showRoot() {
+        this.exposeTestHooks();
         this.dom.root?.classList.remove('hidden');
         document.body.classList.add('scene-game-active');
     }
@@ -235,5 +253,41 @@ export class BoardGameApp {
             this.sound.play('uiTap');
             window.__returnToLauncher?.();
         });
+    }
+
+    getDebugState() {
+        const screen = this.dom.game?.panel?.classList?.contains?.('hidden') ? 'setup' : 'game';
+        const moveHistory = Array.isArray(this.state?.moveHistory) ? this.state.moveHistory : [];
+        const board = this.state?.board;
+        return {
+            screen,
+            game: this.constructor.name.replace(/App$/, '').toLowerCase(),
+            coordinateSystem: 'origin top-left; rows increase downward; columns increase to the right',
+            mode: this.options?.mode ?? null,
+            variant: this.variant ?? null,
+            boardSize: this.options?.size ?? board?.length ?? null,
+            viewMode: this.viewMode ?? (this.use3D ? '3d' : '2d'),
+            use3D: Boolean(this.use3D ?? this.viewMode === '3d'),
+            renderer3d: Boolean(this.renderer3d),
+            currentPlayer: this.state?.currentPlayer ?? this.state?.turn ?? null,
+            playerColor: this.options?.playerColor ?? null,
+            moveCount: moveHistory.length,
+            lastMove: moveHistory[moveHistory.length - 1] ?? this.state?.lastMove ?? null,
+            selected: this.selected,
+            highlightedMoves: Array.isArray(this.highlightMoves) ? this.highlightMoves.length : 0,
+            aiThinking: Boolean(this.state?.aiThinking),
+            gameOver: Boolean(this.state?.gameOver),
+            result: this.state?.result ?? null
+        };
+    }
+
+    exposeTestHooks() {
+        this._renderGameToText = () => JSON.stringify(this.getDebugState());
+        this._advanceTime = (ms = 16) => new Promise((resolve) => {
+            window.setTimeout(() => resolve(this.getDebugState()), ms);
+        });
+        window.boardGameApp = this;
+        window.render_game_to_text = this._renderGameToText;
+        window.advanceTime = this._advanceTime;
     }
 }

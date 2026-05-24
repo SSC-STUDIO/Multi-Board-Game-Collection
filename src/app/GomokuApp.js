@@ -92,12 +92,14 @@ export class GomokuApp {
         // 启动器桥接：首次选中时已由 main.js new 出来；如果用户切回 launcher 再回到 Gomoku，
         // __reenter 会被调用以保证 setup 面板可见、画面不是黑屏。
         this.__reenter = () => {
+            this.exposeTestHooks();
             this.game.enterSetup();
             if (this.renderer3d) {
                 this.renderer3d.resize();
             }
         };
         this.enterSetupQuiet = () => {
+            this.exposeTestHooks();
             this.game.enterSetup();
         };
         // 隐藏 Gomoku 所有面板（用于切换到其他游戏时）
@@ -544,11 +546,16 @@ export class GomokuApp {
         const longestEdge = Math.max(width, height);
         const orientation = width >= height ? 'landscape' : 'portrait';
         const aspectRatio = width / Math.max(height, 1);
+        const phoneLikeViewport = shortestEdge <= 520 || (orientation === 'portrait' && width <= 640);
 
         let deviceForm = 'desktop';
         // 触屏优先设备按长短边阈值区分手机/平板，避免横竖屏切换时 HUD 策略抖动。
         if (touchLike) {
             deviceForm = longestEdge >= 1024 && shortestEdge >= 720 ? 'tablet' : 'mobile';
+        } else if (phoneLikeViewport) {
+            // Browser emulation and narrow desktop windows still need the phone HUD,
+            // otherwise the compact desktop grid overflows and squeezes labels vertically.
+            deviceForm = 'mobile';
         } else if (width < 1280 || height < 760) {
             // 非触屏但空间较紧时使用 compact 桌面布局，减少 HUD 占位。
             deviceForm = 'desktop-compact';

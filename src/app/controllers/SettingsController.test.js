@@ -58,9 +58,9 @@ import {
 // Setup document.body mock with classList support
 if (!document.body) {
     const bodyClasses = new Set();
-    Object.defineProperty(document, 'body', {
-        value: {
-            classList: {
+        Object.defineProperty(document, 'body', {
+            value: {
+                classList: {
                 add: (...names) => names.forEach((n) => bodyClasses.add(n)),
                 remove: (...names) => names.forEach((n) => bodyClasses.delete(n)),
                 contains: (name) => bodyClasses.has(name),
@@ -79,6 +79,13 @@ if (!document.body) {
         configurable: true
     });
     document.body._classes = bodyClasses;
+}
+
+if (!Object.getOwnPropertyDescriptor(document, 'activeElement')) {
+    Object.defineProperty(document, 'activeElement', {
+        value: null,
+        configurable: true
+    });
 }
 
 function createMockElement() {
@@ -108,6 +115,8 @@ function createMockElement() {
         checked: false,
         value: '',
         focus: vi.fn(),
+        blur: vi.fn(),
+        contains: vi.fn(() => false),
         closest: vi.fn(() => null),
         querySelector: vi.fn(() => null),
         querySelectorAll: vi.fn(() => []),
@@ -550,6 +559,20 @@ describe('SettingsController.dismissFirstRunGuide', () => {
         expect(app.dom.firstRunGuide.card._classes.has('hidden')).toBe(true);
         expect(app.dom.firstRunGuide.card._attrs['aria-hidden']).toBe('true');
         expect(document.body.classList.contains('first-run-guide-open')).toBe(false);
+    });
+
+    it('blurs focused guide controls before hiding the guide', () => {
+        const app = createMockApp();
+        const focusedButton = createMockElement();
+        app.firstRunGuideOpen = true;
+        app.dom.firstRunGuide.card.contains = vi.fn((element) => element === focusedButton);
+        const activeElementSpy = vi.spyOn(document, 'activeElement', 'get').mockReturnValue(focusedButton);
+        const ctrl = new SettingsController(app);
+
+        ctrl.dismissFirstRunGuide();
+
+        expect(focusedButton.blur).toHaveBeenCalled();
+        activeElementSpy.mockRestore();
     });
 
     it('does nothing when not open', () => {

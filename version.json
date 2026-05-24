@@ -1,5 +1,5 @@
 {
-  "name": "五子棋 · Gomoku",
+  "name": "多棋类合集 · Board Games",
   "version": "1.0.0",
   "versionCode": 100,
   "buildNumber": 1,
@@ -46,11 +46,11 @@
       "date": "2026-04-04",
       "changes": [
         "首发版本",
-        "完整的五子棋游戏核心",
+        "多棋类启动器与五款棋类入口",
+        "五子棋、围棋、国际象棋、中国象棋、军棋翻翻棋",
         "人人对战、人机对战、练习模式",
-        "经典规则和禁手规则",
-        "三种AI难度等级",
-        "现代化UI设计"
+        "3D 棋盘、AI 难度与 QI 指导",
+        "面向 Web、Android 和桌面的现代化 UI"
       ]
     }
   ],
@@ -58,7 +58,7 @@
     "author": "Your Name",
     "publisher": "Your Studio",
     "website": "https://your-website.com",
-    "repository": "https://github.com/yourusername/gomoku",
+    "repository": "https://github.com/SSC-STUDIO/Multi-Board-Game-Collection",
     "license": "MIT"
   }
 }

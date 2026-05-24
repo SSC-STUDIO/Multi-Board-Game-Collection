@@ -42,12 +42,12 @@ describe('i18n.t()', () => {
     });
 
     it('should return the zh translation for a known key', () => {
-        expect(i18n.t('appTitle')).toBe('五子棋 · Gomoku');
+        expect(i18n.t('appTitle')).toBe('多棋类合集 · Board Games');
     });
 
     it('should return the en translation when locale is en', () => {
         i18n.setLanguage('en');
-        expect(i18n.t('appTitle')).toBe('Gomoku');
+        expect(i18n.t('appTitle')).toBe('Board Games Collection');
     });
 
     it('should interpolate {param} placeholders', () => {
@@ -58,7 +58,7 @@ describe('i18n.t()', () => {
 
     it('should leave unknown placeholder keys as-is', () => {
         const result = i18n.t('appTitle', { missing: 'X' });
-        expect(result).toBe('五子棋 · Gomoku');
+        expect(result).toBe('多棋类合集 · Board Games');
     });
 
     it('should return the key itself when key is not found in any locale', () => {

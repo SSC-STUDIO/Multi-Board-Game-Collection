@@ -49,10 +49,10 @@
 
 ```bash
 # 使用HTTPS
-git clone https://github.com/yourusername/gomoku.git
+git clone https://github.com/SSC-STUDIO/Multi-Board-Game-Collection.git
 
 # 或使用SSH
-git clone git@github.com:yourusername/gomoku.git
+git clone git@github.com:SSC-STUDIO/Multi-Board-Game-Collection.git
 
 # 进入项目目录
 cd gomoku

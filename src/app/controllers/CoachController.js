@@ -315,6 +315,9 @@ export class CoachController {
      * @returns {{row:number, col:number}|null} 标准化后的点对象，无效时返回 null
      */
     normalizeCoachPoint(point, extra = {}) {
+        if (point?.row === null || point?.row === undefined || point?.col === null || point?.col === undefined) {
+            return null;
+        }
         const row = Number(point?.row);
         const col = Number(point?.col);
         if (!Number.isInteger(row) || !Number.isInteger(col)) {
@@ -344,6 +347,9 @@ export class CoachController {
      * @returns {number|null} 标准化后的置信度，无效时返回 null
      */
     normalizeConfidence(confidence) {
+        if (confidence === null || confidence === undefined || confidence === '') {
+            return null;
+        }
         const value = Number(confidence);
         if (!Number.isFinite(value)) {
             return null;

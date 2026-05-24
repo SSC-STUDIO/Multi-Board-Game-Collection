@@ -1,7 +1,7 @@
 {
   "$schema": "https://capacitorjs.com/schema",
   "appId": "com.gomoku.game",
-  "appName": "Gomoku",
+  "appName": "Board Games",
   "webDir": "builds/web",
   "server": {
     "cleartext": true

@@ -106,12 +106,12 @@ async function readPackageMetadata() {
         const packageJsonPath = join(rootDir, 'package.json');
         const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
         return {
-            name: packageJson.description || packageJson.name || '五子棋 · Gomoku',
+            name: packageJson.description || packageJson.name || '多棋类合集 · Board Games',
             version: packageJson.version || '1.0.0'
         };
     } catch {
         return {
-            name: '五子棋 · Gomoku',
+            name: '多棋类合集 · Board Games',
             version: '1.0.0'
         };
     }

@@ -35,12 +35,15 @@ const { makeMockElements } = vi.hoisted(() => ({
                 mode: el('junqi-mode-options'),
                 level: el('junqi-level-options'),
                 levelRow: el('junqi-level-row'),
+                template: el('junqi-template-options'),
+                templateRow: el('junqi-template-row'),
                 start: el('junqi-start-btn'),
                 back: el('junqi-back-to-launcher-btn'),
             },
             game: {
                 panel: el('junqi-game'),
                 board: el('junqi-board'),
+                board3d: el('junqi-board-3d'),
                 message: el('junqi-message'),
                 currentPlayer: el('junqi-current-player'),
                 moveCount: el('junqi-move-count'),
@@ -121,6 +124,51 @@ vi.mock('./flip/ai.js', () => ({
     getFlipAIDelay: vi.fn(() => 500),
 }));
 
+vi.mock('./classic/state.js', () => ({
+    createClassicState: vi.fn(() => ({
+        board: Array.from({ length: 13 }, () => Array(5).fill(null)),
+        turn: 'r',
+        playerColor: 'r',
+        moveHistory: [],
+        gameOver: false,
+        aiThinking: false,
+        result: null,
+    })),
+    createClassicOptions: vi.fn(() => ({
+        variant: 'classic', mode: 'pve', level: 'easy', playerColor: 'r', templateIndex: 0,
+    })),
+}));
+
+vi.mock('./classic/rules.js', () => ({
+    applyMove: vi.fn((board, state) => ({ board, state: { ...state, turn: 'b' } })),
+    checkWinner: vi.fn(() => null),
+    getLegalMoves: vi.fn(() => []),
+    generatePieceMoves: vi.fn(() => []),
+    CLASSIC_ROWS: 13,
+    CLASSIC_COLS: 5,
+    isPlayable: vi.fn(() => true),
+    isCamp: vi.fn(() => false),
+    isHeadquarters: vi.fn(() => false),
+    isMountain: vi.fn(() => false),
+    isFrontline: vi.fn(() => false),
+}));
+
+vi.mock('./classic/ai.js', () => ({
+    getClassicAIMove: vi.fn(() => null),
+    getClassicAIDelay: vi.fn(() => 500),
+}));
+
+vi.mock('./render3d/JunqiRenderer3D.js', () => ({
+    JunqiRenderer3D: class {
+        constructor() {}
+        onCellClick() {}
+        show() {}
+        hide() {}
+        dispose() {}
+        syncBoard() {}
+    },
+}));
+
 const mockDoc = vi.hoisted(() => ({
     getElementById: (id) => {
         const map = {};
@@ -151,17 +199,19 @@ describe('JunqiApp', () => {
     });
 
     describe('constructor', () => {
-        it('should initialize with flip variant and default options', () => {
-            expect(app.options.mode).toBe('pvp');
+        it('should initialize with classic variant and default options', () => {
+            expect(app.options.mode).toBe('pve');
             expect(app.options.level).toBe('easy');
-            expect(app.variant).toBe('flip');
+            expect(app.variant).toBe('classic');
         });
 
         it('should create DOM references', () => {
             expect(app.dom.root).toBeDefined();
             expect(app.dom.setup.panel).toBeDefined();
             expect(app.dom.setup.variant).toBeDefined();
+            expect(app.dom.setup.template).toBeDefined();
             expect(app.dom.game.hint).toBeDefined();
+            expect(app.dom.game.board3d).toBeDefined();
         });
 
         it('should enter setup on construction', () => {
@@ -174,26 +224,29 @@ describe('JunqiApp', () => {
             app.startGame();
             expect(app.dom.setup.panel.classList.add).toHaveBeenCalledWith('hidden');
             expect(app.dom.game.panel.classList.remove).toHaveBeenCalledWith('hidden');
-            expect(app.state.turn).toBeNull();
+            expect(app.state.turn).toBe('r');
         });
     });
 
     describe('setup start button', () => {
-        it('should show comingSoon for fourKingdom variant', () => {
-            app.variant = 'fourKingdom';
+        it('should start flip variant when selected', () => {
+            app.variant = 'flip';
             const clickHandler = app.dom.setup.start.addEventListener.mock.calls.find(
                 (c) => c[0] === 'click'
             );
             if (clickHandler) {
-                const handler = clickHandler[1];
+                const handler = app.dom.setup.start.addEventListener.mock.calls
+                    .filter((c) => c[0] === 'click')
+                    .at(-1)[1];
                 handler();
             }
-            expect(app.showMessage).toBeDefined();
+            expect(app.state.turn).toBeNull();
         });
     });
 
     describe('isHumanTurn', () => {
-        it('should return true when turn is null (first flip)', () => {
+        it('should return true when flip turn is null (first flip)', () => {
+            app.variant = 'flip';
             app.startGame();
             expect(app.isHumanTurn()).toBe(true);
         });

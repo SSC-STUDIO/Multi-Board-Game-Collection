@@ -181,15 +181,25 @@ describe('ImmersiveHudManager.isImmersiveUiCapable', () => {
 describe('ImmersiveHudManager.isDesktopHoverUi', () => {
     it('returns true for fine pointer with hover', () => {
         window.matchMedia = vi.fn(() => ({ matches: false }));
+        Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true, configurable: true });
         const app = createMockApp();
         const mgr = new ImmersiveHudManager(app);
         expect(mgr.isDesktopHoverUi()).toBe(true);
+    });
+
+    it('returns false for narrow emulated phone viewport', () => {
+        window.matchMedia = vi.fn(() => ({ matches: false }));
+        Object.defineProperty(window, 'innerWidth', { value: 390, writable: true, configurable: true });
+        const app = createMockApp();
+        const mgr = new ImmersiveHudManager(app);
+        expect(mgr.isDesktopHoverUi()).toBe(false);
     });
 
     it('returns false for coarse pointer', () => {
         window.matchMedia = vi.fn((q) => ({
             matches: q === '(pointer: coarse)'
         }));
+        Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true, configurable: true });
         const app = createMockApp();
         const mgr = new ImmersiveHudManager(app);
         expect(mgr.isDesktopHoverUi()).toBe(false);

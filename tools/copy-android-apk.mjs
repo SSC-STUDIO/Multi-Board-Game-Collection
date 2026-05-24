@@ -12,7 +12,7 @@ const version = packageJson.version || '0.0.0';
 const apkName = variant === 'debug' ? 'app-debug.apk' : `app-${variant}.apk`;
 const sourceApk = path.join(rootDir, 'android', 'app', 'build', 'outputs', 'apk', variant, apkName);
 const outputDir = path.join(rootDir, 'output', 'android');
-const outputApk = path.join(outputDir, `Gomoku-${version}-${variant}.apk`);
+const outputApk = path.join(outputDir, `BoardGames-${version}-${variant}.apk`);
 
 try {
     await stat(sourceApk);

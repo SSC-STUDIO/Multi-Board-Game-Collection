@@ -1,14 +1,14 @@
 {
-  "name": "gomoku",
-  "productName": "五子棋 · Gomoku",
+  "name": "board-games",
+  "productName": "多棋类合集 · Board Games",
   "version": "1.0.0",
-  "description": "一个精致的五子棋游戏",
+  "description": "五子棋、围棋、国际象棋、中国象棋和军棋翻翻棋合一的多棋类游戏平台",
   "main": "electron-main.js",
   "author": "Your Name",
   "license": "MIT",
   "build": {
     "appId": "com.yourcompany.gomoku",
-    "productName": "五子棋 · Gomoku",
+    "productName": "多棋类合集 · Board Games",
     "directories": {
       "output": "builds/desktop",
       "buildResources": "assets/icons"
@@ -40,7 +40,7 @@
       "installerHeaderIcon": "assets/icons/icon_48x48.png",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "五子棋"
+      "shortcutName": "多棋类合集"
     },
     "mac": {
       "target": [
@@ -75,8 +75,8 @@
       "category": "Game",
       "maintainer": "your@email.com",
       "desktop": {
-        "Name": "五子棋",
-        "Comment": "精致五子棋游戏",
+        "Name": "Board Games",
+        "Comment": "Multi-board game collection",
         "Categories": "Game;BoardGame;"
       }
     },

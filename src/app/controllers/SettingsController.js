@@ -247,8 +247,13 @@ export class SettingsController {
         this.app.firstRunGuideSeen = true;
         this.app.firstRunGuideOpen = false;
         this.persistFirstRunGuideSeen();
-        this.app.dom.firstRunGuide.card?.classList.add('hidden');
-        this.app.dom.firstRunGuide.card?.setAttribute('aria-hidden', 'true');
+        const guideCard = this.app.dom.firstRunGuide.card;
+        const activeElement = document.activeElement;
+        if (guideCard && activeElement && guideCard.contains?.(activeElement)) {
+            activeElement.blur?.();
+        }
+        guideCard?.classList.add('hidden');
+        guideCard?.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('first-run-guide-open');
     }
 

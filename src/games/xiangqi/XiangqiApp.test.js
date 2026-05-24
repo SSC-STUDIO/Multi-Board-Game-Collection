@@ -42,6 +42,7 @@ const { makeMockElements } = vi.hoisted(() => ({
             game: {
                 panel: el(`${prefix}-game`),
                 board: el(`${prefix}-board`),
+                board3d: el(`${prefix}-board-3d`),
                 message: el(`${prefix}-message`),
                 currentPlayer: el(`${prefix}-current-player`),
                 moveCount: el(`${prefix}-move-count`),
@@ -121,6 +122,17 @@ vi.mock('./ai.js', () => ({
     getXiangqiAIDelay: vi.fn(() => 300),
 }));
 
+vi.mock('./render3d/XiangqiRenderer3D.js', () => ({
+    XiangqiRenderer3D: class {
+        constructor() { this.flipped = false; }
+        onCellClick() {}
+        show() {}
+        hide() {}
+        dispose() {}
+        syncBoard() {}
+    },
+}));
+
 const mockDoc = vi.hoisted(() => ({
     getElementById: (id) => {
         const map = {};
@@ -161,6 +173,7 @@ describe('XiangqiApp', () => {
             expect(app.dom.root).toBeDefined();
             expect(app.dom.setup.panel).toBeDefined();
             expect(app.dom.game.board).toBeDefined();
+            expect(app.dom.game.board3d).toBeDefined();
         });
 
         it('should enter setup on construction', () => {
@@ -174,6 +187,7 @@ describe('XiangqiApp', () => {
             expect(app.dom.setup.panel.classList.add).toHaveBeenCalledWith('hidden');
             expect(app.dom.game.panel.classList.remove).toHaveBeenCalledWith('hidden');
             expect(app.state.turn).toBe('r');
+            expect(app.dom.game.board.classList.add).toHaveBeenCalledWith('hidden');
         });
     });
 
