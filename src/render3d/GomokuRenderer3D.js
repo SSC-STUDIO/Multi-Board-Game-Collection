@@ -12,6 +12,7 @@ import {
     CameraController,
     LightingSetup,
     AnimationManager,
+    ParticleSystem,
     InteractionHandler,
     boardToWorld,
 } from './index.js';
@@ -54,6 +55,8 @@ export class GomokuRenderer3D {
             selected: null
         };
         this.winningPulseKey = null;
+        this.particleSystem = null;
+        this.ambientTimer = 0;
 
         this.init();
     }
@@ -89,6 +92,7 @@ export class GomokuRenderer3D {
         this.cameraController.fitToBoard(this.boardSize, false);
 
         this.animationManager = new AnimationManager(this.sceneManager, this.config);
+        this.particleSystem = new ParticleSystem(this.sceneManager.scene);
         this.sceneManager.onBeforeRender = () => this.handleFrame();
 
         this.interactionHandler = new InteractionHandler(this.sceneManager, {
@@ -99,6 +103,17 @@ export class GomokuRenderer3D {
     }
 
     handleFrame() {
+        const dt = this.sceneManager?.clock?.getDelta?.() ?? 0.016;
+        this.particleSystem?.update(dt);
+
+        // Emit ambient particles every 3 seconds
+        this.ambientTimer += dt;
+        if (this.ambientTimer > 3) {
+            this.ambientTimer = 0;
+            this.particleSystem?.emitAmbientParticles();
+            this.sceneManager?.setNeedsRender();
+        }
+
         const timeSeconds = performance.now() / 1000;
         const environmentAnimated = this.environmentBuilder?.update(timeSeconds) ?? false;
         const lightingAnimated = this.lightingSetup?.update(timeSeconds) ?? false;
@@ -307,6 +322,26 @@ export class GomokuRenderer3D {
                         this.getWinningPulseTag(winningKey)
                     );
                     this.winningPulseKey = winningKey;
+
+                    // Victory particle shatter effect
+                    const winPositions = winningCells.map(({ row, col }) => {
+                        const w = boardToWorld(row, col, this.boardSize, this.cellSize);
+                        return { x: w.x, y: this.boardThickness / 2 + this.config.stone.height, z: w.z };
+                    });
+                    const winColor = boardState[winningCells[0]?.row]?.[winningCells[0]?.col] ?? 'black';
+                    this.particleSystem?.emitShatterEffect(winPositions, winColor);
+
+                    // Camera zoom to center of winning line
+                    if (winningCells.length > 0) {
+                        const midIdx = Math.floor(winningCells.length / 2);
+                        this.cameraController?.focusOnCell(
+                            winningCells[midIdx].row,
+                            winningCells[midIdx].col,
+                            this.boardSize,
+                            this.cellSize,
+                            true
+                        );
+                    }
                 }
             }
         } else {
@@ -365,6 +400,14 @@ export class GomokuRenderer3D {
         if (animate) {
             const targetY = this.boardThickness / 2 + this.config.stone.height;
             this.animationManager.playDropAnimation(stone, targetY);
+
+            // Drop particle dust effect
+            const w = boardToWorld(row, col, this.boardSize, this.cellSize);
+            this.particleSystem?.emitDropParticles(w.x, targetY, w.z, color);
+
+            // Camera follow-zoom to last move
+            this.cameraController?.focusOnCell(row, col, this.boardSize, this.cellSize, true);
+            this.cameraController?.playCameraShake(0.04, 0.15);
         }
 
         return stone;
@@ -495,10 +538,41 @@ export class GomokuRenderer3D {
 
     playVictorySequence(cells) {
         this.cameraController.playVictoryFocus(cells, this.boardSize, this.cellSize);
+        const lastCell = cells && cells.length > 0 ? cells[0] : null;
+        if (lastCell) {
+            const winnerColor = (lastCell.color === 'black' || lastCell.color === 'white') ? lastCell.color : 'black';
+            setTimeout(() => this.showVictoryCelebration(winnerColor), 400);
+        }
     }
 
     static isWebGLAvailable() {
         return SceneManager.isWebGLAvailable();
+    }
+
+    /**
+     * Show a victory celebration with confetti-like particles.
+     * @param {string} winnerColor - 'black' or 'white'
+     */
+    showVictoryCelebration(winnerColor = 'black') {
+        if (!this.particleSystem) return;
+        const colors = winnerColor === 'black'
+            ? [0xd4af37, 0xffd700, 0xf0e68c, 0xdaa520, 0xffffff]
+            : [0xc0c0c0, 0xe8e8e8, 0xffffff, 0xb0b0b0, 0xd4af37];
+
+        const center = this.boardSize / 2;
+        for (let i = 0; i < 40; i++) {
+            const angle = (i / 40) * Math.PI * 2;
+            const radius = (Math.random() * 0.5 + 0.5) * this.boardSize * 0.3;
+            const row = center + Math.cos(angle) * radius;
+            const col = center + Math.sin(angle) * radius;
+            const color = colors[i % colors.length];
+            setTimeout(() => {
+                this.particleSystem?.emitVictoryParticles(
+                    row, col, this.boardSize, this.cellSize, this.boardThickness, color
+                );
+                this.sceneManager?.setNeedsRender();
+            }, i * 40);
+        }
     }
 
     dispose() {
@@ -532,6 +606,10 @@ export class GomokuRenderer3D {
 
         if (this.lightingSetup) {
             this.lightingSetup.dispose();
+        }
+
+        if (this.particleSystem) {
+            this.particleSystem.dispose();
         }
 
         if (this.sceneManager) {

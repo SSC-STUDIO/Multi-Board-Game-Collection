@@ -39,6 +39,8 @@ const {
     loadLlmCoachSettings,
     saveLlmCoachSettings,
     fetchWithTimeout,
+    requestLlmCoachAdvice,
+    requestPostGameAnalysis
 } = await import('./llmCoach.js');
 
 // ---------------------------------------------------------------------------
@@ -255,5 +257,132 @@ describe('fetchWithTimeout', () => {
         });
 
         await expect(fetchWithTimeout('https://x', { signal: controller.signal })).rejects.toThrow(LlmCoachError);
+    });
+});
+
+// Mock canvas for board image rendering in test env
+const origCreateElement = document.createElement.bind(document);
+document.createElement = (tag) => {
+    if (tag === 'canvas') {
+        const ctx = {
+            fillStyle: '',
+            strokeStyle: '',
+            lineWidth: 0,
+            font: '',
+            textAlign: '',
+            textBaseline: '',
+            beginPath: vi.fn(),
+            moveTo: vi.fn(),
+            lineTo: vi.fn(),
+            stroke: vi.fn(),
+            fill: vi.fn(),
+            arc: vi.fn(),
+            fillRect: vi.fn(),
+            fillText: vi.fn(),
+            createRadialGradient: () => ({ addColorStop: vi.fn() }),
+        };
+        return { width: 0, height: 0, getContext: () => ctx, toDataURL: () => 'data:image/png;base64,mock' };
+    }
+    return origCreateElement(tag);
+};
+
+describe('requestLlmCoachAdvice multi-game support', () => {
+    const settings = { enabled: true, baseUrl: 'https://api.test', model: 'gpt-4o', apiKey: 'sk-test' };
+    const baseSnapshot = { boardSize: 15, board: [], moveHistory: [], currentPlayer: 'black', lastMove: null };
+
+    beforeEach(() => {
+        globalThis.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: () => Promise.resolve({ choices: [{ message: { content: '{"recommended":{"row":7,"col":7},"alternatives":[],"reason":"center","risk":"low","plan":"control"}' } }], usage: null })
+        });
+    });
+
+    it('should use Gomoku role when gameType is gomoku', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'gomoku' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('Gomoku');
+    });
+
+    it('should use Go role when gameType is go', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'go' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('Go');
+    });
+
+    it('should use Chess role when gameType is chess', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'chess' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('Chess');
+    });
+
+    it('should use Xiangqi role when gameType is xiangqi', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'xiangqi' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('Xiangqi');
+    });
+
+    it('should use Junqi role when gameType is junqi', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'junqi' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('Military Chess');
+    });
+
+    it('should fall back to Gomoku when gameType is empty', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: '' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('Gomoku');
+    });
+});
+describe('requestPostGameAnalysis', () => {
+    const settings = { enabled: true, baseUrl: 'https://api.test', model: 'gpt-4o', apiKey: 'sk-test' };
+    const snapshot = {
+        boardSize: 15,
+        board: Array.from({ length: 15 }, () => Array(15).fill(null)),
+        moveHistory: [],
+        currentPlayer: 'black',
+        lastMove: null,
+        resultType: 'win',
+        resultWinnerColor: 'black',
+        gameOver: true
+    };
+
+    beforeEach(() => {
+        globalThis.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: () => Promise.resolve({
+                choices: [{ message: { content: JSON.stringify({
+                    summary: 'A close game.',
+                    turningPoints: 'Move 12 was key.',
+                    mistakes: 'Both sides missed capture.',
+                    strengths: 'Good opening.',
+                    improvements: 'Endgame technique.',
+                    rating: 7
+                }) } }],
+                usage: null
+            })
+        });
+    });
+
+    it('should send a post-game analysis request with gameType', async () => {
+        await requestPostGameAnalysis({ settings, snapshot, gameType: 'gomoku' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('board game analyst');
+        expect(body.messages[1].content[0].text).toContain('Post-game analysis request');
+    });
+
+    it('should throw when LLM is not configured', async () => {
+        await expect(requestPostGameAnalysis({
+            settings: { enabled: false },
+            snapshot,
+            gameType: 'go'
+        })).rejects.toThrow('not configured');
+    });
+
+    it('should throw on HTTP error', async () => {
+        globalThis.fetch.mockResolvedValueOnce({
+            ok: false,
+            json: () => Promise.resolve({ error: { message: 'rate limited' } })
+        });
+        await expect(requestPostGameAnalysis({ settings, snapshot, gameType: 'chess' })).rejects.toThrow('rate limited');
     });
 });

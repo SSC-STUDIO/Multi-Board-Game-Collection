@@ -284,6 +284,9 @@ export class XiangqiApp extends BoardGameApp {
             this.state.result = { type: 'checkmate', winner };
             this.sound.play('win');
             this.showResult();
+            if (this.renderer3d && winner) {
+                this.renderer3d.playVictorySequence(winner === 'r' ? 'red' : 'black');
+            }
             return;
         }
         if (isStalemate(this.state.board, this.state)) {

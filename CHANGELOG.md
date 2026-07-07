@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### New This Sprint
+- **Go Post-Game Analysis**: GoApp now supports LLM-powered post-game analysis via the result overlay button, with bilingual error handling
+- **Renderer3D Unit Tests**: 6 new tests for `showVictory` and `showVictoryCelebration` methods on `BoardGameRenderer3D`
+- **Post-Game Analysis UI**: Added 'Request Post-Game Analysis' button to all 5 game result overlays, wired to CoachController LLM analysis with structured summary display panel
+- **AI Difficulty Tooltips**: Bilingual difficulty level descriptions (EN/ZH) for Easy/Medium/Master with dynamic display in Gomoku setup UI
+- **3D Victory Celebration**: `showVictoryCelebration()` on `BoardGameRenderer3D` fires shatter particles across the board grid on checkmate for Chess, Xiangqi, and Junqi
+- **Go 3D Ambient Particles**: `GoRenderer3D` now hooks into the render loop with periodic ambient particle emissions every 4 seconds
+
 ### Added
+- **LLM Post-Game Analysis**: AI-powered game review with structured feedback (summary, turning points, mistakes, strengths, improvements, performance rating)
+- **Victory Particle Effects**: Shatter particle system for winning line celebrations across all 5 games
+- **Drop Particle Dust**: Immersive stone/piece placement particle effects
+- **Ambient Particles**: Background particle atmosphere in all 3D scenes
+- **Camera Follow-Zoom**: Automatic focus on last placed piece and winning line center
+- **Multi-Game LLM Coach**: Full support for all 5 games with game-specific prompts and board image rendering
+- **Promotional Materials**: Reddit, Bilibili, V2EX, Zhihu, Chiphell ready-to-post content
+- **Knowledge Base**: 11 architecture rules documenting design decisions
 - Go rules: 16 new edge-case tests (isEmptyBoard, getNeighbors, getGroup,
   corner capture, out-of-bounds, ko restriction, suicide prevention,
   eye-filling) — total 34 Go rules tests, 836 project-wide
@@ -81,3 +97,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is a web-based board games collection, not a Steam title)
 
 ---
+### New This Sprint (continued)
+- **Real-Time LLM Coaching for Non-Gomoku Games**: Go, Chess, Xiangqi, Junqi now have in-game coach hint bars showing LLM-powered move suggestions, reasons, and risk assessment during QI mode play
+- **GameCoach DOM Mapping**: New `buildGameCoachMapping()` helper in `dom.js` creates per-game DOM references for coach hint bars using `data-game-*` attribute selectors
+- **Base Class Coaching Methods**: `BoardGameApp` now provides `isGuidedMode()`, `cancelLlmCoachRequest()`, `refreshCoachGuidance()`, `clearCoachState()`, and `render()` as base methods for all games
+- **Camera Shake on Piece Placement**: `CameraController.playCameraShake()` adds subtle randomized camera displacement on every piece drop in 3D mode
+- **Gomoku Victory Celebration Particles**: `showVictoryCelebration()` emits 40 gold/silver confetti particles radiating from board center on win
+- **Victory Particle System**: New `emitVictoryParticles()` method in ParticleSystem with upward velocity and gravity decay
+- **CSS Styling**: New `.game-coach-hint` class with glassmorphism design for non-Gomoku coach UI

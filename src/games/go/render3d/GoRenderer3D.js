@@ -19,8 +19,10 @@ import {
     LightingSetup,
     CameraController,
     MaterialFactory,
-    StoneBuilder
-} from '../../../render3d/index.js';
+    StoneBuilder,
+    AnimationManager
+,
+    ParticleSystem} from '../../../render3d/index.js';
 import { boardToWorld, worldToBoard } from '../../../config/renderConfig.js';
 
 const BOARD_COLOR = '#d6a86a';
@@ -130,6 +132,7 @@ export class GoRenderer3D {
         this.cameraController = null;
         this.stoneBuilder = null;
         this.materialFactory = null;
+        this.animationManager = null;
         this.boardGroup = null;
         this.boardTexture = null;
 
@@ -155,6 +158,22 @@ export class GoRenderer3D {
         this.materialFactory = new MaterialFactory(config);
         this.stoneBuilder = new StoneBuilder(config);
         this.sceneManager.add(this.stoneBuilder.createStonesGroup());
+
+        this.animationManager = new AnimationManager(this.sceneManager, config);
+        this.particleSystem = new ParticleSystem(this.sceneManager.scene);
+        this.ambientTimer = 0;
+
+        this.sceneManager.onBeforeRender = () => {
+            const now = performance.now();
+            const dt = this._lastFrameTime ? (now - this._lastFrameTime) / 1000 : 0.016;
+            this._lastFrameTime = now;
+            this.particleSystem?.update(dt);
+            this.ambientTimer += dt;
+            if (this.ambientTimer > 4) {
+                this.ambientTimer = 0;
+                this.particleSystem?.emitAmbientParticles();
+            }
+        };
 
         this.buildBoard();
 
@@ -314,6 +333,9 @@ export class GoRenderer3D {
         stone.castShadow = true;
         stone.receiveShadow = true;
         this.stoneBuilder.stonesGroup.add(stone);
+
+        const targetY = thickness / 2 + this.sceneManager.config.stone.height;
+        this.animationManager?.playDropAnimation(stone, targetY);
     }
 
     _removeStone(row, col) {
@@ -446,6 +468,8 @@ export class GoRenderer3D {
     }
 
     dispose() {
+        this.sceneManager.onBeforeRender = null;
+        this.particleSystem?.dispose();
         this._disposed = true;
         if (this._clickHandler && this.sceneManager?.renderer?.domElement) {
             this.sceneManager.renderer.domElement.removeEventListener('click', this._clickHandler);
@@ -455,6 +479,7 @@ export class GoRenderer3D {
         this.stoneBuilder?.dispose?.();
         this.materialFactory?.dispose?.();
         this.lightingSetup?.dispose?.();
+        this.animationManager?.dispose?.();
         this.cameraController?.dispose?.();
         this.sceneManager?.dispose?.();
     }

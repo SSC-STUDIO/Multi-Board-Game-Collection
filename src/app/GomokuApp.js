@@ -14,6 +14,7 @@ import { formatMove } from '../utils/formatters.js';
 
 import { GameController } from './controllers/GameController.js';
 import { CoachController } from './controllers/CoachController.js';
+import { i18n } from '../utils/i18n.js';
 import { SettingsController } from './controllers/SettingsController.js';
 import { ImmersiveHudManager } from './controllers/ImmersiveHudManager.js';
 import { InteractionManager } from './controllers/InteractionManager.js';
@@ -294,6 +295,12 @@ export class GomokuApp {
             this.sound.play('uiTap');
             this.game.enterSetup();
         });
+        if (this.dom.result.postgameBtn) {
+            this.dom.result.postgameBtn.addEventListener('click', () => {
+                this.sound.play('uiTap');
+                this.coach.requestPostGameReview();
+            });
+        }
         this.dom.lang.zh.addEventListener('click', () => this.sound.play('uiTap'));
         this.dom.lang.en.addEventListener('click', () => this.sound.play('uiTap'));
 
@@ -576,7 +583,27 @@ export class GomokuApp {
     // === Delegation ===
 
     // Delegation methods for cross-controller calls
-    render(opts) { return this.game.render(opts); }
+    render(opts) {
+        this.game.render(opts);
+        this.renderPostGameOverlay();
+    }
+
+    renderPostGameOverlay() {
+        const panel = this.dom?.result?.postgamePanel;
+        const contentEl = this.dom?.result?.postgameContent;
+        if (!panel || !contentEl) return;
+        const status = this.state.coachPostGame;
+        if (status === 'ready' && this.state.coachPostGameData) {
+            this.renderPostGamePanel(panel, contentEl, this.state.coachPostGameData);
+        } else if (status === 'loading') {
+            panel.classList.remove('hidden');
+            contentEl.innerHTML = '<p>' + i18n.t('coachPostGameLoading') + '</p>';
+        } else if (status === 'unavailable' || status === 'error') {
+            panel.classList.add('hidden');
+        } else {
+            panel.classList.add('hidden');
+        }
+    }
     commitMove(row, col, color, opts) { return this.game.commitMove(row, col, color, opts); }
     toggleSound() { return this.game.toggleSound(); }
     showHint() { return this.game.showHint(); }

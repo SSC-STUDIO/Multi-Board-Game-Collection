@@ -167,6 +167,20 @@ export function createGoState(options = {}) {
         consecutivePasses: 0,
         gameOver: false,
         result: null,
-        aiThinking: false
-    };
+        aiThinking: false,
+        coachSuggestion: null,
+        coachAlternatives: [],
+        coachSource: 'local',
+        coachLlmStatus: 'unavailable',
+        coachInsight: '',
+        coachRisk: '',
+        coachPlan: '',
+        coachConfidence: null,
+        coachFocus: null,
+        coachPreviewMode: false,
+        coachPreviewBoard: null,
+        coachAnalyzedBoard: null,
+        coachFeedback: '',
+        coachPostGame: null,
+        coachPostGameData: null,    };
 }

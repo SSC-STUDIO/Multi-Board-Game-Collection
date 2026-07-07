@@ -418,6 +418,41 @@ export class CameraController {
     /**
      * 销毁
      */
+
+    /**
+     * Play a subtle camera shake effect (e.g., on piece placement impact).
+     * @param {number} intensity - shake amplitude (default 0.06)
+     * @param {number} duration - shake duration in seconds (default 0.18)
+     */
+    playCameraShake(intensity = 0.06, duration = 0.18) {
+        if (this.prefersReducedMotion) return;
+        const originalPos = this.camera.position.clone();
+        const startTime = performance.now();
+        const durationMs = duration * 1000;
+
+        const shake = () => {
+            const elapsed = performance.now() - startTime;
+            if (elapsed >= durationMs) {
+                this.camera.position.copy(originalPos);
+                this.sceneManager?.setNeedsRender();
+                return;
+            }
+            const progress = elapsed / durationMs;
+            const decay = 1 - progress;
+            const offsetX = (Math.random() - 0.5) * intensity * decay;
+            const offsetY = (Math.random() - 0.5) * intensity * decay * 0.5;
+            const offsetZ = (Math.random() - 0.5) * intensity * decay;
+            this.camera.position.set(
+                originalPos.x + offsetX,
+                originalPos.y + offsetY,
+                originalPos.z + offsetZ
+            );
+            this.sceneManager?.setNeedsRender();
+            requestAnimationFrame(shake);
+        };
+        requestAnimationFrame(shake);
+    }
+
     dispose() {
         this.cancelAnimation();
     }

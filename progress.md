@@ -1,5 +1,7 @@
 Original prompt: Implement the plan to fix grid stability, adapt the game for mobile, add transitions and camera motion, and add a QI guidance play mode.
 
+- 2026-07-07: Added LLM Coach post-game analysis to Chess, Go, Xiangqi, and Junqi apps. Each game now has a post-game review button that sends a board snapshot (state, move history, current player) to `requestPostGameAnalysis` for natural-language strategic analysis. Added `loadLlmCoachSettings` imports, button handlers in game lifecycle hooks, and `requestXxxPostGameReview` async methods to all 4 game classes. Validation: 995/995 tests passing, clean build, all 41 test files green.
+
 - 2026-05-23: Performed a full real-browser playability pass across launcher, help/language, Gomoku, Go, Chess, Xiangqi, Junqi classic, Junqi flip, and 390px mobile launcher. Polished the visual shell after inspection: the old Gomoku `.board` DOM is now hidden with the other removed 2D boards, and the Go/Chess/Xiangqi/Junqi WebGL board shells were lightened from a heavy black box into a translucent 3D tabletop window. Validation passed with `npm run check`, full `npm test` (974 tests), an Edge CDP full-playtest matrix with 8 scenarios and 0 console messages, plus a stricter canvas-click smoke where real mouse events on each WebGL canvas changed game state for all 6 playable boards/variants. Artifacts live under `D:\EliuaK_Csy\Working-Paper\New project\3d-audit-artifacts\full-playtest-20260523\`.
 
 - 2026-05-19: Removed user-visible 2D board paths for Go/Chess/Xiangqi/Junqi: Go no longer exposes the 2D/3D toggle and always starts in WebGL 3D; Chess/Xiangqi/Junqi no longer reveal the old DOM boards when renderer setup fails, instead showing a WebGL-required message. The launcher was rebuilt as a 3D match-hall style stage with animated card tilt and procedural mini board previews, and Go now uses a dedicated oblique camera frame so it reads as true 3D instead of top-down. Validation passed with `npm run check`, full `npm test` (974 tests), and clean Edge DevTools screenshots/state checks at 1920x1080: launcher has no horizontal overflow, Go has a WebGL canvas, `#go-board` is `display:none`, and `#go-view-toggle` is absent. Artifacts live under `D:\EliuaK_Csy\Working-Paper\New project\3d-audit-artifacts\3d-only-polish\`. The shared `develop-web-game` client is still blocked by its missing local `playwright` package, so Edge CDP validation was used.
@@ -254,3 +256,45 @@ Original prompt: Implement the plan to fix grid stability, adapt the game for mo
   2. 新增 i18n 键 `coachLlmRequestFailed`
   3. 补齐 CoachController 13 个方法的测试覆盖
   4. Playwright 冒烟 + 截图视觉验证
+
+## 2026-07-07 (Loop 2: Phase 2+3+4 Feature Sprint)
+
+### Status Summary
+- **Test baseline**: 989 tests / 40 files all pass
+- **Module check**: 111 modules pass
+- **Build**: 139 files, clean
+
+### Completed Features
+1. **LLM Post-Game Analysis** (Phase 2)
+   - New `requestPostGameAnalysis()` in llmCoach.js
+   - `buildPostGameRequest()` with structured JSON response format
+   - CoachController.requestPostGameReview() orchestration method
+   - 9 i18n keys for zh/en (coachPostGameTitle through coachPostGameRequest)
+   - 3 tests added to llmCoach.test.js
+
+2. **ParticleSystem Integration** (Phase 3)
+   - Exported from render3d/index.js
+   - Wired into GomokuRenderer3D (drop particles + victory shatter + ambient)
+   - Wired into GoRenderer3D (drop particles + ambient)
+   - Wired into BoardGameRenderer3D base class (drop particles + victory shatter + ambient)
+   - Fixed GoRenderer3D AnimationManager init bug (was calling null as function)
+   - Fixed GoRenderer3D ParticleSystem initialization
+
+3. **Camera Follow-Zoom** (Phase 3)
+   - Gomoku: focusOnCell on victory winning line center
+   - Gomoku: focusOnCell on animated stone drop
+   - All games: camera zooms to last move via placeStone
+
+4. **Marketing Materials** (Phase 4)
+   - Updated devlog.md with new sprint features
+   - Updated Board_Game_Collection_Report.md with recent additions
+   - Created promo_posts.md with Reddit, Bilibili, V2EX, Zhihu, Chiphell content
+
+5. **Knowledge Base**
+   - Created KNOWLEDGE_BASE.md with 11 architecture rules
+   - RULE-001 through RULE-011 covering LLM Coach, Node.js v24, Vitest mocks, ParticleSystem, i18n, 3D scenes, post-game analysis, PowerShell escaping, shared base class, marketing cadence
+
+### Bug Queue
+- `.bugs/1_NEW_REPORTS.md`: No open bugs
+- `.bugs/3_RESOLVED.md`: Contains BUG-001 resolution
+

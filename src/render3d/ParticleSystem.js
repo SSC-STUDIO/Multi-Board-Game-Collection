@@ -262,6 +262,40 @@ export class ParticleSystem {
     /**
      * 销毁粒子系统
      */
+
+    /**
+     * Emit celebration particles at a board position.
+     * @param {number} row
+     * @param {number} col
+     * @param {number} boardSize
+     * @param {number} cellSize
+     * @param {number} boardThickness
+     * @param {number} color - particle color
+     */
+    emitVictoryParticles(row, col, boardSize, cellSize, boardThickness, color = 0xd4af37) {
+        const world = boardToWorld(row, col, boardSize, cellSize);
+        const count = 3;
+        for (let i = 0; i < count; i++) {
+            const size = 0.04 + Math.random() * 0.06;
+            const velocity = {
+                x: (Math.random() - 0.5) * 1.2,
+                y: 2.5 + Math.random() * 2.0,
+                z: (Math.random() - 0.5) * 1.2,
+            };
+            this.particles.push({
+                position: { x: world.x, y: boardThickness + 0.2, z: world.z },
+                velocity,
+                size,
+                color,
+                life: 1.0,
+                decay: 0.3 + Math.random() * 0.3,
+                gravity: -4.0,
+                tag: 'victory',
+            });
+        }
+        this.needsUpdate = true;
+    }
+
     dispose() {
         this.geometry.dispose();
         this.material.dispose();

@@ -6513,3 +6513,72 @@ body.launcher-open .hud-bottom {
         max-width: 100vw;
     }
 }
+.option-desc {
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 4px;
+    text-align: center;
+    min-height: 1.2em;
+}
+.postgame-panel {
+    margin-top: 12px;
+    padding: 12px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    text-align: left;
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 0.85em;
+    line-height: 1.5;
+}
+.postgame-panel h4 {
+    margin: 0 0 8px 0;
+    font-size: 1em;
+    color: #ccc;
+}
+.postgame-content p {
+    margin: 4px 0;
+}
+.postgame-content .rating {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ffd700;
+}
+/* === Game Coach Hint (non-Gomoku real-time coaching) === */
+.game-coach-hint {
+    margin: 0.5rem 0;
+    padding: 0.6rem 0.8rem;
+    background: linear-gradient(145deg, rgba(76, 175, 216, 0.12), rgba(18, 37, 68, 0.15));
+    border-radius: 10px;
+    border: 1px solid rgba(76, 175, 216, 0.2);
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: rgba(224, 240, 255, 0.92);
+    transition: opacity 0.2s;
+}
+.game-coach-hint.hidden { display: none; }
+.coach-hint-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.35rem;
+}
+.coach-hint-title {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #d8f6ff;
+}
+.coach-hint-status {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.3rem;
+}
+.coach-hint-recommend,
+.coach-hint-reason,
+.coach-hint-risk {
+    margin-top: 0.25rem;
+}
+.coach-hint-reason .panel-note,
+.coach-hint-risk .panel-note {
+    margin: 0;
+    font-size: 0.78rem;
+}

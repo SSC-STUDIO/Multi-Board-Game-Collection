@@ -298,6 +298,9 @@ export class JunqiApp extends BoardGameApp {
         this.state.result = winner;
         this.sound.play('win');
         this.showResult();
+        if (this.renderer3d && winner) {
+            this.renderer3d.playVictorySequence(winner === 'r' ? 'red' : 'black');
+        }
         return true;
     }
 

@@ -6,6 +6,8 @@
  * @module games/go/GoApp
  */
 
+import { CoachController } from '../../app/controllers/CoachController.js';
+import { buildGameCoachMapping } from '../../ui/dom.js';
 import { i18n } from '../../utils/i18n.js';
 import { BoardGameApp } from '../../app/BoardGameApp.js';
 import { createGoState, createGoOptions } from './state.js';
@@ -13,6 +15,7 @@ import { placeStone, isLegalMove, getOpponent } from './rules.js';
 import { scoreBoardWithRule, getTerritoryMap } from './scoring.js';
 import { getGoAIMove, getGoAIDelay } from './ai.js';
 import { GoRenderer3D } from './render3d/GoRenderer3D.js';
+import { requestPostGameAnalysis, isLlmCoachConfigured, loadLlmCoachSettings } from '../../services/llmCoach.js';
 
 const VIEW_MODE_STORAGE_KEY = 'gomoku-go-view-mode';
 
@@ -33,6 +36,10 @@ export class GoApp extends BoardGameApp {
      */
     constructor(root = document) {
         super(root, createGoOptions());
+        this.llmSettings = loadLlmCoachSettings();
+        this.llmCoachRequestId = 0;
+        this.llmCoachAbortController = null;
+        this.coach = new CoachController(this);
         this.renderer3d = null;
         this.viewMode = GoApp._readStoredViewMode();
         this.exposeTestHooks();
@@ -84,7 +91,8 @@ export class GoApp extends BoardGameApp {
                 whiteScore: root.getElementById('go-white-score'),
                 restart: root.getElementById('go-result-restart-btn'),
                 launcher: root.getElementById('go-result-launcher-btn')
-            }
+            },
+            guidance: buildGameCoachMapping(root, 'go'),
         };
     }
 
@@ -271,6 +279,8 @@ export class GoApp extends BoardGameApp {
         this.state.currentPlayer = getOpponent(this.state.currentPlayer);
         this.renderBoard();
         this.renderStatus();
+        this.renderGameCoach();
+        this.refreshCoachGuidance();
         this.maybeScheduleAI();
     }
 
@@ -372,7 +382,13 @@ export class GoApp extends BoardGameApp {
 
     // === Rendering ===
 
-    renderBoard() {
+        render() {
+        this.renderBoard();
+        this.renderStatus();
+        this.renderGameCoach();
+    }
+
+renderBoard() {
         const board = this.dom.game?.board;
         board?.classList.add('hidden');
         this.render3DIfActive();
@@ -451,6 +467,65 @@ export class GoApp extends BoardGameApp {
         if (game.capturedBlack) game.capturedBlack.textContent = String(this.state.captures.black);
         if (game.capturedWhite) game.capturedWhite.textContent = String(this.state.captures.white);
     }
+    async requestGoPostGameReview() {
+        const panel = this.dom?.result?.postgamePanel;
+        const contentEl = this.dom?.result?.postgameContent;
+        if (!panel || !contentEl) return;
+        const settings = loadLlmCoachSettings();
+        if (!isLlmCoachConfigured(settings)) {
+            panel.classList.remove('hidden');
+            contentEl.innerHTML = '<p>' + i18n.t('coachPostGameUnavailable') + '</p>';
+            return;
+        }
+        panel.classList.remove('hidden');
+        contentEl.innerHTML = '<p>' + i18n.t('coachPostGameLoading') + '</p>';
+        try {
+            const snapshot = {
+                boardSize: this.options.size,
+                board: this.state.board,
+                moveHistory: this.state.moveHistory || [],
+                currentPlayer: this.state.currentPlayer,
+                captures: this.state.captures,
+                koPoint: this.state.koPoint
+            };
+            const raw = await requestPostGameAnalysis({ settings, snapshot, gameType: 'go' });
+            let a;
+            try { a = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch { a = { summary: raw }; }
+            this.renderPostGamePanel(panel, contentEl, a);
+        } catch (e) {
+            if (e && e.code === 'aborted') return;
+            contentEl.innerHTML = '<p>' + i18n.t('coachLlmRequestFailed') + '</p>';
+        }
+    }
+
+    isGuidedMode() { return this.options.mode === 'qi'; }
+
+    cancelLlmCoachRequest() {
+        if (this.llmCoachAbortController) {
+            this.llmCoachAbortController.abort();
+            this.llmCoachAbortController = null;
+        }
+    }
+
+    refreshCoachGuidance(a) { return this.coach ? this.coach.refreshCoachGuidance(a) : null; }
+
+    clearCoachState(o) { return this.coach ? this.coach.clearCoachState(o) : null; }
+
+    renderGameCoach() {
+        if (!this.coach) return;
+        const g = this.dom && this.dom.guidance;
+        if (!g || !g.card) return;
+        const s = this.state;
+        const guided = this.isGuidedMode();
+        g.card.classList.toggle('hidden', !guided);
+        if (!guided) return;
+        if (g.move) g.move.textContent = s.coachSuggestion ? (s.coachSuggestion.row + ',' + s.coachSuggestion.col) : '-';
+        if (g.source) g.source.textContent = s.coachSource === 'llm' ? 'LLM' : 'Local';
+        if (g.status) g.status.textContent = s.coachLlmStatus || '-';
+        if (g.insight) g.insight.textContent = s.coachInsight || 'Waiting...';
+        if (g.risk) g.risk.textContent = s.coachRisk || 'Waiting...';
+    }
+
 }
 
 export { formatGoMove, isLegalMove };

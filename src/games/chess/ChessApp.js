@@ -349,6 +349,9 @@ export class ChessApp extends BoardGameApp {
             this.state.result = { type: 'checkmate', winner };
             this.sound.play('win');
             this.showResult();
+            if (this.renderer3d && winner) {
+                this.renderer3d.playVictorySequence(winner === 'w' ? 'white' : 'black');
+            }
             return;
         }
         if (isStalemate(this.state.board, this.state)) {

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SceneManager, LightingSetup } from '../../render3d/index.js';
+import { SceneManager, LightingSetup, AnimationManager, ParticleSystem } from '../../render3d/index.js';
 
 const DEFAULT_THEME = {
     base: 0x2f2419,
@@ -146,6 +146,9 @@ export class BoardGameRenderer3D {
         this.pickPlane = null;
         this.clickHandler = null;
         this.cellClick = null;
+        this.animationManager = null;
+        this.particleSystem = null;
+        this.ambientTimer = 0;
         this.disposed = false;
 
         this.init();
@@ -186,7 +189,10 @@ export class BoardGameRenderer3D {
         this.sceneManager.add(this.boardGroup);
         this.sceneManager.add(this.markerGroup);
         this.sceneManager.add(this.pieceGroup);
+        this.animationManager = new AnimationManager(this.sceneManager, this.sceneManager.config);
+        this.particleSystem = new ParticleSystem(this.sceneManager.scene);
         this.buildBoard();
+        this.particleSystem.emitAmbientParticles();
         this.setupPicking();
     }
 
@@ -599,6 +605,11 @@ export class BoardGameRenderer3D {
         const { x, z } = this.coord(row, col);
         group.position.set(x, 0, z);
         this.pieceGroup.add(group);
+
+        const targetY = group.position.y + (style.height / 2) + 0.18 + style.lift;
+        this.animationManager?.playDropAnimation(group, targetY);
+        const dropPos = this.coord(row, col);
+        this.particleSystem?.emitDropParticles(dropPos.x, targetY, dropPos.z, side === 'dark' || side === 'black' ? 'black' : 'white');
     }
 
     clearGroup(group) {
@@ -617,6 +628,37 @@ export class BoardGameRenderer3D {
         this.sceneManager?.setNeedsRender?.();
     }
 
+    showVictory(winColor, winPositions) {
+        if (!this.particleSystem || !winPositions || winPositions.length === 0) return;
+        const positions = winPositions.map(({ row, col }) => {
+            const w = this.coord(row, col);
+            return { x: w.x, y: 0.18 + (this.pieceStyle?.height ?? 0.3) / 2, z: w.z };
+        });
+        this.particleSystem.emitShatterEffect(positions, winColor);
+    }
+
+    playVictorySequence(winnerColor) {
+        if (!winnerColor) return;
+        setTimeout(() => this.showVictoryCelebration(winnerColor), 300);
+        this.sceneManager?.setNeedsRender?.();
+    }
+
+        showVictoryCelebration(winColor) {
+        if (!this.particleSystem) return;
+        const positions = [];
+        const step = Math.max(1, Math.floor(Math.min(this.rows, this.cols) / 4));
+        for (let r = 0; r < this.rows; r += step) {
+            for (let c = 0; c < this.cols; c += step) {
+                const w = this.coord(r, c);
+                positions.push({ x: w.x, y: 0.18 + (this.pieceStyle?.height ?? 0.3) / 2, z: w.z });
+            }
+        }
+        if (positions.length === 0) {
+            positions.push({ x: 0, y: 0.2, z: 0 });
+        }
+        this.particleSystem.emitShatterEffect(positions, winColor);
+    }
+
     hide() {
         this.container.classList.add('hidden');
         this.container.setAttribute('aria-hidden', 'true');
@@ -632,6 +674,8 @@ export class BoardGameRenderer3D {
         this.clearGroup(this.markerGroup);
         this.clearGroup(this.boardGroup);
         if (this.pickPlane) disposeObject(this.pickPlane);
+        if (this.particleSystem) this.particleSystem.dispose();
+        this.animationManager?.dispose?.();
         this.lightingSetup?.dispose?.();
         this.sceneManager?.dispose?.();
     }

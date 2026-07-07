@@ -196,6 +196,7 @@
                         <button class="option-btn active" type="button" data-level="medium" data-i18n="medium" role="radio" aria-checked="true">进阶</button>
                         <button class="option-btn" type="button" data-level="hard" data-i18n="hard" role="radio" aria-checked="false">大师</button>
                     </div>
+                    <p class="option-desc" id="difficulty-desc" data-i18n-text="mediumDesc"></p>
                 </div>
 
                 <div id="color-options" class="option-row option-row-color hidden">
@@ -756,6 +757,11 @@
                 <div class="result-actions">
                     <button id="result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
                     <button id="result-setup-btn" class="ghost-btn" type="button" data-i18n="backToSetup">返回设置</button>
+                    <button id="result-postgame-btn" class="ghost-btn" type="button" data-i18n="coachPostGameRequest">请求复盘分析</button>
+                </div>
+                <div id="result-postgame-panel" class="postgame-panel hidden">
+                    <h4 data-i18n="coachPostGameTitle">复盘分析</h4>
+                    <div id="result-postgame-content" class="postgame-content"></div>
                 </div>
             </div>
         </div>
@@ -783,7 +789,8 @@
                             <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
                             <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
                             <button class="option-btn" type="button" data-mode="practice" role="radio" aria-checked="false" data-i18n="practice">练习</button>
-                        </div>
+                                                    <button class="option-btn" type="button" data-mode="qi" role="radio" aria-checked="false" data-i18n="qi">QI 教练</button>
+</div>
                     </div>
                     <div class="option-row" id="go-level-row">
                         <label class="option-label" data-i18n="aiLevel">AI 难度</label>
@@ -856,6 +863,32 @@
                     <button id="go-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
                     <button id="go-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
                 </footer>
+                <div class="game-coach-hint glass-panel hidden" data-game="go">
+                    <div class="coach-hint-head">
+                        <span class="coach-hint-title" data-i18n="coachTitle">QI 指导</span>
+                        <button class="ghost-btn coach-mini-btn" data-i18n-aria-label="llmSettingsButton" data-game-settings="go" type="button">
+                            <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19.4 13.5c.08-.48.08-1 0-1.48l2.1-1.64-2-3.46-2.48 1a7.4 7.4 0 0 0-1.28-.74L15.36 4h-4l-.38 3.18c-.46.18-.88.43-1.28.74l-2.48-1-2 3.46 2.1 1.64a7.8 7.8 0 0 0 0 1.48l-2.1 1.64 2 3.46 2.48-1c.4.3.82.55 1.28.74l.38 3.18h4l.38-3.18c.46-.19.88-.44 1.28-.74l2.48 1 2-3.46-2.1-1.64ZM13.36 15.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>
+                            <span class="btn-label" data-i18n="llmSettingsButton">LLM 设置</span>
+                        </button>
+                    </div>
+                    <div class="coach-hint-status">
+                        <span class="coach-chip" data-game-source="go">-</span>
+                        <span class="coach-chip coach-status" data-game-coach-status="go">-</span>
+                    </div>
+                    <div class="coach-hint-recommend">
+                        <span class="meta-label" data-i18n="coachRecommended">推荐</span>
+                        <span class="panel-value" data-game-coach-move="go">-</span>
+                    </div>
+                    <div class="coach-hint-reason">
+                        <span class="meta-label" data-i18n="coachReason">原因</span>
+                        <p class="panel-note" data-game-coach-insight="go" data-i18n="coachWaiting">等待你的回合...</p>
+                    </div>
+                    <div class="coach-hint-risk">
+                        <span class="meta-label" data-i18n="coachRisk">风险</span>
+                        <p class="panel-note" data-game-coach-risk="go" data-i18n="coachWaiting">等待你的回合...</p>
+                    </div>
+                </div>
+
             </section>
 
             <div id="go-result-overlay" class="result-overlay hidden" aria-hidden="true">
@@ -876,6 +909,11 @@
                     <div class="result-actions">
                         <button id="go-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
                         <button id="go-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                        <button id="go-result-postgame-btn" class="ghost-btn" type="button" data-i18n="coachPostGameRequest">请求复盘分析</button>
+                    </div>
+                    <div id="go-result-postgame-panel" class="postgame-panel hidden">
+                        <h4 data-i18n="coachPostGameTitle">复盘分析</h4>
+                        <div id="go-result-postgame-content" class="postgame-content"></div>
                     </div>
                 </div>
             </div>
@@ -895,7 +933,8 @@
                         <div class="option-buttons" id="chess-mode-options" role="radiogroup">
                             <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
                             <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
-                        </div>
+                                                    <button class="option-btn" type="button" data-mode="qi" role="radio" aria-checked="false" data-i18n="qi">QI 教练</button>
+</div>
                     </div>
                     <div class="option-row" id="chess-level-row">
                         <label class="option-label" data-i18n="aiLevel">AI 难度</label>
@@ -957,6 +996,32 @@
                     <button id="chess-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
                     <button id="chess-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
                 </footer>
+                <div class="game-coach-hint glass-panel hidden" data-game="chess">
+                    <div class="coach-hint-head">
+                        <span class="coach-hint-title" data-i18n="coachTitle">QI 指导</span>
+                        <button class="ghost-btn coach-mini-btn" data-i18n-aria-label="llmSettingsButton" data-game-settings="chess" type="button">
+                            <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19.4 13.5c.08-.48.08-1 0-1.48l2.1-1.64-2-3.46-2.48 1a7.4 7.4 0 0 0-1.28-.74L15.36 4h-4l-.38 3.18c-.46.18-.88.43-1.28.74l-2.48-1-2 3.46 2.1 1.64a7.8 7.8 0 0 0 0 1.48l-2.1 1.64 2 3.46 2.48-1c.4.3.82.55 1.28.74l.38 3.18h4l.38-3.18c.46-.19.88-.44 1.28-.74l2.48 1 2-3.46-2.1-1.64ZM13.36 15.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>
+                            <span class="btn-label" data-i18n="llmSettingsButton">LLM 设置</span>
+                        </button>
+                    </div>
+                    <div class="coach-hint-status">
+                        <span class="coach-chip" data-game-source="chess">-</span>
+                        <span class="coach-chip coach-status" data-game-coach-status="chess">-</span>
+                    </div>
+                    <div class="coach-hint-recommend">
+                        <span class="meta-label" data-i18n="coachRecommended">推荐</span>
+                        <span class="panel-value" data-game-coach-move="chess">-</span>
+                    </div>
+                    <div class="coach-hint-reason">
+                        <span class="meta-label" data-i18n="coachReason">原因</span>
+                        <p class="panel-note" data-game-coach-insight="chess" data-i18n="coachWaiting">等待你的回合...</p>
+                    </div>
+                    <div class="coach-hint-risk">
+                        <span class="meta-label" data-i18n="coachRisk">风险</span>
+                        <p class="panel-note" data-game-coach-risk="chess" data-i18n="coachWaiting">等待你的回合...</p>
+                    </div>
+                </div>
+
             </section>
 
             <div id="chess-promotion-overlay" class="confirm-overlay hidden" aria-hidden="true">
@@ -979,6 +1044,11 @@
                     <div class="result-actions">
                         <button id="chess-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
                         <button id="chess-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                        <button id="chess-result-postgame-btn" class="ghost-btn" type="button" data-i18n="coachPostGameRequest">请求复盘分析</button>
+                    </div>
+                    <div id="chess-result-postgame-panel" class="postgame-panel hidden">
+                        <h4 data-i18n="coachPostGameTitle">复盘分析</h4>
+                        <div id="chess-result-postgame-content" class="postgame-content"></div>
                     </div>
                 </div>
             </div>
@@ -998,7 +1068,8 @@
                         <div class="option-buttons" id="xiangqi-mode-options" role="radiogroup">
                             <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
                             <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
-                        </div>
+                                                    <button class="option-btn" type="button" data-mode="qi" role="radio" aria-checked="false" data-i18n="qi">QI 教练</button>
+</div>
                     </div>
                     <div class="option-row" id="xiangqi-level-row">
                         <label class="option-label" data-i18n="aiLevel">AI 难度</label>
@@ -1054,6 +1125,32 @@
                     <button id="xiangqi-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
                     <button id="xiangqi-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
                 </footer>
+                <div class="game-coach-hint glass-panel hidden" data-game="xiangqi">
+                    <div class="coach-hint-head">
+                        <span class="coach-hint-title" data-i18n="coachTitle">QI 指导</span>
+                        <button class="ghost-btn coach-mini-btn" data-i18n-aria-label="llmSettingsButton" data-game-settings="xiangqi" type="button">
+                            <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19.4 13.5c.08-.48.08-1 0-1.48l2.1-1.64-2-3.46-2.48 1a7.4 7.4 0 0 0-1.28-.74L15.36 4h-4l-.38 3.18c-.46.18-.88.43-1.28.74l-2.48-1-2 3.46 2.1 1.64a7.8 7.8 0 0 0 0 1.48l-2.1 1.64 2 3.46 2.48-1c.4.3.82.55 1.28.74l.38 3.18h4l.38-3.18c.46-.19.88-.44 1.28-.74l2.48 1 2-3.46-2.1-1.64ZM13.36 15.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>
+                            <span class="btn-label" data-i18n="llmSettingsButton">LLM 设置</span>
+                        </button>
+                    </div>
+                    <div class="coach-hint-status">
+                        <span class="coach-chip" data-game-source="xiangqi">-</span>
+                        <span class="coach-chip coach-status" data-game-coach-status="xiangqi">-</span>
+                    </div>
+                    <div class="coach-hint-recommend">
+                        <span class="meta-label" data-i18n="coachRecommended">推荐</span>
+                        <span class="panel-value" data-game-coach-move="xiangqi">-</span>
+                    </div>
+                    <div class="coach-hint-reason">
+                        <span class="meta-label" data-i18n="coachReason">原因</span>
+                        <p class="panel-note" data-game-coach-insight="xiangqi" data-i18n="coachWaiting">等待你的回合...</p>
+                    </div>
+                    <div class="coach-hint-risk">
+                        <span class="meta-label" data-i18n="coachRisk">风险</span>
+                        <p class="panel-note" data-game-coach-risk="xiangqi" data-i18n="coachWaiting">等待你的回合...</p>
+                    </div>
+                </div>
+
             </section>
 
             <div id="xiangqi-result-overlay" class="result-overlay hidden" aria-hidden="true">
@@ -1064,6 +1161,11 @@
                     <div class="result-actions">
                         <button id="xiangqi-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
                         <button id="xiangqi-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                        <button id="xiangqi-result-postgame-btn" class="ghost-btn" type="button" data-i18n="coachPostGameRequest">请求复盘分析</button>
+                    </div>
+                    <div id="xiangqi-result-postgame-panel" class="postgame-panel hidden">
+                        <h4 data-i18n="coachPostGameTitle">复盘分析</h4>
+                        <div id="xiangqi-result-postgame-content" class="postgame-content"></div>
                     </div>
                 </div>
             </div>
@@ -1098,7 +1200,8 @@
                         <div class="option-buttons" id="junqi-mode-options" role="radiogroup">
                             <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
                             <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
-                        </div>
+                                                    <button class="option-btn" type="button" data-mode="qi" role="radio" aria-checked="false" data-i18n="qi">QI 教练</button>
+</div>
                     </div>
                     <div class="option-row" id="junqi-level-row">
                         <label class="option-label" data-i18n="aiLevel">AI 难度</label>
@@ -1145,6 +1248,32 @@
                     <button id="junqi-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
                     <button id="junqi-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
                 </footer>
+                <div class="game-coach-hint glass-panel hidden" data-game="junqi">
+                    <div class="coach-hint-head">
+                        <span class="coach-hint-title" data-i18n="coachTitle">QI 指导</span>
+                        <button class="ghost-btn coach-mini-btn" data-i18n-aria-label="llmSettingsButton" data-game-settings="junqi" type="button">
+                            <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19.4 13.5c.08-.48.08-1 0-1.48l2.1-1.64-2-3.46-2.48 1a7.4 7.4 0 0 0-1.28-.74L15.36 4h-4l-.38 3.18c-.46.18-.88.43-1.28.74l-2.48-1-2 3.46 2.1 1.64a7.8 7.8 0 0 0 0 1.48l-2.1 1.64 2 3.46 2.48-1c.4.3.82.55 1.28.74l.38 3.18h4l.38-3.18c.46-.19.88-.44 1.28-.74l2.48 1 2-3.46-2.1-1.64ZM13.36 15.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>
+                            <span class="btn-label" data-i18n="llmSettingsButton">LLM 设置</span>
+                        </button>
+                    </div>
+                    <div class="coach-hint-status">
+                        <span class="coach-chip" data-game-source="junqi">-</span>
+                        <span class="coach-chip coach-status" data-game-coach-status="junqi">-</span>
+                    </div>
+                    <div class="coach-hint-recommend">
+                        <span class="meta-label" data-i18n="coachRecommended">推荐</span>
+                        <span class="panel-value" data-game-coach-move="junqi">-</span>
+                    </div>
+                    <div class="coach-hint-reason">
+                        <span class="meta-label" data-i18n="coachReason">原因</span>
+                        <p class="panel-note" data-game-coach-insight="junqi" data-i18n="coachWaiting">等待你的回合...</p>
+                    </div>
+                    <div class="coach-hint-risk">
+                        <span class="meta-label" data-i18n="coachRisk">风险</span>
+                        <p class="panel-note" data-game-coach-risk="junqi" data-i18n="coachWaiting">等待你的回合...</p>
+                    </div>
+                </div>
+
             </section>
 
             <div id="junqi-result-overlay" class="result-overlay hidden" aria-hidden="true">
@@ -1155,6 +1284,11 @@
                     <div class="result-actions">
                         <button id="junqi-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
                         <button id="junqi-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
+                        <button id="junqi-result-postgame-btn" class="ghost-btn" type="button" data-i18n="coachPostGameRequest">请求复盘分析</button>
+                    </div>
+                    <div id="junqi-result-postgame-panel" class="postgame-panel hidden">
+                        <h4 data-i18n="coachPostGameTitle">复盘分析</h4>
+                        <div id="junqi-result-postgame-content" class="postgame-content"></div>
                     </div>
                 </div>
             </div>

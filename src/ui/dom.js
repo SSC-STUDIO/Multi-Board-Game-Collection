@@ -156,7 +156,10 @@ export function getDOMReferences(root = document) {
             moves: root.getElementById('result-moves'),
             lastMove: root.getElementById('result-last-move'),
             restart: root.getElementById('result-restart-btn'),
-            setup: root.getElementById('result-setup-btn')
+            setup: root.getElementById('result-setup-btn'),
+            postgameBtn: root.getElementById('result-postgame-btn'),
+            postgamePanel: root.getElementById('result-postgame-panel'),
+            postgameContent: root.getElementById('result-postgame-content')
         },
         lang: {
             zh: root.getElementById('lang-zh'),
@@ -223,4 +226,46 @@ export function setupLanguageSwitch(dom, onChange = null) {
 
     i18n.onChange(sync);
     sync();
+}
+
+/**
+ * Build a guidance DOM mapping for non-Gomoku games using game-specific prefixed IDs.
+ * @param {Document|HTMLElement} root
+ * @param {string} prefix - e.g. 'go', 'chess', 'xiangqi', 'junqi'
+ * @returns {Object} guidance DOM mapping compatible with updateGuidance()
+ */
+function safeQuery(el, sel) {
+    return el && typeof el.querySelector === 'function' ? el.querySelector(sel) : null;
+}
+export function buildGameCoachMapping(root, prefix) {
+    return {
+        card: safeQuery(root, `.game-coach-hint[data-game="${prefix}"]`),
+        source: safeQuery(root, `[data-game-source="${prefix}"]`),
+        status: safeQuery(root, `[data-game-coach-status="${prefix}"]`),
+        move: safeQuery(root, `[data-game-coach-move="${prefix}"]`),
+        insight: safeQuery(root, `[data-game-coach-insight="${prefix}"]`),
+        risk: safeQuery(root, `[data-game-coach-risk="${prefix}"]`),
+        alternativesWrap: null,
+        alternatives: null,
+        planWrap: null,
+        plan: null,
+        confidenceWrap: null,
+        confidence: null,
+        feedbackWrap: null,
+        feedback: null,
+        rerun: null,
+        settings: safeQuery(root, `[data-game-settings="${prefix}"]`),
+        upload: null,
+        imageInput: null,
+        importWrap: null,
+        importBtn: null,
+        editBtn: null,
+        analyzeImage: null,
+        analyzeCount: null,
+        analyzeConfidence: null,
+        previewHint: null,
+        previewCommit: null,
+        previewCancel: null,
+        previewActions: null
+    };
 }

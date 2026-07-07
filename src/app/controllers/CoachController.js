@@ -8,8 +8,8 @@ import { checkWin, getWinningLine } from '../../games/gomoku/rules.js';
 import {
     getLlmCoachConfigStatus,
     isLlmCoachConfigured,
-    requestLlmCoachAdvice
-} from '../../services/llmCoach.js';
+    requestLlmCoachAdvice,
+requestPostGameAnalysis} from '../../services/llmCoach.js';
 import { analyzeBoardImage } from '../../services/boardImageAnalyzer.js';
 import { showConfirm } from '../../ui/confirmDialog.js';
 
@@ -26,6 +26,17 @@ export class CoachController {
      */
     constructor(app) {
         this.app = app;
+    }
+
+    /**
+     * Detect the active game type from the DOM or app options.
+     * @returns {string} Game type key (gomoku, go, chess, xiangqi, junqi)
+     */
+    getGameType() {
+        const domGame = document.body?.dataset?.activeGame;
+        if (domGame) return domGame;
+        if (this.app?.options?.gameType) return this.app.options.gameType;
+        return 'gomoku';
     }
 
     /**
@@ -68,30 +79,42 @@ export class CoachController {
             return;
         }
 
+        // Try local AI guidance (Gomoku only); for other games, skip straight to LLM path.
         const suggestion = getMoveGuidance(this.app.state, this.app.state.currentPlayer);
-        if (!suggestion) {
-            this.clearCoachState({ preserveFeedback: true });
+        if (suggestion) {
+            this.app.state.coachSuggestion = { row: suggestion.row, col: suggestion.col };
+            this.app.state.coachAlternatives = this.normalizeLocalAlternatives(suggestion.alternatives || []);
+            this.app.state.coachSource = 'local';
+            const configStatus = getLlmCoachConfigStatus(this.app.llmSettings);
+            this.app.state.coachLlmStatus = configStatus === 'ready' ? 'local' : configStatus;
+            this.app.state.coachInsight = suggestion.insight;
+            this.app.state.coachRisk = suggestion.risk;
+            this.app.state.coachPlan = 'coachPlanLocal';
+            this.app.state.coachConfidence = null;
+            this.app.state.coachFocus = null;
             this.app.render();
+
+            if (announce) {
+                this.app.showMessageKey('coachSuggestedMessage', { move: formatMove(suggestion.row, suggestion.col) });
+            }
+
+            this.requestLlmCoachGuidance(suggestion);
             return;
         }
 
-        this.app.state.coachSuggestion = { row: suggestion.row, col: suggestion.col };
-        this.app.state.coachAlternatives = this.normalizeLocalAlternatives(suggestion.alternatives || []);
-        this.app.state.coachSource = 'local';
+        // Non-Gomoku games: no local AI, proceed directly to LLM coaching.
         const configStatus = getLlmCoachConfigStatus(this.app.llmSettings);
         this.app.state.coachLlmStatus = configStatus === 'ready' ? 'local' : configStatus;
-        this.app.state.coachInsight = suggestion.insight;
-        this.app.state.coachRisk = suggestion.risk;
+        this.app.state.coachSuggestion = null;
+        this.app.state.coachAlternatives = [];
+        this.app.state.coachSource = 'local';
+        this.app.state.coachInsight = '';
+        this.app.state.coachRisk = '';
         this.app.state.coachPlan = 'coachPlanLocal';
         this.app.state.coachConfidence = null;
         this.app.state.coachFocus = null;
         this.app.render();
-
-        if (announce) {
-            this.app.showMessageKey('coachSuggestedMessage', { move: formatMove(suggestion.row, suggestion.col) });
-        }
-
-        this.requestLlmCoachGuidance(suggestion);
+        this.requestLlmCoachGuidance(null);
     }
 
     /**
@@ -148,7 +171,8 @@ export class CoachController {
             const rawAdvice = await requestLlmCoachAdvice({
                 settings: this.app.llmSettings,
                 snapshot: this.createLlmCoachSnapshot(localSuggestion),
-                signal: this.app.llmCoachAbortController.signal
+                signal: this.app.llmCoachAbortController.signal,
+                gameType: this.getGameType()
             });
 
             if (!this.isCurrentLlmCoachRequest(requestId, positionKey)) {
@@ -758,5 +782,53 @@ export class CoachController {
             return ordered;
         }
         return [...stones];
+    }
+
+    /**
+     * Request post-game analysis from the LLM Coach.
+     */
+    async requestPostGameReview() {
+        if (!isLlmCoachConfigured(this.app.llmSettings)) {
+            this.app.state.coachPostGame = 'unavailable';
+            this.app.render();
+            return;
+        }
+        this.app.state.coachPostGame = 'loading';
+        this.app.render();
+        try {
+            const snapshot = {
+                boardSize: this.app.options.size,
+                board: this.app.state.board,
+                moveHistory: this.app.state.moveHistory,
+                currentPlayer: this.app.state.currentPlayer,
+                lastMove: this.app.state.lastMove,
+                resultType: this.app.state.resultType,
+                resultWinnerColor: this.app.state.resultWinnerColor,
+                gameOver: this.app.state.gameOver,
+                coordinateSystem: '0-based row and col'
+            };
+            const rawContent = await requestPostGameAnalysis({
+                settings: this.app.llmSettings,
+                snapshot,
+                signal: this.app.llmCoachAbortController ? this.app.llmCoachAbortController.signal : undefined,
+                gameType: this.getGameType()
+            });
+            let analysis;
+            try {
+                analysis = typeof rawContent === 'string' ? JSON.parse(rawContent) : rawContent;
+            } catch {
+                analysis = { summary: rawContent };
+            }
+            this.app.state.coachPostGame = 'ready';
+            this.app.state.coachPostGameData = analysis;
+            this.app.render();
+        } catch (error) {
+            if (error && error.code === 'aborted') return;
+            this.app.state.coachPostGame = 'error';
+            this.app.state.coachPostGameData = null;
+            this.app.render();
+            const reason = (error && error.message) || 'unknown';
+            this.app.showMessageKey('coachLlmRequestFailed', { reason: reason });
+        }
     }
 }

@@ -55,6 +55,20 @@ export function createChessState(options = {}) {
         moveHistory: [],
         result: null,
         gameOver: false,
-        aiThinking: false
-    };
+        aiThinking: false,
+        coachSuggestion: null,
+        coachAlternatives: [],
+        coachSource: 'local',
+        coachLlmStatus: 'unavailable',
+        coachInsight: '',
+        coachRisk: '',
+        coachPlan: '',
+        coachConfidence: null,
+        coachFocus: null,
+        coachPreviewMode: false,
+        coachPreviewBoard: null,
+        coachAnalyzedBoard: null,
+        coachFeedback: '',
+        coachPostGame: null,
+        coachPostGameData: null,    };
 }

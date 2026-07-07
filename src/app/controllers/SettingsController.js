@@ -437,6 +437,18 @@ export class SettingsController {
             this.app.sound.play('uiTap');
             setActiveButton(group, button);
             onSelect(button.dataset[dataAttribute]);
+            if (dataAttribute === 'level') {
+                this.updateDifficultyDesc(button.dataset[dataAttribute]);
+            }
         });
+    }
+
+    updateDifficultyDesc(level) {
+        const desc = document.getElementById('difficulty-desc');
+        if (!desc) return;
+        const key = level + 'Desc';
+        if (typeof i18n !== 'undefined') {
+            desc.textContent = i18n.t(key);
+        }
     }
 }

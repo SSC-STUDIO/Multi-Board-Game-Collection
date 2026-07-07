@@ -80,6 +80,57 @@ export class BoardGameApp {
         this.enterSetup();
     }
 
+
+    renderPostGamePanel(panel, contentEl, data) {
+        if (!panel || !contentEl || !data) return;
+        panel.classList.remove('hidden');
+        const sections = [];
+        if (data.summary) sections.push(`<p><strong>${i18n.t('coachPostGameSummary') || 'Summary'}:</strong> ${data.summary}</p>`);
+        if (data.turningPoints) sections.push(`<p><strong>${i18n.t('coachPostGameTurningPoints') || 'Turning Points'}:</strong> ${data.turningPoints}</p>`);
+        if (data.mistakes) sections.push(`<p><strong>${i18n.t('coachPostGameMistakes') || 'Mistakes'}:</strong> ${data.mistakes}</p>`);
+        if (data.strengths) sections.push(`<p><strong>${i18n.t('coachPostGameStrengths') || 'Strengths'}:</strong> ${data.strengths}</p>`);
+        if (data.improvements) sections.push(`<p><strong>${i18n.t('coachPostGameImprovements') || 'Improvements'}:</strong> ${data.improvements}</p>`);
+        if (data.rating) sections.push(`<p class="rating"><strong>${i18n.t('coachPostGameRating') || 'Rating'}:</strong> ${data.rating}</p>`);
+        contentEl.innerHTML = sections.join('');
+    }
+
+    // === Coaching (non-Gomoku games) ===
+
+    isGuidedMode() {
+        return this.options.mode === 'qi';
+    }
+
+    cancelLlmCoachRequest() {
+        if (this.llmCoachAbortController) {
+            this.llmCoachAbortController.abort();
+            this.llmCoachAbortController = null;
+        }
+    }
+
+    refreshCoachGuidance(_announce) {
+        // Override in subclass or delegate to CoachController
+    }
+
+    clearCoachState(_opts) {
+        // Override in subclass or delegate to CoachController
+    }
+
+    renderPostGameOverlay() {
+        if (!this.dom || !this.dom.result || !this.dom.result.postgamePanel) return;
+        var panel = this.dom.result.postgamePanel;
+        var contentEl = this.dom.result.postgameContent;
+        if (!panel || !contentEl) return;
+        var status = this.state ? this.state.coachPostGame : null;
+        if (status === 'ready' && this.state && this.state.coachPostGameData) {
+            this.renderPostGamePanel(panel, contentEl, this.state.coachPostGameData);
+        } else if (status === 'loading') {
+            panel.classList.remove('hidden');
+            contentEl.innerHTML = '<p>Loading post-game analysis...</p>';
+        } else {
+            panel.classList.add('hidden');
+        }
+    }
+
     dispose() {
         this.clearAITimer();
         this.sound?.dispose?.();

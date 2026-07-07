@@ -782,3 +782,74 @@ describe('CoachController.requestLlmCoachGuidance error handling', () => {
         expect(app.state.coachLlmStatus).toBe('disabled');
     });
 });
+describe('CoachController.refreshCoachGuidance non-Gomoku LLM-only path', () => {
+    it('clears local suggestion when getMoveGuidance returns null', async () => {
+        const app = createApp();
+        vi.mocked(getMoveGuidance).mockReturnValue(null);
+        vi.mocked(requestLlmCoachAdvice).mockResolvedValue({ recommended: null });
+        const controller = new CoachController(app);
+        controller.refreshCoachGuidance();
+        expect(app.state.coachSuggestion).toBeNull();
+        expect(app.state.coachAlternatives).toEqual([]);
+        expect(app.state.coachSource).toBe('local');
+        expect(app.state.coachInsight).toBe('');
+        expect(app.state.coachRisk).toBe('');
+        expect(app.state.coachPlan).toBe('coachPlanLocal');
+        expect(app.state.coachConfidence).toBeNull();
+        expect(app.state.coachFocus).toBeNull();
+        expect(app.render).toHaveBeenCalled();
+    });
+    it('passes null suggestion for Go game type', async () => {
+        const app = createApp({ options: { size: 9, rule: 'chinese', mode: 'qi', playerColor: 'black', gameType: 'go' } });
+        document.body = { dataset: { activeGame: 'go' } };
+        vi.mocked(getMoveGuidance).mockReturnValue(null);
+        vi.mocked(requestLlmCoachAdvice).mockResolvedValue({ recommended: null });
+        const controller = new CoachController(app);
+        controller.refreshCoachGuidance();
+        expect(app.render).toHaveBeenCalled();
+        expect(app.state.coachSuggestion).toBeNull();
+        document.body = { dataset: {} };
+    });
+    it('works for Chess game type via DOM dataset', async () => {
+        const app = createApp({ options: { size: 8, rule: 'standard', mode: 'qi', playerColor: 'black', gameType: 'chess' } });
+        document.body = { dataset: { activeGame: 'chess' } };
+        vi.mocked(getMoveGuidance).mockReturnValue(null);
+        vi.mocked(requestLlmCoachAdvice).mockResolvedValue({ recommended: null });
+        const controller = new CoachController(app);
+        controller.refreshCoachGuidance();
+        expect(app.state.coachSuggestion).toBeNull();
+        expect(controller.getGameType()).toBe('chess');
+        document.body = { dataset: {} };
+    });
+    it('works for Xiangqi game type via DOM dataset', async () => {
+        const app = createApp({ options: { size: 9, rule: 'standard', mode: 'qi', playerColor: 'black', gameType: 'xiangqi' } });
+        document.body = { dataset: { activeGame: 'xiangqi' } };
+        vi.mocked(getMoveGuidance).mockReturnValue(null);
+        vi.mocked(requestLlmCoachAdvice).mockResolvedValue({ recommended: null });
+        const controller = new CoachController(app);
+        controller.refreshCoachGuidance();
+        expect(app.state.coachSuggestion).toBeNull();
+        expect(controller.getGameType()).toBe('xiangqi');
+        document.body = { dataset: {} };
+    });
+    it('works for Junqi game type via DOM dataset', async () => {
+        const app = createApp({ options: { size: 13, rule: 'standard', mode: 'qi', playerColor: 'black', gameType: 'junqi' } });
+        document.body = { dataset: { activeGame: 'junqi' } };
+        vi.mocked(getMoveGuidance).mockReturnValue(null);
+        vi.mocked(requestLlmCoachAdvice).mockResolvedValue({ recommended: null });
+        const controller = new CoachController(app);
+        controller.refreshCoachGuidance();
+        expect(app.state.coachSuggestion).toBeNull();
+        expect(controller.getGameType()).toBe('junqi');
+        document.body = { dataset: {} };
+    });
+    it('sets disabled status when LLM is not configured for non-Gomoku', () => {
+        const app = createApp({ llmSettings: { enabled: false } });
+        vi.mocked(getMoveGuidance).mockReturnValue(null);
+        vi.mocked(isLlmCoachConfigured).mockReturnValue(false);
+        const controller = new CoachController(app);
+        controller.refreshCoachGuidance();
+        expect(app.state.coachLlmStatus).toBe('disabled');
+        expect(app.render).toHaveBeenCalled();
+    });
+});
