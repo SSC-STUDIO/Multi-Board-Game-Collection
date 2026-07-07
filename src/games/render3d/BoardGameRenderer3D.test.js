@@ -2,8 +2,13 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('three', () => {
     const noop = () => {};
-    const D = function() {};
-    D.prototype = {};
+    const D = function() {
+        this.position = { x: 0, y: 0, z: 0, set: function(x,y,z) { this.x=x; this.y=y; this.z=z; } };
+        this.rotation = { x: 0, y: 0, z: 0 };
+        this.children = [];
+    };
+    D.prototype.add = function() { for (var i = 0; i < arguments.length; i++) this.children.push(arguments[i]); };
+    D.prototype.traverse = function(fn) { fn(this); this.children.forEach(function(c) { if (c && c.traverse) c.traverse(fn); }); };
     const t = {
         BufferGeometry: D, BufferAttribute: D, PointsMaterial: D, Points: D,
         Float32Array: globalThis.Float32Array,
@@ -203,6 +208,72 @@ describe('BoardGameRenderer3D', () => {
             r.sceneManager = null;
             expect(() => r.playCameraShake()).not.toThrow();
         });
+    });
+
+
+
+    describe('addPiece with SoundManager integration', () => {
+        function createAddPieceRenderer() {
+            const r = createPartialRenderer();
+            r.pieceGroup = { add: vi.fn() };
+            r.animationManager = { playDropAnimation: vi.fn() };
+            r.sceneManager = {
+                camera: { position: { clone: () => ({ x: 0, y: 5, z: 5, copy: vi.fn() }), set: vi.fn() } },
+                setNeedsRender: vi.fn()
+            };
+            r.pieceSide = (piece, row, col) => {
+                return (piece === 'X' || piece === 'black') ? 'dark' : 'light';
+            };
+            r.labelPiece = (piece) => piece || '';
+            r.pieceStyle = { radiusTop: 0.34, radiusBottom: 0.38, height: 0.24, labelSize: 0.58, lift: 0, bevel: true, metalness: 0.08, roughness: 0.42 };
+            r.theme = { pieceLight: 0xf3e4bf, pieceDark: 0x2d3441, pieceRed: 0xb43a31, pieceBlack: 0x22252c, hidden: 0x6c5731 };
+            globalThis.requestAnimationFrame = vi.fn();
+            return r;
+        }
+
+        it('should call soundManager.playMove with black when piece side is dark', () => {
+            const r = createAddPieceRenderer();
+            r.soundManager = { playMove: vi.fn() };
+            r.addPiece('X', 0, 0);
+            expect(r.soundManager.playMove).toHaveBeenCalledOnce();
+            expect(r.soundManager.playMove).toHaveBeenCalledWith('black', 'human');
+        });
+
+        it('should call soundManager.playMove with white when piece side is light', () => {
+            const r = createAddPieceRenderer();
+            r.soundManager = { playMove: vi.fn() };
+            r.addPiece('O', 1, 1);
+            expect(r.soundManager.playMove).toHaveBeenCalledOnce();
+            expect(r.soundManager.playMove).toHaveBeenCalledWith('white', 'human');
+        });
+
+        it('should pass options.source to soundManager.playMove', () => {
+            const r = createAddPieceRenderer();
+            r.soundManager = { playMove: vi.fn() };
+            r.addPiece('X', 2, 3, { source: 'ai' });
+            expect(r.soundManager.playMove).toHaveBeenCalledWith('black', 'ai');
+        });
+
+        it('should not throw when soundManager is not set', () => {
+            const r = createAddPieceRenderer();
+            r.soundManager = null;
+            expect(() => r.addPiece('X', 0, 0)).not.toThrow();
+        });
+
+        it('should not throw when soundManager is undefined', () => {
+            const r = createAddPieceRenderer();
+            delete r.soundManager;
+            expect(() => r.addPiece('O', 0, 0)).not.toThrow();
+        });
+
+        it('should default source to human when options.source is not provided', () => {
+            const r = createAddPieceRenderer();
+            r.soundManager = { playMove: vi.fn() };
+            r.addPiece('black', 0, 0, {});
+            expect(r.soundManager.playMove).toHaveBeenCalledWith('black', 'human');
+        });
+
+        delete globalThis.requestAnimationFrame;
     });
 
 });
