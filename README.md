@@ -359,7 +359,7 @@ All 5 games feature intelligent AI opponents with three difficulty levels:
 | Game | Easy | Medium | Hard |
 |------|------|--------|------|
 | **Gomoku** | Random top-6 | Minimax depth 2 | Adaptive depth 2-4 + 3-move opening book |
-| **Go** | Random top-6 | Random top-3 | 2-ply minimax + Monte Carlo territory evaluation |
+| **Go** | Random top-6 | Random top-3 | 2-ply minimax + territory eval + transposition table |
 | **Chess** | Depth 1 | Depth 3 | Depth 5 + MVV-LVA + killer move heuristic |
 | **Xiangqi** | Depth 1 | Depth 3 | Depth 5 + positional bonuses + killer moves |
 | **Junqi** | Random top-6 | Random top-3 | Best-move + defensive flag protection |
