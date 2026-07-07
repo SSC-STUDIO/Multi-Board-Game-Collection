@@ -7,30 +7,62 @@
       {
         "path": "save/",
         "pattern": "*.json",
-        "description": "游戏存档和设置"
+        "description": "Game saves and settings"
       }
     ]
   },
   "saveData": {
     "structure": {
       "settings": {
-        "language": "zh-CN",
+        "language": "en-US",
+        "activeGame": "gomoku",
         "boardSize": 15,
         "defaultRule": "classic",
         "defaultMode": "pvp",
         "aiDifficulty": "medium",
         "soundEnabled": true,
         "musicEnabled": true,
-        "theme": "default"
+        "theme": "default",
+        "llmCoach": {
+          "enabled": false,
+          "provider": "openai",
+          "model": "gpt-4",
+          "baseUrl": "",
+          "apiKey": ""
+        }
       },
       "stats": {
-        "gamesPlayed": 0,
-        "gamesWon": 0,
-        "winningStreak": 0,
-        "currentStreak": 0,
-        "movesMade": 0,
-        "fastestWin": null,
-        "achievements": []
+        "gomoku": {
+          "gamesPlayed": 0,
+          "gamesWon": 0,
+          "winningStreak": 0
+        },
+        "go": {
+          "gamesPlayed": 0,
+          "gamesWon": 0,
+          "winningStreak": 0
+        },
+        "chess": {
+          "gamesPlayed": 0,
+          "gamesWon": 0,
+          "winningStreak": 0
+        },
+        "xiangqi": {
+          "gamesPlayed": 0,
+          "gamesWon": 0,
+          "winningStreak": 0
+        },
+        "junqi": {
+          "gamesPlayed": 0,
+          "gamesWon": 0,
+          "winningStreak": 0
+        },
+        "total": {
+          "gamesPlayed": 0,
+          "gamesWon": 0,
+          "movesMade": 0,
+          "achievements": []
+        }
       },
       "history": {
         "recentGames": [],

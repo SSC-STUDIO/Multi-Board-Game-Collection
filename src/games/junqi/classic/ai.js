@@ -16,7 +16,7 @@ export function getClassicAIDelay(level) {
     return AI_DELAY_BY_LEVEL[level] ?? AI_DELAY_BY_LEVEL.medium;
 }
 
-function evaluateMove(board, move) {
+function evaluateMove(board, move, level) {
     const target = board[move.to[0]][move.to[1]];
     const piece = board[move.from[0]][move.from[1]];
     let score = 0;
@@ -34,7 +34,7 @@ export function getClassicAIMove(state) {
     const moves = getLegalMoves(state.board, state.turn);
     if (!moves.length) return null;
     const scored = moves
-        .map((move) => ({ move, score: evaluateMove(state.board, move) }))
+        .map((move) => ({ move, score: evaluateMove(state.board, move, state.options?.level) }))
         .sort((a, b) => b.score - a.score);
     const topN = state.options?.level === 'easy' ? 6 : state.options?.level === 'hard' ? 1 : 3;
     const pool = scored.slice(0, Math.max(1, Math.min(topN, scored.length)));
