@@ -120,12 +120,12 @@ Toggle QI Coach in any game's setup screen — the coach analyzes positions in r
 - LLM Coach buildPostGameRequest now accepts gameType and injects game-specific strategic prompts for all 5 games
 - System prompt dynamically selects the right game role and strategy focus
 - User message includes game type label for LLM context
-- Tests updated: 999 passing across 41 test files
+- Tests updated: 1005 passing across 41 test files
 
 ## Go AI 2-Ply Minimax + Gomoku Opening Book (2026-07-07)
 
-- Go AI hard mode now uses 2-ply minimax search for stronger territorial play
-- Gomoku AI hard mode includes center-first opening book and second-move response
+- Go AI hard mode now uses 2-ply minimax with Monte Carlo territory evaluation (alive group scoring + random playout sampling)
+- Gomoku AI hard mode includes center-first opening book, second-move response, and third-move diagonal/orthogonal counter
 - Both improvements make hard difficulty significantly more challenging
 
 ## 1002 Tests Milestone (2026-07-08)

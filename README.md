@@ -246,7 +246,7 @@ This is a multi-board game collection featuring Gomoku, Go, Chess, Xiangqi, and 
 
 #### Game Modes
 - **Player vs Player** — Face-to-face competition with friends
-- **Player vs AI** — Challenge intelligent AI opponents (3 difficulty levels for Gomoku)
+- **Player vs AI** — Challenge intelligent AI opponents (3 difficulty levels for all games)
 - **Practice Mode** — Explore game variations freely
 
 #### Flexible Rules
