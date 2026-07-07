@@ -113,7 +113,10 @@ export class JunqiApp extends BoardGameApp {
                 title: root.getElementById('junqi-result-title'),
                 detail: root.getElementById('junqi-result-detail'),
                 restart: root.getElementById('junqi-result-restart-btn'),
-                launcher: root.getElementById('junqi-result-launcher-btn')
+                launcher: root.getElementById('junqi-result-launcher-btn'),
+                postgameBtn: root.getElementById('junqi-result-postgame-btn'),
+                postgamePanel: root.getElementById('junqi-result-postgame-panel'),
+                postgameContent: root.getElementById('junqi-result-postgame-content')
             }
         };
     }

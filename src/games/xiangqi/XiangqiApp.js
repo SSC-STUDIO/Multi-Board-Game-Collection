@@ -78,7 +78,10 @@ export class XiangqiApp extends BoardGameApp {
                 title: root.getElementById('xiangqi-result-title'),
                 detail: root.getElementById('xiangqi-result-detail'),
                 restart: root.getElementById('xiangqi-result-restart-btn'),
-                launcher: root.getElementById('xiangqi-result-launcher-btn')
+                launcher: root.getElementById('xiangqi-result-launcher-btn'),
+                postgameBtn: root.getElementById('xiangqi-result-postgame-btn'),
+                postgamePanel: root.getElementById('xiangqi-result-postgame-panel'),
+                postgameContent: root.getElementById('xiangqi-result-postgame-content')
             }
         };
     }

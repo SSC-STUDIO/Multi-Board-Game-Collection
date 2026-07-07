@@ -77,7 +77,10 @@ export class ChessApp extends BoardGameApp {
                 title: root.getElementById('chess-result-title'),
                 detail: root.getElementById('chess-result-detail'),
                 restart: root.getElementById('chess-result-restart-btn'),
-                launcher: root.getElementById('chess-result-launcher-btn')
+                launcher: root.getElementById('chess-result-launcher-btn'),
+                postgameBtn: root.getElementById('chess-result-postgame-btn'),
+                postgamePanel: root.getElementById('chess-result-postgame-panel'),
+                postgameContent: root.getElementById('chess-result-postgame-content')
             },
             promotion: {
                 overlay: root.getElementById('chess-promotion-overlay'),

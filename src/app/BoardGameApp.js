@@ -49,6 +49,7 @@ export class BoardGameApp {
         this.dom = this.queryDom(root);
         this.bindSetupEvents();
         this.bindGameEvents();
+        this.bindPostGameButton();
         this.enterSetup();
     }
 
@@ -58,6 +59,17 @@ export class BoardGameApp {
     createInitialState() { return {}; }
     bindSetupEvents() {}
     bindGameEvents() {}
+
+    bindPostGameButton() {
+        var btn = this.dom?.result?.postgameBtn;
+        if (btn && !btn._postgameBound) {
+            btn._postgameBound = true;
+            btn.addEventListener('click', () => {
+                this.sound?.play('uiTap');
+                if (this.coach) this.coach.requestPostGameReview();
+            });
+        }
+    }
     startGameImpl() {}
     renderBoard() {}
     renderStatus() {}
@@ -251,6 +263,7 @@ export class BoardGameApp {
         if (result.title) result.title.textContent = formatted.title || '';
         if (result.detail) result.detail.textContent = formatted.detail || '';
         this.postFormatResult(formatted);
+        this.renderPostGameOverlay();
     }
 
     /** 子类可覆盖以填充非标准 result DOM（如 Go 的 blackScore/whiteScore）。 */
