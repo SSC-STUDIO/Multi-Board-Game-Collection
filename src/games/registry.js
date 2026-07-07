@@ -109,6 +109,23 @@ export const GAMES = [
                 return new m.JunqiApp(root);
             }
         }))
+    },
+    {
+        id: 'shogi',
+        titleKey: 'gameShogiTitle',
+        taglineKey: 'gameShogiTagline',
+        category: 'abstract',
+        boardTopology: 'grid',
+        status: 'available',
+        capabilities: ['llm-coach'],
+        glyph: '\u5C06',
+        accent: '#d48a5b',
+        accentAlt: '#5f1f1a',
+        loadModule: () => import('./shogi/ShogiApp.js').then((m) => ({
+            enter(root) {
+                return new m.ShogiApp(root);
+            }
+        }))
     }
 ];
 
