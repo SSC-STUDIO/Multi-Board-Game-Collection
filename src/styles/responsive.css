@@ -274,6 +274,20 @@
     }
 }
 
+/* 语言切换按钮移动端适配 */
+@media (max-width: 640px) {
+    .lang-switch {
+        gap: 2px;
+        padding: 4px;
+    }
+
+    .lang-btn {
+        min-width: 40px;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+}
+
 /* 触摸设备优化 */
 @media (hover: none) and (pointer: coarse) {
     /* 增大所有可点击元素的触摸区域 */
