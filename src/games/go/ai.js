@@ -103,6 +103,24 @@ function evaluateMove(board, row, col, color) {
  * @param {import('./state.js').GoState} state
  * @returns {{ pass: true } | { row: number, col: number }}
  */
+
+/**
+ * 2-ply minimax for Go hard mode: evaluate opponent's best response
+ */
+function minimaxPly(board, row, col, color, koPoint) {
+    const placement = placeStone(board, row, col, color);
+    if (!placement.legal) return -Infinity;
+    const opponent = getOpponent(color);
+    const legal = getLegalMoves(placement.board, opponent, { koPoint: placement.koPoint || null });
+    if (legal.length === 0) return evaluateMove(board, row, col, color);
+    let worstScore = Infinity;
+    const candidates = legal.slice(0, Math.min(8, legal.length));
+    for (const { row: or, col: oc } of candidates) {
+        const oppEval = evaluateMove(placement.board, or, oc, opponent);
+        if (oppEval < worstScore) worstScore = oppEval;
+    }
+    return evaluateMove(board, row, col, color) - worstScore * 0.3;
+}
 export function getGoAIMove(state) {
     const { board, currentPlayer, koPoint, options } = state;
     const legal = getLegalMoves(board, currentPlayer, { koPoint });
@@ -125,6 +143,17 @@ export function getGoAIMove(state) {
 
     const level = options?.level ?? 'medium';
     const topN = level === 'easy' ? 6 : level === 'medium' ? 3 : 1;
+
+    // Hard mode: use 2-ply minimax for better play
+    if (level === 'hard' && scored.length > 1) {
+        const minimaxScored = scored.map(m => ({
+            ...m,
+            minimax: minimaxPly(board, m.row, m.col, currentPlayer, koPoint)
+        })).sort((a, b) => b.minimax - a.minimax);
+        if (minimaxScored[0].minimax > -Infinity) {
+            return { row: minimaxScored[0].row, col: minimaxScored[0].col };
+        }
+    }
     const best = scored[0];
     // 决定性优势（吃子/救子/形成活二眼等）：当 best 领先次名 > 6 分时，绕过随机池直接选它，
     // 避免"明明能吃子却随机避开"的业余常识错误。
