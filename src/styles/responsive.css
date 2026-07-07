@@ -415,3 +415,24 @@
         transition: none;
     }
 }
+
+/* Keyboard navigation cursor */
+.cell-keyboard-cursor {
+    background: rgba(255, 215, 0, 0.35) !important;
+    box-shadow: inset 0 0 0 2px rgba(255, 215, 0, 0.8), 0 0 8px rgba(255, 215, 0, 0.4) !important;
+    border-radius: 4px;
+    z-index: 5;
+}
+.cell-keyboard-cursor::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border: 2px solid rgba(255, 215, 0, 0.9);
+    border-radius: 4px;
+    pointer-events: none;
+    animation: keyboard-cursor-pulse 1.2s ease-in-out infinite;
+}
+@keyframes keyboard-cursor-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}

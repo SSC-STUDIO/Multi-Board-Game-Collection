@@ -258,7 +258,81 @@ export class InteractionManager {
      * 处理全局键盘事件：Escape 关闭覆盖层，方向键导航选项按钮
      * @param {KeyboardEvent} event - 键盘事件对象
      */
+    /**
+     * Initialize keyboard cursor at center of the board
+     */
+    initKeyboardCursor() {
+        const size = this.app.options.size || 15;
+        this.keyboardCursor = { row: Math.floor(size / 2), col: Math.floor(size / 2) };
+        this.updateKeyboardCursorVisual();
+    }
+
+    /**
+     * Update the visual cursor indicator on the board
+     */
+    updateKeyboardCursorVisual() {
+        const board = this.app.dom.board;
+        if (!board) return;
+        const existing = board.querySelector('.cell-keyboard-cursor');
+        if (existing) existing.classList.remove('cell-keyboard-cursor');
+        if (!this.keyboardCursor) return;
+        const cell = board.querySelector(
+            `[data-row="${this.keyboardCursor.row}"][data-col="${this.keyboardCursor.col}"]`
+        );
+        if (cell) cell.classList.add('cell-keyboard-cursor');
+    }
+
+    /**
+     * Move keyboard cursor in a direction
+     * @param {number} dr - row delta (-1, 0, 1)
+     * @param {number} dc - col delta (-1, 0, 1)
+     */
+    moveKeyboardCursor(dr, dc) {
+        if (!this.keyboardCursor) this.initKeyboardCursor();
+        const size = this.app.options.size || 15;
+        const newRow = Math.max(0, Math.min(size - 1, this.keyboardCursor.row + dr));
+        const newCol = Math.max(0, Math.min(size - 1, this.keyboardCursor.col + dc));
+        this.keyboardCursor.row = newRow;
+        this.keyboardCursor.col = newCol;
+        this.updateKeyboardCursorVisual();
+    }
+
+    /**
+     * Confirm keyboard selection: place piece at cursor position
+     */
+    confirmKeyboardSelection() {
+        if (!this.keyboardCursor) return;
+        this.handleCellClick(this.keyboardCursor.row, this.keyboardCursor.col);
+    }
+
+    /**
+     * Clear keyboard cursor visual
+     */
+    clearKeyboardCursor() {
+        const board = this.app.dom.board;
+        if (!board) return;
+        const existing = board.querySelector('.cell-keyboard-cursor');
+        if (existing) existing.classList.remove('cell-keyboard-cursor');
+        this.keyboardCursor = null;
+    }
+
     handleGlobalKeydown(event) {
+        // Arrow keys: board cursor navigation
+        if (!this.app.state.gameOver && !event.ctrlKey && !event.altKey && !event.metaKey) {
+            if (event.key === 'ArrowUp') { event.preventDefault(); this.moveKeyboardCursor(-1, 0); return; }
+            if (event.key === 'ArrowDown') { event.preventDefault(); this.moveKeyboardCursor(1, 0); return; }
+            if (event.key === 'ArrowLeft') { event.preventDefault(); this.moveKeyboardCursor(0, -1); return; }
+            if (event.key === 'ArrowRight') { event.preventDefault(); this.moveKeyboardCursor(0, 1); return; }
+            if (event.key === 'Enter' || event.key === ' ') {
+                const focused = document.activeElement;
+                if (!focused || focused === document.body || focused === this.app.dom.board) {
+                    event.preventDefault();
+                    this.confirmKeyboardSelection();
+                    return;
+                }
+            }
+        }
+
         // Escape key: close open overlays
         if (event.key === 'Escape') {
             if (this.app.llmSettingsOpen) {
@@ -271,6 +345,10 @@ export class InteractionManager {
             }
             if (this.app.firstRunGuideOpen) {
                 this.app.dismissFirstRunGuide();
+                return;
+            }
+            if (this.keyboardCursor) {
+                this.clearKeyboardCursor();
                 return;
             }
         }

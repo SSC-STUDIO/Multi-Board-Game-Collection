@@ -488,3 +488,105 @@ describe('InteractionManager.handleGlobalKeydown', () => {
         expect(event.preventDefault).toHaveBeenCalled();
     });
 });
+
+describe('InteractionManager.initKeyboardCursor', () => {
+    it('should initialize cursor at center of board', () => {
+        const app = createApp({ size: 15 });
+        app.dom.board = { querySelector: vi.fn(() => null), classList: { add: () => {}, remove: () => {} } };
+        const mgr = new InteractionManager(app);
+        mgr.initKeyboardCursor();
+        expect(mgr.keyboardCursor.row).toBe(7);
+        expect(mgr.keyboardCursor.col).toBe(7);
+    });
+
+    it('should initialize at center for different board size', () => {
+        const app = createApp({ size: 19 });
+        app.dom.board = { querySelector: vi.fn(() => null), classList: { add: () => {}, remove: () => {} } };
+        const mgr = new InteractionManager(app);
+        mgr.initKeyboardCursor();
+        expect(mgr.keyboardCursor.row).toBe(9);
+        expect(mgr.keyboardCursor.col).toBe(9);
+    });
+});
+
+describe('InteractionManager.moveKeyboardCursor', () => {
+    it('should move cursor right', () => {
+        const app = createApp({ size: 15 });
+        app.dom.board = { querySelector: vi.fn(() => null) };
+        const mgr = new InteractionManager(app);
+        mgr.moveKeyboardCursor(0, 1);
+        expect(mgr.keyboardCursor.row).toBe(7);
+        expect(mgr.keyboardCursor.col).toBe(8);
+    });
+
+    it('should move cursor left', () => {
+        const app = createApp({ size: 15 });
+        app.dom.board = { querySelector: vi.fn(() => null) };
+        const mgr = new InteractionManager(app);
+        mgr.moveKeyboardCursor(0, -1);
+        expect(mgr.keyboardCursor.row).toBe(7);
+        expect(mgr.keyboardCursor.col).toBe(6);
+    });
+
+    it('should clamp at board boundaries', () => {
+        const app = createApp({ size: 15 });
+        app.dom.board = { querySelector: vi.fn(() => null) };
+        const mgr = new InteractionManager(app);
+        mgr.keyboardCursor = { row: 0, col: 0 };
+        mgr.moveKeyboardCursor(-1, -1);
+        expect(mgr.keyboardCursor.row).toBe(0);
+        expect(mgr.keyboardCursor.col).toBe(0);
+    });
+
+    it('should clamp at max boundaries', () => {
+        const app = createApp({ size: 15 });
+        app.dom.board = { querySelector: vi.fn(() => null) };
+        const mgr = new InteractionManager(app);
+        mgr.keyboardCursor = { row: 14, col: 14 };
+        mgr.moveKeyboardCursor(1, 1);
+        expect(mgr.keyboardCursor.row).toBe(14);
+        expect(mgr.keyboardCursor.col).toBe(14);
+    });
+});
+
+describe('InteractionManager.confirmKeyboardSelection', () => {
+    it('should call handleCellClick with cursor position', () => {
+        const app = createApp({ size: 15 });
+        app.dom.board = { querySelector: vi.fn(() => null) };
+        const mgr = new InteractionManager(app);
+        mgr.keyboardCursor = { row: 5, col: 3 };
+        const spy = vi.spyOn(mgr, 'handleCellClick');
+        mgr.confirmKeyboardSelection();
+        expect(spy).toHaveBeenCalledWith(5, 3);
+    });
+
+    it('should do nothing if no cursor', () => {
+        const app = createApp({ size: 15 });
+        app.dom.board = { querySelector: vi.fn(() => null) };
+        const mgr = new InteractionManager(app);
+        mgr.keyboardCursor = null;
+        const spy = vi.spyOn(mgr, 'handleCellClick');
+        mgr.confirmKeyboardSelection();
+        expect(spy).not.toHaveBeenCalled();
+    });
+});
+
+describe('InteractionManager.clearKeyboardCursor', () => {
+    it('should clear cursor and remove CSS class', () => {
+        const mockCell = { classList: { add: vi.fn(), remove: vi.fn() } };
+        const app = createApp({ size: 15 });
+        app.dom.board = { querySelector: vi.fn(() => mockCell) };
+        const mgr = new InteractionManager(app);
+        mgr.keyboardCursor = { row: 5, col: 5 };
+        mgr.clearKeyboardCursor();
+        expect(mgr.keyboardCursor).toBeNull();
+        expect(mockCell.classList.remove).toHaveBeenCalledWith('cell-keyboard-cursor');
+    });
+
+    it('should handle missing board gracefully', () => {
+        const app = createApp({ size: 15 });
+        app.dom.board = null;
+        const mgr = new InteractionManager(app);
+        expect(() => mgr.clearKeyboardCursor()).not.toThrow();
+    });
+});
