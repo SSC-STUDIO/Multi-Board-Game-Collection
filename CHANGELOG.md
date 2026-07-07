@@ -8,6 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Shogi (Japanese Chess) with 9x9 board, 14 piece types, promotion, and drop mechanics
+- Othello (Reversi) with 8x8 board, disc flipping, and minimax AI
+- AI commentary service for real-time move explanations across all games
+- Keyboard navigation for game boards (arrow keys, Enter, Escape)
+- 3D renderer tests for Chess, Xiangqi, and Junqi (34 tests)
+- Difficulty-adaptive LLM coaching (Easy/Medium/Hard)
+- SoundManager integration for piece placement audio SFX
+- Move history context in coaching prompts
+
+### Changed
+- Updated test count to 1112 across 47 test files
+- Collection expanded from 5 to 7 games
+
+### Added
 - **SoundManager integration in 3D renderer** — Piece drop audio SFX now plays automatically in 3D mode via optional chaining, with correct color mapping (black/white) and source detection (human/AI).
 - **Difficulty-adaptive LLM Coach** — Three coaching levels (easy/medium/hard) adjust prompt complexity for beginner, intermediate, and advanced players.
 - **Move history in LLM Coach prompts** — Last 10 moves are now included in coaching requests for better strategic context.
@@ -15,6 +29,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+### Added
+- Shogi (Japanese Chess) with 9x9 board, 14 piece types, promotion, and drop mechanics
+- Othello (Reversi) with 8x8 board, disc flipping, and minimax AI
+- AI commentary service for real-time move explanations across all games
+- Keyboard navigation for game boards (arrow keys, Enter, Escape)
+- 3D renderer tests for Chess, Xiangqi, and Junqi (34 tests)
+- Difficulty-adaptive LLM coaching (Easy/Medium/Hard)
+- SoundManager integration for piece placement audio SFX
+- Move history context in coaching prompts
+
+### Changed
+- Updated test count to 1112 across 47 test files
+- Collection expanded from 5 to 7 games
 
 ### New This Sprint
 - **AI Search Improvements**: Transposition tables for all 5 games + killer moves for Chess/Xiangqi
