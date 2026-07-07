@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### New This Sprint
+- **Transposition Tables**: Chess and Xiangqi AI now cache evaluated positions to avoid redundant search
 - **Chess & Xiangqi Killer Move Heuristic**: Both games now store top 2 killer moves per depth for better alpha-beta pruning
 - **GitHub Community Templates**: Bug report, feature request, PR templates, CODEOWNERS, SECURITY.md, CONTRIBUTING.md
 - **Go AI Territory Evaluation**: Monte Carlo territory evaluation with alive group scoring and random playout sampling for hard mode
