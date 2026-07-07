@@ -418,6 +418,7 @@ export class ChessApp extends BoardGameApp {
         if (g.risk) g.risk.textContent = s.coachRisk || 'Waiting...';
     }
 
+    render() { this.renderBoard(); this.renderStatus(); this.renderGameCoach(); }
     renderBoard() {
         this.dom.game?.board?.classList.add('hidden');
         this.render3DIfActive();
