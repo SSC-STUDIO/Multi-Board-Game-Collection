@@ -608,6 +608,7 @@ export class BoardGameRenderer3D {
 
         const targetY = group.position.y + (style.height / 2) + 0.18 + style.lift;
         this.animationManager?.playDropAnimation(group, targetY);
+        this.playCameraShake();
         const dropPos = this.coord(row, col);
         this.particleSystem?.emitDropParticles(dropPos.x, targetY, dropPos.z, side === 'dark' || side === 'black' ? 'black' : 'white');
     }
@@ -679,4 +680,29 @@ export class BoardGameRenderer3D {
         this.lightingSetup?.dispose?.();
         this.sceneManager?.dispose?.();
     }
+
+    playCameraShake(intensity = 0.05, duration = 0.16) {
+        if (!this.sceneManager?.camera) return;
+        const cam = this.sceneManager.camera;
+        const originalPos = cam.position.clone();
+        const startTime = performance.now();
+        const durationMs = duration * 1000;
+        const shake = () => {
+            const elapsed = performance.now() - startTime;
+            if (elapsed >= durationMs) {
+                cam.position.copy(originalPos);
+                this.sceneManager?.setNeedsRender();
+                return;
+            }
+            const decay = 1 - elapsed / durationMs;
+            const ox = (Math.random() - 0.5) * intensity * decay;
+            const oy = (Math.random() - 0.5) * intensity * decay * 0.5;
+            const oz = (Math.random() - 0.5) * intensity * decay;
+            cam.position.set(originalPos.x + ox, originalPos.y + oy, originalPos.z + oz);
+            this.sceneManager?.setNeedsRender();
+            requestAnimationFrame(shake);
+        };
+        requestAnimationFrame(shake);
+    }
+
 }

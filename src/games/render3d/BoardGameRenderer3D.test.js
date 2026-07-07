@@ -182,4 +182,27 @@ describe('BoardGameRenderer3D', () => {
         });
     });
 
+    describe('playCameraShake', () => {
+        it('should request animation frames for shake', () => {
+            vi.useFakeTimers();
+            const r = createPartialRenderer();
+            r.sceneManager = { camera: { position: { clone: () => ({ x: 0, y: 5, z: 5, copy: vi.fn() }), set: vi.fn() } }, setNeedsRender: vi.fn() };
+            globalThis.requestAnimationFrame = vi.fn();
+            r.playCameraShake();
+            expect(globalThis.requestAnimationFrame).toHaveBeenCalled();
+            delete globalThis.requestAnimationFrame;
+            vi.useRealTimers();
+        });
+        it('should not throw if sceneManager.camera is missing', () => {
+            const r = createPartialRenderer();
+            r.sceneManager = {};
+            expect(() => r.playCameraShake()).not.toThrow();
+        });
+        it('should return early if no sceneManager', () => {
+            const r = createPartialRenderer();
+            r.sceneManager = null;
+            expect(() => r.playCameraShake()).not.toThrow();
+        });
+    });
+
 });

@@ -1,4 +1,4 @@
-/** LLM Coach 服务：设置管理、API 请求、连接测�?@module services/llmCoach */
+﻿/** LLM Coach 鏈嶅姟锛氳缃鐞嗐€丄PI 璇锋眰銆佽繛鎺ユ祴锟?@module services/llmCoach */
 
 // === Constants ===
 const STORAGE_KEY = 'gomoku-llm-coach-settings';
@@ -48,31 +48,31 @@ const DEFAULT_SETTINGS = {
 
 /**
  * @typedef {Object} LlmCoachSettings
- * @property {boolean} enabled - 是否启用远程 LLM 教练
- * @property {string} baseUrl - OpenAI 兼容 API 基础地址
- * @property {string} model - 请求时使用的模型�?
- * @property {string} apiKey - 原始 API Key
+ * @property {boolean} enabled - 鏄惁鍚敤杩滅▼ LLM 鏁欑粌
+ * @property {string} baseUrl - OpenAI 鍏煎 API 鍩虹鍦板潃
+ * @property {string} model - 璇锋眰鏃朵娇鐢ㄧ殑妯″瀷锟?
+ * @property {string} apiKey - 鍘熷 API Key
  */
 
 /**
  * @typedef {Object} LlmCoachRequestOptions
- * @property {LlmCoachSettings} settings - 已规范化�?LLM 设置
- * @property {Object} snapshot - 发送给模型的棋局快照
- * @property {AbortSignal} [signal] - 上层取消信号
+ * @property {LlmCoachSettings} settings - 宸茶鑼冨寲锟?LLM 璁剧疆
+ * @property {Object} snapshot - 鍙戦€佺粰妯″瀷鐨勬灞€蹇収
+ * @property {AbortSignal} [signal] - 涓婂眰鍙栨秷淇″彿
  */
 
 // === Obfuscation ===
 
 /**
- * 对字符串进行简单的 XOR + Base64 混淆编码�?
- * 注意：这是轻量级混淆，并非安全加密，仅用于防止明文存储�?
- * @param {string} str - 原始字符�?
- * @returns {string} 混淆后的字符�?
+ * 瀵瑰瓧绗︿覆杩涜绠€鍗曠殑 XOR + Base64 娣锋穯缂栫爜锟?
+ * 娉ㄦ剰锛氳繖鏄交閲忕骇娣锋穯锛屽苟闈炲畨鍏ㄥ姞瀵嗭紝浠呯敤浜庨槻姝㈡槑鏂囧瓨鍌拷?
+ * @param {string} str - 鍘熷瀛楃锟?
+ * @returns {string} 娣锋穯鍚庣殑瀛楃锟?
  */
 function obfuscate(str) {
   try {
-    /* 逐字�?XOR 混淆：每个字符的 charCode 与索引取�?256 的值进行异或，
-       再用 btoa 编码�?Base64，避�?localStorage 中明文存�?API Key�?*/
+    /* 閫愬瓧锟?XOR 娣锋穯锛氭瘡涓瓧绗︾殑 charCode 涓庣储寮曞彇锟?256 鐨勫€艰繘琛屽紓鎴栵紝
+       鍐嶇敤 btoa 缂栫爜锟?Base64锛岄伩锟?localStorage 涓槑鏂囧瓨锟?API Key锟?*/
     return btoa(String(str).split('').map((ch, i) =>
       String.fromCharCode(ch.charCodeAt(0) ^ (i % 256))
     ).join(''));
@@ -89,12 +89,12 @@ function deobfuscate(encoded) {
 }
 
 /**
- * 表示 LLM 教练配置、请求或响应解析阶段的可分类错误�?
+ * 琛ㄧず LLM 鏁欑粌閰嶇疆銆佽姹傛垨鍝嶅簲瑙ｆ瀽闃舵鐨勫彲鍒嗙被閿欒锟?
  */
 export class LlmCoachError extends Error {
     /**
-     * @param {string} message - 错误说明
-     * @param {string} [code='llm_error'] - 机器可读的错误码
+     * @param {string} message - 閿欒璇存槑
+     * @param {string} [code='llm_error'] - 鏈哄櫒鍙鐨勯敊璇爜
      */
     constructor(message, code = 'llm_error') {
         super(message);
@@ -106,8 +106,8 @@ export class LlmCoachError extends Error {
 // === Settings ===
 
 /**
- * 从本地存储加�?LLM 教练设置，并在必要时迁移旧格式�?
- * @returns {LlmCoachSettings} 规范化后的设�?
+ * 浠庢湰鍦板瓨鍌ㄥ姞锟?LLM 鏁欑粌璁剧疆锛屽苟鍦ㄥ繀瑕佹椂杩佺Щ鏃ф牸寮忥拷?
+ * @returns {LlmCoachSettings} 瑙勮寖鍖栧悗鐨勮锟?
  */
 export function loadLlmCoachSettings() {
     try {
@@ -132,13 +132,13 @@ export function loadLlmCoachSettings() {
 }
 
 /**
- * 规范化并持久�?LLM 教练设置�?
- * @param {Partial<LlmCoachSettings>} settings - 待保存的设置
- * @returns {LlmCoachSettings} 规范化后的设�?
+ * 瑙勮寖鍖栧苟鎸佷箙锟?LLM 鏁欑粌璁剧疆锟?
+ * @param {Partial<LlmCoachSettings>} settings - 寰呬繚瀛樼殑璁剧疆
+ * @returns {LlmCoachSettings} 瑙勮寖鍖栧悗鐨勮锟?
  */
 export function saveLlmCoachSettings(settings) {
     const normalized = normalizeLlmCoachSettings(settings);
-    // API Key 仅做轻量混淆，目标是避免误扫到明文，不承担真正的机密保护职责�?
+    // API Key 浠呭仛杞婚噺娣锋穯锛岀洰鏍囨槸閬垮厤璇壂鍒版槑鏂囷紝涓嶆壙鎷呯湡姝ｇ殑鏈哄瘑淇濇姢鑱岃矗锟?
     const toSave = { ...normalized, _v: 2, apiKey: obfuscate(normalized.apiKey) };
     try {
         window.localStorage?.setItem(STORAGE_KEY, JSON.stringify(toSave));
@@ -150,9 +150,9 @@ export function saveLlmCoachSettings(settings) {
 }
 
 /**
- * 将任意输入修整为完整�?LLM 教练设置对象�?
- * @param {Partial<LlmCoachSettings>} [settings={}] - 原始设置
- * @returns {LlmCoachSettings} 规范化后的设�?
+ * 灏嗕换鎰忚緭鍏ヤ慨鏁翠负瀹屾暣锟?LLM 鏁欑粌璁剧疆瀵硅薄锟?
+ * @param {Partial<LlmCoachSettings>} [settings={}] - 鍘熷璁剧疆
+ * @returns {LlmCoachSettings} 瑙勮寖鍖栧悗鐨勮锟?
  */
 export function normalizeLlmCoachSettings(settings = {}) {
     return {
@@ -164,9 +164,9 @@ export function normalizeLlmCoachSettings(settings = {}) {
 }
 
 /**
- * 根据当前设置返回配置状态�?
- * @param {Partial<LlmCoachSettings>} settings - 待检查的设置
- * @returns {'disabled'|'missing'|'ready'} 配置状�?
+ * 鏍规嵁褰撳墠璁剧疆杩斿洖閰嶇疆鐘舵€侊拷?
+ * @param {Partial<LlmCoachSettings>} settings - 寰呮鏌ョ殑璁剧疆
+ * @returns {'disabled'|'missing'|'ready'} 閰嶇疆鐘讹拷?
  */
 export function getLlmCoachConfigStatus(settings) {
     const normalized = normalizeLlmCoachSettings(settings);
@@ -182,16 +182,16 @@ export function getLlmCoachConfigStatus(settings) {
 }
 
 /**
- * 判断 LLM 教练配置是否完整可用�?
- * @param {Partial<LlmCoachSettings>} settings - 待检查的设置
- * @returns {boolean} 是否已具备发起请求所需的全部字�?
+ * 鍒ゆ柇 LLM 鏁欑粌閰嶇疆鏄惁瀹屾暣鍙敤锟?
+ * @param {Partial<LlmCoachSettings>} settings - 寰呮鏌ョ殑璁剧疆
+ * @returns {boolean} 鏄惁宸插叿澶囧彂璧疯姹傛墍闇€鐨勫叏閮ㄥ瓧锟?
  */
 export function isLlmCoachConfigured(settings) {
     return getLlmCoachConfigStatus(settings) === 'ready';
 }
 
 /**
- * 注册全局错误处理器，便于快速识别教练请求链路中的未捕获异常�?
+ * 娉ㄥ唽鍏ㄥ眬閿欒澶勭悊鍣紝渚夸簬蹇€熻瘑鍒暀缁冭姹傞摼璺腑鐨勬湭鎹曡幏寮傚父锟?
  * @returns {void}
  */
 export function setupGlobalErrorHandlers() {
@@ -208,9 +208,9 @@ export function setupGlobalErrorHandlers() {
 // === API Request ===
 
 /**
- * 请求 LLM 教练建议，并解析为结构化对象�?
- * @param {LlmCoachRequestOptions} [options={}] - 请求参数
- * @returns {Promise<Object>} 教练返回的结构化建议
+ * 璇锋眰 LLM 鏁欑粌寤鸿锛屽苟瑙ｆ瀽涓虹粨鏋勫寲瀵硅薄锟?
+ * @param {LlmCoachRequestOptions} [options={}] - 璇锋眰鍙傛暟
+ * @returns {Promise<Object>} 鏁欑粌杩斿洖鐨勭粨鏋勫寲寤鸿
  */
 export async function requestLlmCoachAdvice({ settings, snapshot, signal, gameType } = {}) {
     try {
@@ -255,10 +255,10 @@ export async function requestLlmCoachAdvice({ settings, snapshot, signal, gameTy
 }
 
 /**
- * 使用一份固定的示例棋局测试 LLM 连接配置是否可用�?
- * @param {Partial<LlmCoachSettings>} settings - 待测试的设置
- * @param {{ signal?: AbortSignal }} [options={}] - 取消选项
- * @returns {Promise<Object>} 远端返回的解析结�?
+ * 浣跨敤涓€浠藉浐瀹氱殑绀轰緥妫嬪眬娴嬭瘯 LLM 杩炴帴閰嶇疆鏄惁鍙敤锟?
+ * @param {Partial<LlmCoachSettings>} settings - 寰呮祴璇曠殑璁剧疆
+ * @param {{ signal?: AbortSignal }} [options={}] - 鍙栨秷閫夐」
+ * @returns {Promise<Object>} 杩滅杩斿洖鐨勮В鏋愮粨锟?
  */
 /**
  * Request post-game analysis from the LLM.
@@ -319,11 +319,11 @@ export async function testLlmCoachConnection(settings, { signal } = {}) {
 }
 
 /**
- * 构�?OpenAI 兼容 `chat/completions` 请求体�?
- * @param {Object} snapshot - 棋局快照
- * @param {string} boardImageDataUrl - 棋盘截图 Data URL
- * @param {string} model - 目标模型�?
- * @returns {Object} 请求体对�?
+ * 鏋勶拷?OpenAI 鍏煎 `chat/completions` 璇锋眰浣擄拷?
+ * @param {Object} snapshot - 妫嬪眬蹇収
+ * @param {string} boardImageDataUrl - 妫嬬洏鎴浘 Data URL
+ * @param {string} model - 鐩爣妯″瀷锟?
+ * @returns {Object} 璇锋眰浣撳锟?
  */
 /**
  * Build a chat completion request for post-game analysis.
@@ -339,10 +339,6 @@ const POST_GAME_ADVICE = {
 function buildPostGameRequest(snapshot, boardImageDataUrl, model, gameType) {
     const stateJson = JSON.stringify(snapshot, null, 2);
     const _advice = POST_GAME_ADVICE[gameType] || POST_GAME_ADVICE.gomoku;
-    const pgConfig = (typeof GAME_COACH_CONFIG !== "undefined" && GAME_COACH_CONFIG._postGame) || {
-        role: "You are an expert board game analyst.",
-        analysisPrompt: "Analyze this completed game."
-    };
     return {
         model,
         temperature: 0.4,
@@ -411,10 +407,10 @@ function buildChatCompletionRequest(snapshot, boardImageDataUrl, model, gameType
 }
 
 /**
- * 带超时与上层取消信号竞争控制�?`fetch` 包装器�?
- * @param {string} url - 请求地址
- * @param {RequestInit & { signal?: AbortSignal, timeoutMs?: number }} options - fetch 选项
- * @returns {Promise<Response>} fetch 响应
+ * 甯﹁秴鏃朵笌涓婂眰鍙栨秷淇″彿绔炰簤鎺у埗锟?`fetch` 鍖呰鍣拷?
+ * @param {string} url - 璇锋眰鍦板潃
+ * @param {RequestInit & { signal?: AbortSignal, timeoutMs?: number }} options - fetch 閫夐」
+ * @returns {Promise<Response>} fetch 鍝嶅簲
  */
 export async function fetchWithTimeout(url, options) {
     const timeoutMs = Number(options?.timeoutMs) > 0 ? Number(options.timeoutMs) : REQUEST_TIMEOUT_MS;
@@ -431,7 +427,7 @@ export async function fetchWithTimeout(url, options) {
         if (parentSignal.aborted) {
             timeoutController.abort();
         } else {
-            // 让超时控制器与外层控制器共享同一取消出口，避免出现“请求已取消但超时计时器仍在跑”的竞态�?
+            // 璁╄秴鏃舵帶鍒跺櫒涓庡灞傛帶鍒跺櫒鍏变韩鍚屼竴鍙栨秷鍑哄彛锛岄伩鍏嶅嚭鐜扳€滆姹傚凡鍙栨秷浣嗚秴鏃惰鏃跺櫒浠嶅湪璺戔€濈殑绔炴€侊拷?
             parentSignal.addEventListener('abort', abortFromParent, { once: true });
         }
     }
@@ -459,9 +455,9 @@ export async function fetchWithTimeout(url, options) {
 }
 
 /**
- * �?OpenAI 兼容响应中提取助手消息正文�?
- * @param {any} payload - 原始响应 JSON
- * @returns {string} 纯文本助手内�?
+ * 锟?OpenAI 鍏煎鍝嶅簲涓彁鍙栧姪鎵嬫秷鎭鏂囷拷?
+ * @param {any} payload - 鍘熷鍝嶅簲 JSON
+ * @returns {string} 绾枃鏈姪鎵嬪唴锟?
  */
 export function extractAssistantContent(payload) {
     const message = payload?.choices?.[0]?.message;
@@ -488,9 +484,9 @@ export function extractAssistantContent(payload) {
 }
 
 /**
- * 将模型返回的文本解析为教�?JSON 对象�?
- * @param {string} content - 助手返回文本
- * @returns {Object} 解析后的教练数据
+ * 灏嗘ā鍨嬭繑鍥炵殑鏂囨湰瑙ｆ瀽涓烘暀锟?JSON 瀵硅薄锟?
+ * @param {string} content - 鍔╂墜杩斿洖鏂囨湰
+ * @returns {Object} 瑙ｆ瀽鍚庣殑鏁欑粌鏁版嵁
  */
 export function parseCoachJson(content) {
     const jsonText = extractJsonObjectText(content);
@@ -502,9 +498,9 @@ export function parseCoachJson(content) {
 }
 
 /**
- * 从普通文本或 Markdown 代码块中截取最可能�?JSON 对象正文�?
- * @param {string} content - 原始助手文本
- * @returns {string} �?JSON 文本
+ * 浠庢櫘閫氭枃鏈垨 Markdown 浠ｇ爜鍧椾腑鎴彇鏈€鍙兘锟?JSON 瀵硅薄姝ｆ枃锟?
+ * @param {string} content - 鍘熷鍔╂墜鏂囨湰
+ * @returns {string} 锟?JSON 鏂囨湰
  */
 function extractJsonObjectText(content) {
     const trimmed = String(content || '').trim();
@@ -525,8 +521,8 @@ function extractJsonObjectText(content) {
 // === Image Generation ===
 
 /**
- * 将棋局快照绘制�?Data URL，供多模态模型读取当前棋盘�?
- * @param {Object} snapshot - 棋局快照
+ * 灏嗘灞€蹇収缁樺埗锟?Data URL锛屼緵澶氭ā鎬佹ā鍨嬭鍙栧綋鍓嶆鐩橈拷?
+ * @param {Object} snapshot - 妫嬪眬蹇収
  * @returns {string} PNG Data URL
  */
 function createBoardImageDataUrl(snapshot, gameType) {

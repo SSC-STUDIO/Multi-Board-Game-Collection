@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### New This Sprint
+- **3D Camera Shake**: BoardGameRenderer3D now triggers a subtle camera shake when pieces land, with decay-based random offset restoring position after 160ms
+- **Dead Code Cleanup**: Removed unused pgConfig variable from LLM Coach post-game analysis
+- **Test Count**: 1005 tests across 41 files
 - **Go Post-Game Analysis**: GoApp now supports LLM-powered post-game analysis via the result overlay button, with bilingual error handling
 - **Renderer3D Unit Tests**: 6 new tests for `showVictory` and `showVictoryCelebration` methods on `BoardGameRenderer3D`
 - **Post-Game Analysis UI**: Added 'Request Post-Game Analysis' button to all 5 game result overlays, wired to CoachController LLM analysis with structured summary display panel
