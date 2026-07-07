@@ -27,7 +27,7 @@ I've been working on **Multi-Board-Game-Collection** — an open-source suite th
 - **Bilingual UI** (English & Chinese)
 - **Cross-platform**: Web, Electron Desktop, Android (Capacitor)
 
-Tech stack: vanilla JS + Three.js + Vite + Vitest (1015 tests passing).
+Tech stack: vanilla JS + Three.js + Vite + Vitest (1020 tests passing).
 - **Piece drop audio SFX** with color-coded sounds and directional panning via SoundManager
 - **Difficulty-adaptive coaching** (Easy/Medium/Hard) for beginners to advanced players
 - **Move history context** — AI coach sees your recent moves for smarter strategic advice

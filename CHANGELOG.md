@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **SoundManager integration in 3D renderer** — Piece drop audio SFX now plays automatically in 3D mode via optional chaining, with correct color mapping (black/white) and source detection (human/AI).
 - **Difficulty-adaptive LLM Coach** — Three coaching levels (easy/medium/hard) adjust prompt complexity for beginner, intermediate, and advanced players.
 - **Move history in LLM Coach prompts** — Last 10 moves are now included in coaching requests for better strategic context.
-- **Test count fix** — Corrected CHANGELOG test count from 1005 to 1015.
+- **Test count fix** — Corrected CHANGELOG test count from 1005 to 1020.
 
 
 ## [Unreleased]
@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gomoku Opening Book**: Expanded with 3-move strategic responses (diagonal/orthogonal counters)
 - **3D Camera Shake**: BoardGameRenderer3D now triggers a subtle camera shake when pieces land, with decay-based random offset restoring position after 160ms
 - **Dead Code Cleanup**: Removed unused pgConfig variable from LLM Coach post-game analysis
-- **Test Count**: 1015 tests across 41 files
+- **Test Count**: 1020 tests across 41 files
 - **Go Post-Game Analysis**: GoApp now supports LLM-powered post-game analysis via the result overlay button, with bilingual error handling
 - **Renderer3D Unit Tests**: 6 new tests for `showVictory` and `showVictoryCelebration` methods on `BoardGameRenderer3D`
 - **Post-Game Analysis UI**: Added 'Request Post-Game Analysis' button to all 5 game result overlays, wired to CoachController LLM analysis with structured summary display panel
