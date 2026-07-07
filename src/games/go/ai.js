@@ -105,6 +105,64 @@ function evaluateMove(board, row, col, color) {
  */
 
 /**
+ * Monte Carlo territory evaluation: count influence and alive groups.
+ * Returns score difference (positive = good for `color`).
+ * Samples up to `samples` random playouts to estimate territory.
+ */
+function evaluateTerritory(board, color, samples = 4) {
+    const size = board.length;
+    const opponent = getOpponent(color);
+    let territoryScore = 0;
+
+    // Count alive groups (3+ liberties) and at-risk groups (<=2 liberties)
+    const visited = new Set();
+    for (let r = 0; r < size; r++) {
+        for (let c2 = 0; c2 < size; c2++) {
+            if (board[r][c2] === null || board[r][c2] === undefined) continue;
+            const key = `${r},${c2}`;
+            if (visited.has(key)) continue;
+            const group = getGroup(board, r, c2);
+            group.stones.forEach(([sr, sc]) => visited.add(`${sr},${sc}`));
+            const owner = group.stones[0][0] !== undefined ? board[group.stones[0][0]][group.stones[0][1]] : null;
+            if (owner === color) {
+                if (group.libertyCount >= 3) territoryScore += group.stones.length * 1.5;
+                else if (group.libertyCount <= 1) territoryScore -= group.stones.length * 2;
+            } else if (owner === opponent) {
+                if (group.libertyCount >= 3) territoryScore -= group.stones.length * 1.5;
+                else if (group.libertyCount <= 1) territoryScore += group.stones.length * 2;
+            }
+        }
+    }
+
+    // Random playout sampling: fill empty points randomly and count influence
+    for (let s = 0; s < samples; s++) {
+        const emptyPoints = [];
+        for (let r = 0; r < size; r++) {
+            for (let c2 = 0; c2 < size; c2++) {
+                if (board[r][c2] === null || board[r][c2] === undefined) emptyPoints.push([r, c2]);
+            }
+        }
+        // Shuffle and take first 12 points
+        for (let i = emptyPoints.length - 1; i > 0; i--) {
+            const j = Math.floor(randomFraction() * (i + 1));
+            [emptyPoints[i], emptyPoints[j]] = [emptyPoints[j], emptyPoints[i]];
+        }
+        const sampled = emptyPoints.slice(0, Math.min(12, emptyPoints.length));
+        for (const [r, c2] of sampled) {
+            let adjColor = 0, adjOpp = 0;
+            for (const [nr, nc] of getNeighbors(size, r, c2)) {
+                if (board[nr][nc] === color) adjColor++;
+                if (board[nr][nc] === opponent) adjOpp++;
+            }
+            if (adjColor > adjOpp) territoryScore += 0.5;
+            else if (adjOpp > adjColor) territoryScore -= 0.5;
+        }
+    }
+
+    return territoryScore;
+}
+
+/**
  * 2-ply minimax for Go hard mode: evaluate opponent's best response
  */
 function minimaxPly(board, row, col, color, koPoint) {
@@ -119,7 +177,9 @@ function minimaxPly(board, row, col, color, koPoint) {
         const oppEval = evaluateMove(placement.board, or, oc, opponent);
         if (oppEval < worstScore) worstScore = oppEval;
     }
-    return evaluateMove(board, row, col, color) - worstScore * 0.3;
+    const baseScore = evaluateMove(board, row, col, color);
+    const territory = evaluateTerritory(placement.board, color, 3);
+    return baseScore - worstScore * 0.3 + territory * 0.4;
 }
 export function getGoAIMove(state) {
     const { board, currentPlayer, koPoint, options } = state;
