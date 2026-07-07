@@ -156,3 +156,13 @@ Real-time AI coaching powered by any OpenAI-compatible API. Toggle "QI Coach" in
 GitHub: https://github.com/SSC-STUDIO/Multi-Board-Game-Collection
 
 欢迎交流技术细节！
+## Updated Feature List (2026-07-07)
+
+- 999 unit tests passing across 41 test files
+- LLM Coach now game-specific for all 5 games (Gomoku, Go, Chess, Xiangqi, Junqi)
+- Go AI hard mode: 2-ply minimax for stronger territorial play
+- Gomoku AI hard mode: center-first opening book + second-move response
+- Chess/Xiangqi AI hard mode: depth 5 (up from 4)
+- 3D Victory celebrations wired into Chess, Xiangqi, Junqi
+- 332 i18n elements fully bilingual (English/Chinese)
+- Smooth camera transitions with 5 preset angles
