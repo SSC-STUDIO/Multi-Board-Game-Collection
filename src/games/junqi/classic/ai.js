@@ -20,6 +20,14 @@ function evaluateMove(board, move, level) {
     const target = board[move.to[0]][move.to[1]];
     const piece = board[move.from[0]][move.from[1]];
     let score = 0;
+    // Hard mode: defensive bonus for protecting flag area (rows 11-12)
+    if (level === 'hard' && move.from[0] >= 11 && move.to[0] < 11) {
+        score -= 8;
+    }
+    // Hard mode: prioritize advancing pieces toward opponent
+    if (level === 'hard' && move.to[0] < move.from[0]) {
+        score += 2;
+    }
     if (target?.rank === 'F') score += 10000;
     if (target?.rank === 'S') score += 250;
     if (target) score += (RANK_LEVEL[target.rank] || 0) * 18;
