@@ -162,10 +162,47 @@ function evaluateTerritory(board, color, samples = 4) {
     return territoryScore;
 }
 
+
+// Transposition table for Go minimax evaluation cache
+const GO_TT_SIZE = 1 << 14; // 16K entries
+let goTT = new Map();
+
+function boardHash(board) {
+    let h = 0;
+    const size = board.length;
+    for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+            const p = board[r][c];
+            if (p) {
+                const code = (p === "black" ? 1 : 2);
+                h = (h * 31 + code + r * size + c) | 0;
+            }
+        }
+    }
+    return h;
+}
+
+function goTTStore(key, score) {
+    if (goTT.size >= GO_TT_SIZE) {
+        let count = 0;
+        for (const k of goTT.keys()) {
+            if (count++ % 2 === 0) goTT.delete(k);
+        }
+    }
+    goTT.set(key, score);
+}
+
+export function resetGoTT() { goTT.clear(); }
+
 /**
  * 2-ply minimax for Go hard mode: evaluate opponent's best response
  */
-function minimaxPly(board, row, col, color, koPoint) {
+function minimaxPly(board, row, col, color, koPoint, depth = 1) {
+    const hash = boardHash(board);
+    const ttKey = hash + ":" + color + ":" + depth;
+    const ttEntry = goTT.get(ttKey);
+    if (ttEntry !== undefined) return ttEntry;
+
     const placement = placeStone(board, row, col, color);
     if (!placement.legal) return -Infinity;
     const opponent = getOpponent(color);
@@ -179,7 +216,9 @@ function minimaxPly(board, row, col, color, koPoint) {
     }
     const baseScore = evaluateMove(board, row, col, color);
     const territory = evaluateTerritory(placement.board, color, 3);
-    return baseScore - worstScore * 0.3 + territory * 0.4;
+    const result = baseScore - worstScore * 0.3 + territory * 0.4;
+    goTTStore(ttKey, result);
+    return result;
 }
 export function getGoAIMove(state) {
     const { board, currentPlayer, koPoint, options } = state;
