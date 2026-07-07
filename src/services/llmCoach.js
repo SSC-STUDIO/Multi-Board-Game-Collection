@@ -270,7 +270,7 @@ export async function requestPostGameAnalysis({ settings, snapshot, signal, game
             throw new LlmCoachError("LLM coach is not configured.", "missing_config");
         }
         const boardImageData = createBoardImageDataUrl(snapshot, gameType);
-        const request = buildPostGameRequest(snapshot, boardImageData, normalized.model);
+        const request = buildPostGameRequest(snapshot, boardImageData, normalized.model, gameType);
         const response = await fetchWithTimeout(normalized.baseUrl + "/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -328,8 +328,17 @@ export async function testLlmCoachConnection(settings, { signal } = {}) {
 /**
  * Build a chat completion request for post-game analysis.
  */
-function buildPostGameRequest(snapshot, boardImageDataUrl, model) {
+const POST_GAME_ADVICE = {
+    gomoku: "For Gomoku: evaluate five-in-a-row threats, Renji forbidden-move avoidance, opening theory, and mid-game attack-defend balance.",
+    go: "For Go: evaluate territory vs influence, life-and-death, ko fights, and endgame scoring.",
+    chess: "For Chess: evaluate material balance, king safety, pawn structure, piece activity, and tactical motifs.",
+    xiangqi: "For Xiangqi: evaluate material, river-crossing advantages, palace defense, and checkmate nets.",
+    junqi: "For Junqi: evaluate flag protection, rank hierarchy, railway mobility, and tactical reveals."
+};
+
+function buildPostGameRequest(snapshot, boardImageDataUrl, model, gameType) {
     const stateJson = JSON.stringify(snapshot, null, 2);
+    const _advice = POST_GAME_ADVICE[gameType] || POST_GAME_ADVICE.gomoku;
     const pgConfig = (typeof GAME_COACH_CONFIG !== "undefined" && GAME_COACH_CONFIG._postGame) || {
         role: "You are an expert board game analyst.",
         analysisPrompt: "Analyze this completed game."
@@ -342,16 +351,17 @@ function buildPostGameRequest(snapshot, boardImageDataUrl, model) {
             {
                 role: "system",
                 content: [
-                    pgConfig.role,
+                    "You are an expert " + (gameType || "gomoku") + " post-game analyst.",
                     "Return only strict JSON with keys: summary, turningPoints, mistakes, strengths, improvements, rating.",
                     "All fields are strings except rating which is a number 1-10.",
-                    pgConfig.analysisPrompt
+                    "Analyze the full game sequence, not just the final position.",
+                    _advice
                 ].join(" ")
             },
             {
                 role: "user",
                 content: [
-                    { type: "text", text: "Post-game analysis request:\nJSON game data:\n" + stateJson },
+                    { type: "text", text: "Post-game analysis request for " + (gameType || "gomoku") + ".\nJSON game data:\n" + stateJson },
                     ...(boardImageDataUrl ? [{ type: "image_url", image_url: { url: boardImageDataUrl } }] : [])
                 ]
             }

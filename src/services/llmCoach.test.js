@@ -366,7 +366,7 @@ describe('requestPostGameAnalysis', () => {
     it('should send a post-game analysis request with gameType', async () => {
         await requestPostGameAnalysis({ settings, snapshot, gameType: 'gomoku' });
         const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        expect(body.messages[0].content).toContain('board game analyst');
+        expect(body.messages[0].content).toContain('post-game analyst');
         expect(body.messages[1].content[0].text).toContain('Post-game analysis request');
     });
 
