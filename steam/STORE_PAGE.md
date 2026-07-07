@@ -10,16 +10,16 @@ Five classic board games in one beautifully crafted 3D collection: Gomoku, Go, C
 ### Five Games, One Collection
 
 **Gomoku (Five in a Row)**
-Classic 15x15 or 19x19 board. Play with standard rules or the strategic Renju variant with forbidden-move enforcement. Features complete opening theory support and real-time threat detection.
+Classic 15x15 or 19x19 board. Play with standard rules or the strategic Renju variant with forbidden-move enforcement. Features complete opening theory with 3-move strategic responses and real-time threat detection.
 
 **Go (Weiqi / Baduk)**
-The ancient game of territory on 9x9, 13x13, or 19x19 boards. Full Chinese and Japanese scoring support with accurate life-and-death evaluation. AI uses 2-ply minimax for territorial play.
+The ancient game of territory on 9x9, 13x13, or 19x19 boards. Full Chinese and Japanese scoring support with accurate life-and-death evaluation. AI uses 2-ply minimax with Monte Carlo territory evaluation for stronger play.
 
 **Chess**
 Standard 8x8 chess with full rule enforcement: castling, en passant, promotion, and checkmate detection. AI uses minimax with alpha-beta pruning at depth 5 on hard mode.
 
 **Xiangqi (Chinese Chess)**
-9x10 board with river mechanics, palace restrictions, and cannon jump rules. Chariot/Horse/Cannon tactical play with AI depth-5 search on hard mode.
+9x10 board with river mechanics, palace restrictions, and cannon jump rules. Chariot/Horse/Cannon tactical play with AI depth-5 search with killer move heuristic on hard mode.
 
 **Junqi (Luzhanqi / Military Chess)**
 13x13 board with unique flip-reveal mechanics. Military rank hierarchy, railway mobility, camp usage, and flag protection strategies.
@@ -30,7 +30,7 @@ All games are rendered using Three.js with:
 - Realistic wood-grain board textures and stone/piece materials
 - Dynamic lighting with soft shadows
 - Smooth camera transitions between 5 preset viewing angles
-- Piece drop animations with impact particles
+- Piece drop animations with impact particles and camera shake
 - Victory celebration effects
 - 60 FPS across Web, Desktop (Electron), and Mobile (Capacitor)
 
@@ -47,7 +47,7 @@ Enable QI Coach mode to receive real-time strategic advice powered by LLM (Large
 Each AI opponent scales through three levels:
 - **Easy**: Relaxed play with some randomness — perfect for beginners
 - **Medium**: Solid tactical play with alpha-beta pruning
-- **Hard**: Deep search (depth 4-5) with opening books and advanced evaluation
+- **Hard**: Deep search (depth 4-5) with opening books, killer moves, territory evaluation, and advanced evaluation
 
 ### Full Bilingual Support
 

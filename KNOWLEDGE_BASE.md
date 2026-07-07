@@ -197,10 +197,10 @@ When adding gameType to LLM Coach request functions:
 ## Rule: AI Depth Settings per Game
 
 Each game has a depthForLevel function mapping difficulty to search depth:
-- Gomoku: easy=random top-6, medium=minimax depth 2, hard=adaptive depth 2/3/4 + opening book
-- Go: easy=random top-6, medium=random top-3, hard=2-ply minimax evaluation
+- Gomoku: easy=random top-6, medium=minimax depth 2, hard=adaptive depth 2/3/4 + opening book (3-move responses)
+- Go: easy=random top-6, medium=random top-3, hard=2-ply minimax + Monte Carlo territory evaluation
 - Chess: easy=depth 1, medium=depth 3, hard=depth 5 with MVV-LVA move ordering
-- Xiangqi: easy=depth 1, medium=depth 3, hard=depth 5
+- Xiangqi: easy=depth 1, medium=depth 3, hard=depth 5 with killer move heuristic
 - Junqi: easy=random top-6, medium=random top-3, hard=best-move-only + defensive flag protection
 
 When bumping depth, always run npm run test to verify no timeout. Depth 5 is safe max for browsers.
