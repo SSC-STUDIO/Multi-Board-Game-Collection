@@ -4,6 +4,20 @@
 const STORAGE_KEY = 'gomoku-llm-coach-settings';
 const REQUEST_TIMEOUT_MS = 12_000;
 const REQUEST_TEMPERATURE = 0.2;
+const DIFFICULTY_CONFIG = {
+    easy: {
+        hint: 'Explain like you are teaching a beginner. Use simple language, explain basic concepts, and focus on fundamental strategies.',
+        maxAlternatives: 1
+    },
+    medium: {
+        hint: 'Provide intermediate-level advice. Assume the player knows basic rules. Focus on tactical patterns and positional understanding.',
+        maxAlternatives: 2
+    },
+    hard: {
+        hint: 'Provide advanced competitive analysis. Focus on deep reading, opponent weaknesses, and optimal play. Be concise and precise.',
+        maxAlternatives: 3
+    }
+};
 
 // === Multi-Game Coach Prompts ===
 const GAME_COACH_CONFIG = {
@@ -212,14 +226,14 @@ export function setupGlobalErrorHandlers() {
  * @param {LlmCoachRequestOptions} [options={}] - 璇锋眰鍙傛暟
  * @returns {Promise<Object>} 鏁欑粌杩斿洖鐨勭粨鏋勫寲寤鸿
  */
-export async function requestLlmCoachAdvice({ settings, snapshot, signal, gameType } = {}) {
+export async function requestLlmCoachAdvice({ settings, snapshot, signal, gameType, difficulty } = {}) {
     try {
         const normalized = normalizeLlmCoachSettings(settings);
         if (!isLlmCoachConfigured(normalized)) {
             throw new LlmCoachError('LLM coach is not configured.', 'missing_config');
         }
 
-        const request = buildChatCompletionRequest(snapshot, createBoardImageDataUrl(snapshot, gameType), normalized.model, gameType);
+        const request = buildChatCompletionRequest(snapshot, createBoardImageDataUrl(snapshot, gameType), normalized.model, gameType, difficulty);
         const response = await fetchWithTimeout(`${normalized.baseUrl}/v1/chat/completions`, {
             method: 'POST',
             headers: {
@@ -364,7 +378,7 @@ function buildPostGameRequest(snapshot, boardImageDataUrl, model, gameType) {
         ]
     };
 }
-function buildChatCompletionRequest(snapshot, boardImageDataUrl, model, gameType) {
+function buildChatCompletionRequest(snapshot, boardImageDataUrl, model, gameType, difficulty) {
     const stateJson = JSON.stringify(snapshot, null, 2);
 
     return {
@@ -380,6 +394,7 @@ function buildChatCompletionRequest(snapshot, boardImageDataUrl, model, gameType
                     'Return only strict JSON with keys: recommended, alternatives, reason, risk, plan, confidence.',
                     'All move coordinates must use 0-based integer row and col from the supplied board JSON.',
                     (GAME_COACH_CONFIG[gameType] || GAME_COACH_CONFIG.gomoku).moveHint,
+                    (DIFFICULTY_CONFIG[difficulty] || DIFFICULTY_CONFIG.medium).hint,
                     'Keep reason, risk, and plan concise and useful for a human learner.'
                 ].join(' ')
             },
@@ -391,7 +406,10 @@ function buildChatCompletionRequest(snapshot, boardImageDataUrl, model, gameType
                         text: [
                             (GAME_COACH_CONFIG[gameType] || GAME_COACH_CONFIG.gomoku).analyzePrefix,
                             'JSON board state:',
-                            stateJson
+                            stateJson,
+                            ...(snapshot.moveHistory && snapshot.moveHistory.length > 0
+                                ? ['Move history (' + snapshot.moveHistory.length + ' moves):' + JSON.stringify(snapshot.moveHistory.slice(-10))]
+                                : [])
                         ].join('\n')
                     },
                     {
