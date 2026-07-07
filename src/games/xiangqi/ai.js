@@ -32,6 +32,22 @@ const BASE_VALUES = {
     K: 20000, R: 600, N: 300, C: 300, A: 120, E: 150, P: 30
 };
 
+// Killer move heuristic: store best non-capture moves per depth
+const MAX_KILLERS = 2;
+const MAX_DEPTH = 8;
+let killerMoves = Array.from({ length: MAX_DEPTH }, () => []);
+
+function storeKiller(move, depth) {
+    if (depth < 0 || depth >= MAX_DEPTH) return;
+    const killers = killerMoves[depth];
+    // Don't duplicate
+    if (killers.some(k => k.from[0] === move.from[0] && k.from[1] === move.from[1]
+        && k.to[0] === move.to[0] && k.to[1] === move.to[1])) return;
+    killers.unshift(move);
+    if (killers.length > MAX_KILLERS) killers.pop();
+}
+
+
 // 红兵过河加值表（黑卒用镜像）。row=0..9
 // 红兵在未过河时（row>=5）都是基础价值；过河后（row<5）逐步提升
 
@@ -114,14 +130,23 @@ export function evaluate(board) {
     return score;
 }
 
-function orderMoves(moves) {
+function orderMoves(moves, depth = 0) {
+    const killers = (depth >= 0 && depth < MAX_DEPTH) ? killerMoves[depth] : [];
     return moves
         .map((mv) => {
             let s = 0;
             if (mv.capture) {
                 const vic = BASE_VALUES[mv.capture[1]] || 0;
                 const agr = BASE_VALUES[mv.piece[1]] || 0;
-                s += 10 * vic - agr;
+                s += 1000 + 10 * vic - agr;
+            } else {
+                for (let k = 0; k < killers.length; k++) {
+                    if (killers[k].from[0] === mv.from[0] && killers[k].from[1] === mv.from[1]
+                        && killers[k].to[0] === mv.to[0] && killers[k].to[1] === mv.to[1]) {
+                        s += 500 - k * 10;
+                        break;
+                    }
+                }
             }
             return { mv, score: s };
         })
@@ -141,7 +166,7 @@ function search(board, state, depth, alpha, beta) {
         return { score: evaluate(board), move: null };
     }
 
-    const moves = orderMoves(getLegalMoves(board, state));
+    const moves = orderMoves(getLegalMoves(board, state), depth);
     if (moves.length === 0) {
         return { score: evaluate(board), move: null };
     }
@@ -154,7 +179,10 @@ function search(board, state, depth, alpha, beta) {
             const { score } = search(b2, s2, depth - 1, alpha, beta);
             if (score > value) { value = score; bestMove = mv; }
             alpha = Math.max(alpha, value);
-            if (alpha >= beta) break;
+            if (alpha >= beta) {
+                if (!mv.capture) storeKiller(mv, depth);
+                break;
+            }
         }
         return { score: value, move: bestMove };
     }
@@ -164,7 +192,10 @@ function search(board, state, depth, alpha, beta) {
         const { score } = search(b2, s2, depth - 1, alpha, beta);
         if (score < value) { value = score; bestMove = mv; }
         beta = Math.min(beta, value);
-        if (alpha >= beta) break;
+        if (alpha >= beta) {
+            if (!mv.capture) storeKiller(mv, depth);
+            break;
+        }
     }
     return { score: value, move: bestMove };
 }
