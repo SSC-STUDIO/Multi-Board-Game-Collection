@@ -1,4 +1,25 @@
 ﻿# Devlog: Multi-Board-Game-Collection — 5-in-1 Board Game Suite with 3D & LLM Coach
+## SoundManager + LLM Coach Improvements (2026-07-08)
+
+### SoundManager Integration
+- Wired SoundManager into BoardGameRenderer3D for piece drop audio SFX
+- Correct color mapping: black/dark pieces play low-frequency sound, white/light play high-frequency
+- Source detection: human moves get stereo panning, AI moves get different volume
+- Optional chaining ensures safe no-op when no soundManager is provided
+
+### LLM Coach Difficulty-Adaptive Coaching
+- Added DIFFICULTY_CONFIG with easy/medium/hard coaching levels
+- Easy: beginner-friendly explanations, simple language, fundamental strategies
+- Medium: intermediate tactical patterns and positional understanding
+- Hard: advanced competitive analysis, deep reading, opponent weaknesses
+- Player can select difficulty in LLM Coach settings
+
+### Move History Context
+- Last 10 moves from move history now included in coaching prompts
+- Gives the LLM strategic context about game flow and recent decisions
+- Improves quality of real-time advice and post-game analysis
+
+
 
 ## What is this?
 

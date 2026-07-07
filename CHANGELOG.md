@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **SoundManager integration in 3D renderer** — Piece drop audio SFX now plays automatically in 3D mode via optional chaining, with correct color mapping (black/white) and source detection (human/AI).
+- **Difficulty-adaptive LLM Coach** — Three coaching levels (easy/medium/hard) adjust prompt complexity for beginner, intermediate, and advanced players.
+- **Move history in LLM Coach prompts** — Last 10 moves are now included in coaching requests for better strategic context.
+- **Test count fix** — Corrected CHANGELOG test count from 1005 to 1009.
+
+
+## [Unreleased]
+
 ### New This Sprint
 - **AI Search Improvements**: Transposition tables for all 5 games + killer moves for Chess/Xiangqi
 - **Chess & Xiangqi Killer Move Heuristic**: Both games now store top 2 killer moves per depth for better alpha-beta pruning
