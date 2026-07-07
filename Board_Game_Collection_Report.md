@@ -18,7 +18,7 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 - **Difficulty-Adaptive Coaching** (Easy/Medium/Hard) with move history context for smarter advice
 - **Multi-platform**: Web (Vite), Electron Desktop, Android (Capacitor)
 - **Bilingual UI**: English / 简体中文 with zero text clipping
-- **1009 Unit Tests** across 41 test files — 100% pass rate
+- **1015 Unit Tests** across 41 test files — 100% pass rate
 
 ---
 
@@ -38,13 +38,13 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 - **Frontend**: Vanilla JavaScript (ES Modules), CSS Variables
 - **3D Engine**: Three.js ^0.164.0
 - **Build**: Vite ^8.0.10, custom Node.js scripts
-- **Testing**: Vitest ^4.1.5 — 1009 tests, 40 test files
+- **Testing**: Vitest ^4.1.5 — 1015 tests, 40 test files
 - **Desktop**: Electron ^28.0.0 + electron-builder
 - **Mobile**: Capacitor ^8.3.1 (Android APK)
 - **i18n**: English / 简体中文
 
 ### Code Quality Metrics
-- **Test Coverage**: 40 test files, 1009 tests, 100% pass rate
+- **Test Coverage**: 40 test files, 1015 tests, 100% pass rate
 - **Module Check**: 111 JavaScript modules verified
 - **Build**: 139 files in 322ms, zero errors
 - **Architecture**: Clean layered design (Game → App → UI → Render3D)
@@ -98,7 +98,7 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 - [x] Registry: llm-coach capability for all games
 - [x] CoachController: non-Gomoku LLM-only path
 - [x] 6 new multi-game LLM Coach tests
-- [x] All 1009 tests pass, 111 modules verified, build clean
+- [x] All 1015 tests pass, 111 modules verified, build clean
 
 ### In Progress
 - [ ] Phase 4: Marketing report & promotional content
@@ -140,7 +140,7 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 - Post-game analysis overlay
 
 ### Test & Build Status
-- 1009 unit tests passing across 41 test files
+- 1015 unit tests passing across 41 test files
 - 139 build output files
 - 0 build errors
 - 100% pass rate on all rule engines (Renju, Chinese/Japanese Go scoring, Chess castling/en passant, Xiangqi river/palace rules, Junqi flip mechanics)
@@ -148,7 +148,7 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 ## Sprint Update 2026-07-07
 
 ### Highlights
-- 999 unit tests passing across 41 test files (up from 1009)
+- 999 unit tests passing across 41 test files (up from 1015)
 - Chess/Xiangqi AI hard difficulty bumped from depth 4 to depth 5
 - LLM Coach post-game analysis now game-specific for all 5 games
 - playVictorySequence unit tests added for 3D renderer
