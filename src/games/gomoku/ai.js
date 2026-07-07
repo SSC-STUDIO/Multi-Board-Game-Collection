@@ -289,9 +289,52 @@ function evaluateMove(state, row, col, color) {
     return (attackScore + attackBonus) * 1.18 + (defenseScore + defenseBonus) + centerBias;
 }
 
+// Transposition table for Gomoku search caching
+const TT_SIZE = 1 << 16; // 64K entries
+const ttExact = 0, ttLower = 1, ttUpper = 2;
+let gomokuTT = new Map();
+
+function boardHashGomoku(board, size) {
+    let h = 0;
+    for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+            const p = board[r][c];
+            if (p) {
+                const code = (p === "black" ? 1 : 2);
+                h = (h * 31 + code + r * size + c) | 0;
+            }
+        }
+    }
+    return h;
+}
+
+function ttLookupGomoku(hash, depth, alpha, beta) {
+    const entry = gomokuTT.get(hash);
+    if (!entry || entry.depth < depth) return null;
+    if (entry.flag === ttExact) return entry.score;
+    if (entry.flag === ttLower && entry.score >= beta) return entry.score;
+    if (entry.flag === ttUpper && entry.score <= alpha) return entry.score;
+    return null;
+}
+
+function ttStoreGomoku(hash, depth, score, flag) {
+    if (gomokuTT.size >= TT_SIZE) {
+        let count = 0;
+        for (const key of gomokuTT.keys()) {
+            if (count++ % 2 === 0) gomokuTT.delete(key);
+        }
+    }
+    gomokuTT.set(hash, { depth, score, flag });
+}
+
 function minimaxSearch(state, depth, alpha, beta, isMaximizing, aiColor, opponentColor) {
     const { board, options } = state;
     const { size } = options;
+
+    // Check transposition table
+    const hash = boardHashGomoku(board, size);
+    const ttEntry = ttLookupGomoku(hash, depth, alpha, beta);
+    if (ttEntry !== null) return ttEntry;
 
     // Terminal: depth exhausted or no candidates
     if (depth === 0) {
@@ -321,6 +364,8 @@ function minimaxSearch(state, depth, alpha, beta, isMaximizing, aiColor, opponen
             alpha = Math.max(alpha, eval_);
             if (beta <= alpha) break;
         }
+        const flag = maxEval >= beta ? ttLower : maxEval <= alpha ? ttUpper : ttExact;
+        ttStoreGomoku(hash, depth, maxEval, flag);
         return maxEval;
     } else {
         let minEval = Infinity;
@@ -332,6 +377,8 @@ function minimaxSearch(state, depth, alpha, beta, isMaximizing, aiColor, opponen
             beta = Math.min(beta, eval_);
             if (beta <= alpha) break;
         }
+        const flag = minEval >= beta ? ttLower : minEval <= alpha ? ttUpper : ttExact;
+        ttStoreGomoku(hash, depth, minEval, flag);
         return minEval;
     }
 }
