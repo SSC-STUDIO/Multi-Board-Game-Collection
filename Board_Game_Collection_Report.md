@@ -16,7 +16,7 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 - **LLM Coach** providing real-time strategic advice via any OpenAI-compatible API
 - **Multi-platform**: Web (Vite), Electron Desktop, Android (Capacitor)
 - **Bilingual UI**: English / 简体中文 with zero text clipping
-- **980 Unit Tests** across 40 test files — 100% pass rate
+- **995 Unit Tests** across 41 test files — 100% pass rate
 
 ---
 
@@ -118,3 +118,25 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 - **Camera Follow-Zoom**: Automatic focus on the last move for enhanced gameplay experience
 - **Multi-Game LLM Coach**: Full support for all 5 games with game-specific prompts and board image rendering
 - **Test Coverage**: 989 tests across 40 test files, 111 modules verified
+
+---
+
+## Latest Sprint Updates (2026-07-07)
+
+### 3D Victory Celebrations (All Games)
+- Confetti particle bursts (40 particles, gold/silver palette)
+- Camera shake on piece placement (prefersReducedMotion aware)
+- Board-wide shatter effects on checkmate/resignation
+- Chess, Xiangqi, Junqi now match Gomoku's 3D celebration experience
+
+### QI Coach Mode (All 5 Games)
+- Real-time AI coaching via any OpenAI-compatible API
+- Toggle in setup screen (QI / 指导 button)
+- Game-specific system prompts with rules and move format
+- Post-game analysis overlay
+
+### Test & Build Status
+- 995 unit tests passing across 41 test files
+- 139 build output files
+- 0 build errors
+- 100% pass rate on all rule engines (Renju, Chinese/Japanese Go scoring, Chess castling/en passant, Xiangqi river/palace rules, Junqi flip mechanics)

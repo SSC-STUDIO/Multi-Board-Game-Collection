@@ -108,3 +108,17 @@ GitHub 地址：https://github.com/SSC-STUDIO/Multi-Board-Game-Collection
 - **Three.js 3D Scenes**: Home Study, Park Pavilion, Tournament Hall with dynamic lighting, shadows, and particle effects
 - **995 Unit Tests**: 100% pass rate across 41 test files
 - **Bilingual UI**: English and 简体中文 throughout
+
+## Latest Features for Promotion
+
+### 3D Victory Celebrations
+Every game now has stunning 3D victory effects — confetti particles, camera shake, and board-wide celebration animations. Gomoku, Go, Chess, Xiangqi, and Junqi all benefit from the same immersive experience.
+
+### QI Coach Mode
+Real-time AI coaching powered by any OpenAI-compatible API. Toggle "QI Coach" in setup to get move suggestions, strategic insights, and risk assessments — in natural language.
+
+### Stats
+- 995 unit tests, 100% pass rate
+- 41 test files covering all 5 rule engines
+- 5 games in one launcher
+- 3D scenes: Home Study, Park Pavilion, Tournament Hall

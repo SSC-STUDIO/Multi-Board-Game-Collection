@@ -105,3 +105,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gomoku Victory Celebration Particles**: `showVictoryCelebration()` emits 40 gold/silver confetti particles radiating from board center on win
 - **Victory Particle System**: New `emitVictoryParticles()` method in ParticleSystem with upward velocity and gravity decay
 - **CSS Styling**: New `.game-coach-hint` class with glassmorphism design for non-Gomoku coach UI
+
+### New This Session (Sprint Update)
+- ✅ 3D victory celebrations for Chess, Xiangqi, Junqi (confetti + camera shake)
+- ✅ QI Coach mode wired for Go, Chess, Xiangqi, Junqi setup screens
+- ✅ game.mode.qi i18n key added to en-US and zh-CN
+- ✅ .game-coach-hint glassmorphism UI styles
+- ✅ playVictorySequence() added to BoardGameRenderer3D base class
+- ✅ 995 tests passing across 41 test files
