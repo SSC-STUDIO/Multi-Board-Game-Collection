@@ -1,206 +1,58 @@
-# Steam 应用配置
+# Steam Store Configuration
 
-## 应用信息
+## Application Info
 
-**应用名称:** 五子棋 · Gomoku
-**应用类型:** 游戏
-**发行日期:** 待定
-**开发阶段:** 开发中
+**Name:** Multi-Board-Game-Collection
+**Type:** Game
+**Release Date:** TBD
+**Development Stage:** In Development
+**Store Page:** steam/STORE_PAGE.md
 
-## 商店信息
+## Store Summary (English)
+Five classic board games in one beautifully crafted 3D collection: Gomoku, Go, Chess, Xiangqi, and Junqi. Immersive Three.js rendering, intelligent AI opponents, and an AI-powered QI Coach to help you improve.
 
-### 简短描述 (简体中文)
-一个精致的五子棋游戏,支持人人对战、人机对战和练习模式,包含经典规则和禁手规则。
+## Store Summary (简体中文)
+五款经典棋类游戏集于一身：五子棋、围棋、国际象棋、中国象棋和军棋。沉浸式Three.js 3D渲染，智能AI对手，AI驱动的棋力指导助你提升。
 
-### 详细描述 (简体中文)
+## Content Rating
+- ESRB: Everyone (E)
+- PEGI: 3+
+- CERO: A (全年龄)
 
-五子棋 · Gomoku 是一款现代化设计的五子棋游戏,提供沉浸式的对弈体验。
+## Tags
+Strategy, Board Game, Puzzle, Singleplayer, Local Multiplayer, AI, Classic Games, Chess, Go, Gomoku, Xiangqi, Junqi, Free to Play, Casual, Indie, 3D, Educational
 
-#### 核心特性:
+## Genres
+Strategy, Casual, Free to Play
 
-✨ **多种游戏模式**
-- 人人对战 - 与好友面对面博弈
-- 人机对战 - 挑战智能AI对手
-- 练习模式 - 轻松探索棋局变化
+## Features
+- 5 complete board games (Gomoku, Go, Chess, Xiangqi, Junqi)
+- Immersive Three.js 3D rendering
+- AI-powered QI Coach (LLM integration)
+- 3 difficulty levels per game
+- Full bilingual support (English / 简体中文)
+- Responsive design (Web, Desktop, Mobile)
+- 999 unit tests, 139 build files
 
-🎯 **灵活的规则选择**
-- 经典规则 - 连五即胜,简单直接
-- 禁手规则 - 黑方禁止三三、四四、长连,更具策略深度
+## System Requirements
 
-🎮 **个性化设置**
-- 多种AI难度等级(轻松、进阶、大师)
-- 可选棋盘尺寸(15×15 或 19×19)
-- 自由选择执子颜色
+### Minimum
+- OS: Windows 7 SP1 / macOS 10.13 / Linux
+- Processor: Intel Core i3 or equivalent
+- Memory: 2 GB RAM
+- Graphics: WebGL-capable integrated GPU
+- Storage: 100 MB available space
 
-💡 **智能辅助功能**
-- 悔棋功能 - 回退不当落子
-- AI提示 - 获取最优落子建议
-- 换边功能 - 随时切换执子方
+### Recommended
+- OS: Windows 10+ / macOS 12+ / Linux
+- Processor: Intel Core i5 or better
+- Memory: 4 GB RAM
+- Graphics: WebGL 2.0 capable dedicated GPU
+- Storage: 200 MB available space
 
-🎨 **精美界面设计**
-- 现代化UI设计
-- 流畅的动画效果
-- 实时局势分析
-- 完整的棋谱记录
+## Achievements: 20 total
+- 5 game-specific master achievements
+- 15 cross-game achievements (First Win, AI Conqueror, Grand Champion, etc.)
 
-📊 **对局统计**
-- 实时显示手数统计
-- 局势阶段分析
-- 最后一手标记
-
-无论你是五子棋新手还是老手,这款游戏都能为你提供愉悦的对弈体验!
-
-## 系统要求
-
-### 最低配置
-- **操作系统:** Windows 7 SP1 / macOS 10.13 / Linux (任意主流发行版)
-- **处理器:** Intel Core i3 或同等性能
-- **内存:** 2 GB RAM
-- **显卡:** 支持现代浏览器的集成显卡
-- **存储空间:** 100 MB 可用空间
-- **网络:** 宽带互联网连接(用于下载和更新)
-
-### 推荐配置
-- **操作系统:** Windows 10 / macOS 12 / Linux (Ubuntu 20.04+)
-- **处理器:** Intel Core i5 或更高
-- **内存:** 4 GB RAM
-- **显卡:** 支持现代浏览器的独立显卡
-- **存储空间:** 200 MB 可用空间
-- **网络:** 宽带互联网连接
-
-## 游戏特性标签
-
-- 单人游戏
-- 策略游戏
-- 棋盘游戏
-- 休闲游戏
-- 回合制
-- AI对战
-- 本地多人
-
-## 内容分级
-
-**ESRB:** Everyone (E)
-**PEGI:** 3+
-**CERO:** A (全年龄)
-
-适合所有年龄段的玩家。
-
-## 成就系统
-
-### 建议成就列表
-
-1. **🏆 首胜**
-   - 赢得第一局游戏
-   - 稀有度: 普通
-
-2. **🔥 连胜之路**
-   - 连续获胜3局
-   - 稀有度: 稀有
-
-3. **🤖 AI终结者**
-   - 在大师难度击败AI
-   - 稀有度: 史诗
-
-4. **💎 完美对局**
-   - 不使用悔棋完成一局
-   - 稀有度: 稀有
-
-5. **⚡ 快速制胜**
-   - 20手内获胜
-   - 稀有度: 史诗
-
-6. **🎯 战略大师**
-   - 使用禁手规则获胜
-   - 稀有度: 稀有
-
-7. **📚 棋道学徒**
-   - 完成10局游戏
-   - 稀有度: 普通
-
-8. **👑 棋坛霸主**
-   - 完成100局游戏
-   - 稀有度: 史诗
-
-## 云存档配置
-
-- 保存游戏设置
-- 保存对局历史
-- 保存成就进度
-- 预计云存档大小: < 1 MB
-
-## 本地化支持
-
-### 当前支持
-- 简体中文 (完整)
-
-### 计划支持
-- 英语 (English)
-- 繁体中文
-- 日语 (日本語)
-- 韩语 (한국어)
-
-## 更新计划
-
-### 版本 1.0 (首发)
-- 完整的五子棋游戏核心
-- 人人对战、人机对战、练习模式
-- 经典规则和禁手规则
-- 基础成就系统
-
-### 版本 1.1 (计划中)
-- 在线多人对战
-- 更多AI难度等级
-- 额外的棋盘主题
-- 更多成就
-
-### 版本 1.2 (计划中)
-- 回放系统
-- 棋谱导入导出
-- 自定义主题
-- 排行榜
-
-## 商店页面素材清单
-
-- [ ] 主宣传图 (616×353)
-- [ ] 头部宣传图 (460×215)
-- [ ] 商店截图 (至少5张, 1920×1080)
-- [ ] 预告片 (推荐)
-- [ ] 成就图标 (8个)
-- [ ] 库页面横幅 (1920×620)
-
-## Steamworks 集成
-
-### 已规划功能
-- [x] Steam 成就系统
-- [x] Steam 云存档
-- [ ] Steam 好友系统集成
-- [ ] Steam 排行榜
-- [ ] Steam 创意工坊(自定义主题)
-
-### 技术实现
-- 使用 Steamworks SDK
-- 通过 Electron 打包为桌面应用
-- 支持自动更新
-
-## 营销信息
-
-### 关键卖点
-1. 现代化的精致界面设计
-2. 智能AI对手,多种难度
-3. 完整的规则支持
-4. 流畅的游戏体验
-5. 免费游玩
-
-### 目标受众
-- 棋盘游戏爱好者
-- 策略游戏玩家
-- 休闲游戏玩家
-- 想要学习五子棋的新手
-
-### 竞品分析
-与其他五子棋游戏相比的优势:
-- 更现代的UI设计
-- 更智能的AI算法
-- 完整的禁手规则支持
-- 更丰富的功能(悔棋、提示、换边)
+## Marketing Slogan
+"Five Ancient Games, One Modern Experience"
