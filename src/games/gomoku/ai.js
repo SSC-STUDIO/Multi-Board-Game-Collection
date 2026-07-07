@@ -99,6 +99,23 @@ export function getBestMove(state, color) {
             return { row: center, col: center, score: 900 };
         }
     }
+    // Third move: respond to opponent's placement near center
+    if (moveHistory.length === 2) {
+        const center = Math.floor(size / 2);
+        const lastOpp = moveHistory[moveHistory.length - 1];
+        if (lastOpp && lastOpp.color !== color) {
+            const dr = lastOpp.row - center;
+            const dc = lastOpp.col - center;
+            // If opponent played diagonal, play orthogonally adjacent to center
+            if (Math.abs(dr) === 1 && Math.abs(dc) === 1 && !board[center][center]) {
+                return { row: center, col: center, score: 950 };
+            }
+            // If opponent played orthogonal, play diagonal to maintain balance
+            if ((Math.abs(dr) + Math.abs(dc)) === 1 && !board[center + dr][center + dc]) {
+                return { row: center + dr, col: center + dc, score: 920 };
+            }
+        }
+    }
     // Hard: minimax with alpha-beta, adaptive depth, top 15 candidates
     const moveCount = moveHistory.length;
     const depth = moveCount < 6 ? 2 : moveCount < 20 ? 3 : 4;
