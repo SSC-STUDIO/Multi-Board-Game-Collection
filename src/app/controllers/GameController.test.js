@@ -83,6 +83,11 @@ vi.mock('../../services/llmCoach.js', () => ({
     getLlmCoachConfigStatus: vi.fn(() => 'missing'),
     isLlmCoachConfigured: vi.fn(() => false)
 }));
+vi.mock('../../services/aiCommentary.js', () => ({
+    getMoveCommentary: vi.fn(async () => null),
+    isCommentaryAvailable: vi.fn(() => false),
+    clearCommentaryCache: vi.fn()
+}));
 
 import { GameController } from './GameController.js';
 import { getBestMove, getAIDelay, getMoveReview } from '../../games/gomoku/ai.js';

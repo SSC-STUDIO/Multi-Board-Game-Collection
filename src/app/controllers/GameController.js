@@ -27,6 +27,7 @@ import { formatMove, getPlayerLabel } from '../../utils/formatters.js';
 import { getOpponent, isBoardFull, isInside } from '../../utils/board.js';
 import { getSceneAmbienceCue } from '../../config/sceneConfig.js';
 import { getLlmCoachConfigStatus, isLlmCoachConfigured } from '../../services/llmCoach.js';
+import { getMoveCommentary, isCommentaryAvailable, clearCommentaryCache } from '../../services/aiCommentary.js';
 
 /**
  * 游戏流程控制器。
@@ -47,6 +48,7 @@ export class GameController {
      * @returns {void}
      */
     createFreshState() {
+        clearCommentaryCache();
         this.app.state = createGameState(this.app.options);
         hideResultOverlay(this.app.dom);
     }
@@ -269,6 +271,27 @@ export class GameController {
                 this.app.refreshCoachGuidance();
             } else {
                 this.app.render();
+            }
+
+            // AI Commentary: request async move explanation
+            if (isCommentaryAvailable(this.app.llmSettings) && !this.app.state.gameOver) {
+                const gameType = this.app.options.gameType || 'gomoku';
+                const commentarySnapshot = {
+                    boardSize: this.app.options.size,
+                    currentPlayer: this.app.state.currentPlayer,
+                    moveHistory: this.app.state.moveHistory,
+                    lastMove: move
+                };
+                getMoveCommentary({
+                    settings: this.app.llmSettings,
+                    snapshot: commentarySnapshot,
+                    gameType
+                }).then((text) => {
+                    if (text && !this.app.state.gameOver) {
+                        this.app.state.commentary = text;
+                        this.app.render();
+                    }
+                }).catch(() => {});
             }
 
             if (this.app.isAIMode() && this.app.state.currentPlayer !== this.app.options.playerColor) {
