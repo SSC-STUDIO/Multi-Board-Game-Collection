@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 # 🎮 多款棋盘游戏合集 / Multi-Board Game Collection
 
@@ -54,6 +54,7 @@
 #### 多渲染引擎
 - 2D渲染：国际象棋、中国象棋、军棋翻翻棋
 - 3D渲染：五子棋与围棋支持Three.js沉浸式3D场景
+- 3D音效：棋子落子音效(SoundManager)，方向性声像定位
 - 五子棋3D场景预设：家、公园、比赛现场
 - 现代化UI设计，流畅动画效果
 
