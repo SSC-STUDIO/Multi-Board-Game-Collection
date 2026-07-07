@@ -148,6 +148,7 @@ export class BoardGameRenderer3D {
         this.cellClick = null;
         this.animationManager = null;
         this.particleSystem = null;
+        this.soundManager = null;
         this.ambientTimer = 0;
         this.disposed = false;
 
@@ -611,6 +612,8 @@ export class BoardGameRenderer3D {
         this.playCameraShake();
         const dropPos = this.coord(row, col);
         this.particleSystem?.emitDropParticles(dropPos.x, targetY, dropPos.z, side === 'dark' || side === 'black' ? 'black' : 'white');
+        const moveColor = (side === 'dark' || side === 'black') ? 'black' : 'white';
+        this.soundManager?.playMove(moveColor, options.source || 'human');
     }
 
     clearGroup(group) {
