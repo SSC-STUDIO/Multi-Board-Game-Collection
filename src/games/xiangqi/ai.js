@@ -127,7 +127,7 @@ function search(board, state, depth, alpha, beta) {
 
 function depthForLevel(level) {
     if (level === 'easy') return 1;
-    if (level === 'hard') return 4;
+    if (level === 'hard') return 5;
     return 3;
 }
 

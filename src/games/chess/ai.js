@@ -3,7 +3,7 @@
  *
  * - easy：depth 1（只看一层，基本看子力），搜索结果随机打散
  * - medium：depth 3（开局中盘防蓝废走），随机微调限于分差 ≤ 30 的候选
- * - hard：depth 4（更准，但仍限于 MVP 等级）
+ * - hard：depth 5（更准，但仍限于 MVP 等级）
  *
  * 评分以"白方视角"为正：白优 > 0，黑优 < 0。
  * 搜索时按当前 turn 决定极大/极小方向。
@@ -197,7 +197,7 @@ function search(board, state, depth, alpha, beta) {
  */
 function depthForLevel(level) {
     if (level === 'easy') return 1;
-    if (level === 'hard') return 4;
+    if (level === 'hard') return 5;
     return 3;
 }
 

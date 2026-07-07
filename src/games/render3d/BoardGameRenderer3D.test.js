@@ -137,4 +137,49 @@ describe('BoardGameRenderer3D', () => {
             expect(positions.length).toBeGreaterThanOrEqual(1);
         });
     });
+    describe('playVictorySequence', () => {
+        it('should schedule showVictoryCelebration via setTimeout', () => {
+            vi.useFakeTimers();
+            const r = createPartialRenderer();
+            r.particleSystem = { emitShatterEffect: vi.fn() };
+            r.sceneManager = { setNeedsRender: vi.fn() };
+            r.playVictorySequence('white');
+            expect(r.sceneManager.setNeedsRender).toHaveBeenCalled();
+            expect(r.particleSystem.emitShatterEffect).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(300);
+            expect(r.particleSystem.emitShatterEffect).toHaveBeenCalledOnce();
+            vi.useRealTimers();
+        });
+        it('should do nothing if winnerColor is null', () => {
+            vi.useFakeTimers();
+            const r = createPartialRenderer();
+            r.particleSystem = { emitShatterEffect: vi.fn() };
+            r.sceneManager = { setNeedsRender: vi.fn() };
+            r.playVictorySequence(null);
+            expect(r.sceneManager.setNeedsRender).not.toHaveBeenCalled();
+            vi.advanceTimersByTime(500);
+            expect(r.particleSystem.emitShatterEffect).not.toHaveBeenCalled();
+            vi.useRealTimers();
+        });
+        it('should do nothing if winnerColor is undefined', () => {
+            vi.useFakeTimers();
+            const r = createPartialRenderer();
+            r.particleSystem = { emitShatterEffect: vi.fn() };
+            r.sceneManager = { setNeedsRender: vi.fn() };
+            r.playVictorySequence(undefined);
+            expect(r.sceneManager.setNeedsRender).not.toHaveBeenCalled();
+            vi.useRealTimers();
+        });
+        it('should gracefully handle missing sceneManager.setNeedsRender', () => {
+            vi.useFakeTimers();
+            const r = createPartialRenderer();
+            r.particleSystem = { emitShatterEffect: vi.fn() };
+            r.sceneManager = {};
+            expect(() => r.playVictorySequence('black')).not.toThrow();
+            vi.advanceTimersByTime(300);
+            expect(r.particleSystem.emitShatterEffect).toHaveBeenCalledOnce();
+            vi.useRealTimers();
+        });
+    });
+
 });
