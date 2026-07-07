@@ -228,6 +228,17 @@ npm run build:desktop
 
 ## English
 
+
+### Games at a Glance
+
+| Game | Board | Rules | 3D | AI Levels | LLM Coach |
+|------|-------|-------|:---:|:---------:|:---------:|
+| **Gomoku** (Five in a Row) | 15×15 | Renju + forbidden moves | ✅ | 3 | ✅ |
+| **Go** (Weiqi/Baduk) | 9/13/19 | Chinese + Japanese scoring | ✅ | 3 | ✅ |
+| **Chess** (International) | 8×8 | Full FIDE rules | ❌ | 3 | ✅ |
+| **Xiangqi** (Chinese Chess) | 9×10 | River + palace rules | ❌ | 3 | ✅ |
+| **Junqi** (Military Chess) | 6×10 | Flip-reveal mechanics | ❌ | 3 | ✅ |
+
 ### About
 
 This is a multi-board game collection featuring Gomoku, Go, Chess, Xiangqi, and Junqi (Flip) in one unified launcher. Each game has its own independent rules engine and application module, providing diverse board game experiences.
