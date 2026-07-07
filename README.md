@@ -406,6 +406,18 @@ We welcome all forms of contribution! Please see [CONTRIBUTING.md](CONTRIBUTING.
 ### License
 
 This project is licensed under the [MIT License](LICENSE).
+### Roadmap
+
+- [ ] 3D rendering for Chess, Xiangqi, and Junqi
+- [ ] Shogi (Japanese Chess) implementation
+- [ ] Othello/Reversi implementation
+- [ ] Online multiplayer via WebSockets
+- [ ] AI commentary during games
+- [ ] Tournament mode with bracket system
+- [ ] Custom piece themes and board skins
+- [ ] Sound effects for piece placement
+- [ ] Keyboard navigation and accessibility improvements
+- [ ] iOS app via Capacitor
 
 ---
 
