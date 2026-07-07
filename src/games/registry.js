@@ -126,6 +126,23 @@ export const GAMES = [
                 return new m.ShogiApp(root);
             }
         }))
+    },
+    {
+        id: 'othello',
+        titleKey: 'gameOthelloTitle',
+        taglineKey: 'gameOthelloTagline',
+        category: 'abstract',
+        boardTopology: 'grid',
+        status: 'available',
+        capabilities: ['llm-coach'],
+        glyph: '\u25CF',
+        accent: '#4a7a4a',
+        accentAlt: '#2d402f',
+        loadModule: () => import('./othello/OthelloApp.js').then((m) => ({
+            enter(root) {
+                return new m.OthelloApp(root);
+            }
+        }))
     }
 ];
 

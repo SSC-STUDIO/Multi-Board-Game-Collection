@@ -28,6 +28,10 @@ const COMMENTARY_PROMPTS = {
     junqi: {
         system: "You are a concise Junqi (Military Chess) commentator. After each move, provide a brief 1-2 sentence explanation. Focus on: piece revelation implications, attack-defense balance, and flag protection. Be direct and insightful.",
         format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
+    },
+    othello: {
+        system: "You are a concise Othello (Reversi) commentator. After each move, provide a brief 1-2 sentence explanation. Focus on: disc flips, positional advantage, corner control, and mobility. Be direct and insightful.",
+        format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
     }
 };
 
