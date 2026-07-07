@@ -289,3 +289,5 @@ export function getXiangqiAIMove(state) {
 }
 
 export { oppositeColor };
+
+export function resetTranspositionTable() { transpositionTable.clear(); }

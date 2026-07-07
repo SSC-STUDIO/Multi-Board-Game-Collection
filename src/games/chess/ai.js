@@ -316,3 +316,5 @@ export function getChessAIMove(state) {
 }
 
 export { oppositeColor };
+
+export function resetTranspositionTable() { transpositionTable.clear(); }

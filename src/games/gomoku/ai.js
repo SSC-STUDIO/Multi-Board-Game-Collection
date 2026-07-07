@@ -601,3 +601,5 @@ function pickRiskTag(state, row, col, color) {
 
     return 'coachRiskCounter';
 }
+
+export function resetTranspositionTable() { gomokuTT.clear(); }
