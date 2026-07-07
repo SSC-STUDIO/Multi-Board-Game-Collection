@@ -127,3 +127,9 @@ Toggle QI Coach in any game's setup screen — the coach analyzes positions in r
 - Go AI hard mode now uses 2-ply minimax search for stronger territorial play
 - Gomoku AI hard mode includes center-first opening book and second-move response
 - Both improvements make hard difficulty significantly more challenging
+
+## 1002 Tests Milestone (2026-07-08)
+
+- Junqi AI defensive mode tests added (hard/medium/empty board)
+- Total test count now 1002 across 41 test files
+- All 5 games now have AI engine tests
