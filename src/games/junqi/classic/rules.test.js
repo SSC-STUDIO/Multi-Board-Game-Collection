@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { getClassicAIMove } from './ai.js';
 import {
     CLASSIC_ROWS,
     CLASSIC_COLS,
@@ -105,5 +106,41 @@ describe('games/junqi/classic/rules', () => {
     it('generates legal moves for the side to move in the initial setup', () => {
         const board = createInitialBoard();
         expect(getLegalMoves(board, 'r').length).toBeGreaterThan(0);
+    });
+});
+describe('games/junqi/classic/ai', () => {
+    it('getClassicAIMove returns a move for hard mode', () => {
+        const board = createInitialBoard();
+        const state = {
+            board,
+            turn: 'r',
+            options: { level: 'hard' }
+        };
+        const move = getClassicAIMove(state);
+        expect(move).toBeDefined();
+        expect(move.from).toBeDefined();
+        expect(move.to).toBeDefined();
+    });
+
+    it('getClassicAIMove returns a move for medium mode', () => {
+        const board = createInitialBoard();
+        const state = {
+            board,
+            turn: 'r',
+            options: { level: 'medium' }
+        };
+        const move = getClassicAIMove(state);
+        expect(move).toBeDefined();
+    });
+
+    it('getClassicAIMove returns null for empty board', () => {
+        const board = Array.from({ length: 13 }, () => Array(5).fill(null));
+        const state = {
+            board,
+            turn: 'r',
+            options: { level: 'easy' }
+        };
+        const move = getClassicAIMove(state);
+        expect(move).toBeNull();
     });
 });
