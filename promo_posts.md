@@ -27,7 +27,9 @@ I've been working on **Multi-Board-Game-Collection** — an open-source suite th
 - **Bilingual UI** (English & Chinese)
 - **Cross-platform**: Web, Electron Desktop, Android (Capacitor)
 
-Tech stack: vanilla JS + Three.js + Vite + Vitest (989 tests passing).
+Tech stack: vanilla JS + Three.js + Vite + Vitest (995 tests passing).
+
+- **Victory celebrations** — confetti particles, camera shake, board-wide animations on checkmate
 
 Star it on GitHub: https://github.com/SSC-STUDIO/Multi-Board-Game-Collection
 
@@ -53,7 +55,7 @@ Would love feedback from fellow board game enthusiasts! What features would you 
 - 双语 UI（中文/英文）
 - 支持 Web、Electron 桌面端、Android APK
 
-📦 技术栈：原生 JavaScript + Three.js + Vite + Vitest（989 个测试全部通过）
+📦 技术栈：原生 JavaScript + Three.js + Vite + Vitest（995 个测试全部通过）
 
 GitHub: https://github.com/SSC-STUDIO/Multi-Board-Game-Collection
 
@@ -122,3 +124,35 @@ Real-time AI coaching powered by any OpenAI-compatible API. Toggle "QI Coach" in
 - 41 test files covering all 5 rule engines
 - 5 games in one launcher
 - 3D scenes: Home Study, Park Pavilion, Tournament Hall
+
+
+---
+
+## 52Poje / Chiphell (Technical Deep-Dive)
+
+### Title:
+从零构建 Five-in-One 棋盘游戏合集 — 技术架构分享
+
+### Body:
+最近完成了一个5合1棋盘游戏项目，分享下技术架构和踩坑经验。
+
+**项目架构**：
+- 每款游戏独立模块（state/rules/ai/render3d），通过 GameRegistry 动态加载
+- 共享基础设施：BoardGameRenderer3D 基类、SceneManager、LightingSetup、AnimationManager
+- LLM Coach 服务层：通过 OpenAI 兼容 API 提供实时策略指导
+
+**3D 渲染亮点**：
+- Three.js + 自定义 SceneManager（OrbitControls + 自动渲染循环）
+- 3种场景预设：Home Study（暖光）、Park Pavilion（自然光）、Tournament Hall（竞技光）
+- 材质系统：CanvasTexture 生成木纹棋盘、抛光石材棋子
+- 粒子系统：落子特效、胜利庆祝（confetti）、碎片效果
+
+**测试策略**：
+- Vitest 995 个单元测试，100% 通过
+- 规则引擎全覆盖：Renju禁手、中国/日本围棋计分、国际象棋特殊规则
+- Three.js 渲染器测试使用 Mock DOM
+- LLM Coach 服务测试使用 API Mock
+
+GitHub: https://github.com/SSC-STUDIO/Multi-Board-Game-Collection
+
+欢迎交流技术细节！
