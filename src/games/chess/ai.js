@@ -43,6 +43,48 @@ function storeKiller(move, depth) {
 }
 
 
+// Transposition table for caching evaluated positions
+const TT_SIZE = 1 << 16; // 64K entries
+const ttExact = 0, ttLower = 1, ttUpper = 2;
+let transpositionTable = new Map();
+
+function boardHash(board, state) {
+    let h = 0;
+    const turnBit = state.turn === "w" ? 1 : 0;
+    h = (h * 31 + turnBit) | 0;
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const p = board[r][c];
+            if (p) {
+                const code = p.charCodeAt(0) * 100 + p.charCodeAt(1);
+                h = (h * 31 + code + r * 8 + c) | 0;
+            }
+        }
+    }
+    return h;
+}
+
+function ttLookup(hash, depth, alpha, beta) {
+    const entry = transpositionTable.get(hash);
+    if (!entry || entry.depth < depth) return null;
+    if (entry.flag === ttExact) return entry.score;
+    if (entry.flag === ttLower && entry.score >= beta) return entry.score;
+    if (entry.flag === ttUpper && entry.score <= alpha) return entry.score;
+    return null;
+}
+
+function ttStore(hash, depth, score, flag, move) {
+    if (transpositionTable.size >= TT_SIZE) {
+        // Simple eviction: clear half the table
+        let count = 0;
+        for (const key of transpositionTable.keys()) {
+            if (count++ % 2 === 0) transpositionTable.delete(key);
+        }
+    }
+    transpositionTable.set(hash, { depth, score, flag, move });
+}
+
+
 // piece-square tables（从白方视角；黑方镜像）
 const PST_P = [
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -170,6 +212,10 @@ function orderMoves(moves, depth = 0) {
  * alpha-beta 搜索。返回 { score, move }。
  */
 function search(board, state, depth, alpha, beta) {
+    const hash = boardHash(board, state);
+    const ttEntry = ttLookup(hash, depth, alpha, beta);
+    if (ttEntry !== null) return { score: ttEntry, move: null };
+
     if (isCheckmate(board, state)) {
         // 被将死：当前执方失败，返回极大劣势（白被将死 → -inf，黑被将死 → +inf）
         return { score: state.turn === 'w' ? -99_999 : 99_999, move: null };
@@ -202,6 +248,8 @@ function search(board, state, depth, alpha, beta) {
                 break;
             }
         }
+        const flag = value <= alpha ? ttUpper : value >= beta ? ttLower : ttExact;
+        ttStore(hash, depth, value, flag, bestMove);
         return { score: value, move: bestMove };
     }
     // 黑方为最小化方
@@ -219,6 +267,8 @@ function search(board, state, depth, alpha, beta) {
             break;
         }
     }
+    const flag = value >= beta ? ttLower : value <= alpha ? ttUpper : ttExact;
+    ttStore(hash, depth, value, flag, bestMove);
     return { score: value, move: bestMove };
 }
 
