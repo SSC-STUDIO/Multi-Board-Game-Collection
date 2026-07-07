@@ -32,12 +32,15 @@ All games are rendered using Three.js with:
 - Smooth camera transitions between 5 preset viewing angles
 - Piece drop animations with impact particles and camera shake
 - Victory celebration effects
+- **Piece drop audio SFX** with directional panning and color-coded sounds
 - 60 FPS across Web, Desktop (Electron), and Mobile (Capacitor)
 
 ### AI-Powered QI Coach
 
 Enable QI Coach mode to receive real-time strategic advice powered by LLM (Large Language Model):
 - Move suggestions with reasoning and risk analysis
+- **Difficulty-adaptive coaching** (Easy/Medium/Hard) for beginners to advanced players
+- **Move history context** — coach sees your recent moves for better strategic advice
 - Alternative moves for learning different strategies
 - Post-game analysis with game-specific strategic insights
 - Works across all five games with tailored advice per game type
