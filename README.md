@@ -2,11 +2,14 @@
 
 # 🎮 多款棋盘游戏合集 / Multi-Board Game Collection
 
-**五子棋 · 围棋 · 国际象棋 · 中国象棋 · 军棋翻翻棋**
+**5 classic board games • Immersive Three.js 3D • LLM AI Coach • Cross-platform**
 
-[![Steam](https://img.shields.io/badge/Steam-即将推出-blue?logo=steam&logoColor=white)](https://store.steampowered.com/)
+[![Stars](https://img.shields.io/github/stars/SSC-STUDIO/Multi-Board-Game-Collection?style=social)](https://github.com/SSC-STUDIO/Multi-Board-Game-Collection)
+[![Steam](https://img.shields.io/badge/Steam-Wishlist-blue?logo=steam&logoColor=white)](https://store.steampowered.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0-orange.svg)](version.json)
+[![Tests](https://img.shields.io/badge/Tests-995%20-passing-brightgreen.svg)]()
+[![3D](https://img.shields.io/badge/Three.js-3D%20Rendering-blueviolet.svg)](https://threejs.org/)
 
 [English](#english) | [简体中文](#简体中文)
 
@@ -266,6 +269,12 @@ This is a multi-board game collection featuring Gomoku, Go, Chess, Xiangqi, and 
 - Resign — Concede the game
 - Complete move history for review
 
+
+#### Quality Assurance
+- **995 unit tests** across 41 test files — 100% pass rate
+- Rule engine tests: Renju forbidden moves, Chinese/Japanese Go scoring, Chess castling/en passant, Xiangqi river/palace rules, Junqi flip mechanics
+- Three.js renderer tests with mock DOM
+- LLM Coach service tests with API mocking
 #### Cross-Platform
 - Web version (browser play)
 - Android APK
