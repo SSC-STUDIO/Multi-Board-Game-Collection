@@ -340,6 +340,27 @@ npm run build
 npm run build:desktop
 ```
 
+
+#### AI Engine Features
+
+All 5 games feature intelligent AI opponents with three difficulty levels:
+
+| Game | Easy | Medium | Hard |
+|------|------|--------|------|
+| **Gomoku** | Random top-6 | Minimax depth 2 | Adaptive depth 2-4 + 3-move opening book |
+| **Go** | Random top-6 | Random top-3 | 2-ply minimax + Monte Carlo territory evaluation |
+| **Chess** | Depth 1 | Depth 3 | Depth 5 + MVV-LVA + killer move heuristic |
+| **Xiangqi** | Depth 1 | Depth 3 | Depth 5 + positional bonuses + killer moves |
+| **Junqi** | Random top-6 | Random top-3 | Best-move + defensive flag protection |
+
+**Advanced AI Features:**
+- Alpha-beta pruning with killer move heuristics (Chess, Xiangqi)
+- Monte Carlo territory evaluation (Go hard mode)
+- Opening book with strategic responses (Gomoku)
+- Piece-square tables for positional evaluation (Chess, Xiangqi)
+- Defensive mode with flag protection (Junqi)
+- Adaptive search depth based on game phase (Gomoku)
+
 #### Tech Stack
 - **Frontend**: Vanilla JavaScript (ES Modules)
 - **Styling**: Vanilla CSS (CSS Variables)
@@ -356,7 +377,7 @@ See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
 - Multi-game launcher supporting Gomoku, Go, Chess, Xiangqi, Junqi
 - Player vs Player, Player vs AI, Practice modes
 - Classic and Renju rules for Gomoku, Chinese and Japanese scoring for Go
-- Three AI difficulty levels (Gomoku)
+- Three AI difficulty levels (all 5 games with advanced heuristics)
 - Modern UI design
 - Complete assist features
 - Cross-platform support (Web / Android / Desktop)
