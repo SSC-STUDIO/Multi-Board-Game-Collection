@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### New This Sprint
+- **Go AI Territory Evaluation**: Monte Carlo territory evaluation with alive group scoring and random playout sampling for hard mode
+- **Gomoku Opening Book**: Expanded with 3-move strategic responses (diagonal/orthogonal counters)
 - **3D Camera Shake**: BoardGameRenderer3D now triggers a subtle camera shake when pieces land, with decay-based random offset restoring position after 160ms
 - **Dead Code Cleanup**: Removed unused pgConfig variable from LLM Coach post-game analysis
 - **Test Count**: 1005 tests across 41 files

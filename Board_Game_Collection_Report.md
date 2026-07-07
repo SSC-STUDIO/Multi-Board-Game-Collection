@@ -105,11 +105,13 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 ### Next Up
 - [ ] Board_Game_Collection_Report.md (this document)
 - [ ] Steam store page preparation
-- [ ] 3D scene polish for Gomoku (audio SFX, camera animations)
+- [x] 3D scene polish: camera shake on piece drops, ambient particles
 
 ### Recent Additions (July 2026)
 - **Victory Celebration Particles**: All 5 board games now have immersive 3D victory particle effects when a game ends
 - **Go Ambient Particles**: GoRenderer3D now emits ambient floating particles in the 3D scene
+- **Go AI Territory Evaluation**: Monte Carlo territory evaluation with alive group scoring for hard mode
+- **Gomoku Opening Book**: Expanded with 3-move strategic responses (diagonal/orthogonal counters)
 - **AI Difficulty Descriptions**: Bilingual tooltips explain what each AI difficulty level does
 
 - **LLM Post-Game Analysis**: AI-powered game review with structured feedback (summary, turning points, mistakes, strengths, improvements, performance rating)

@@ -27,7 +27,10 @@ I've been working on **Multi-Board-Game-Collection** — an open-source suite th
 - **Bilingual UI** (English & Chinese)
 - **Cross-platform**: Web, Electron Desktop, Android (Capacitor)
 
-Tech stack: vanilla JS + Three.js + Vite + Vitest (995 tests passing).
+Tech stack: vanilla JS + Three.js + Vite + Vitest (1005 tests passing).
+- **Camera shake** on piece drops for tactile feedback
+- **Monte Carlo territory evaluation** in Go AI for stronger hard mode
+- **Expanded opening book** for Gomoku with 3-move strategic responses
 
 - **Victory celebrations** — confetti particles, camera shake, board-wide animations on checkmate
 
