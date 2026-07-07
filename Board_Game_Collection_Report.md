@@ -13,7 +13,9 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 ### Key Differentiators
 - **5 Complete Games** in one unified launcher
 - **Three.js 3D Rendering** with realistic wood textures, stone physics, dynamic lighting, shadows, and camera shake on piece drops
+- **Piece Drop Audio SFX** via SoundManager with color-coded sounds and directional panning
 - **LLM Coach** providing real-time strategic advice via any OpenAI-compatible API
+- **Difficulty-Adaptive Coaching** (Easy/Medium/Hard) with move history context for smarter advice
 - **Multi-platform**: Web (Vite), Electron Desktop, Android (Capacitor)
 - **Bilingual UI**: English / 简体中文 with zero text clipping
 - **1009 Unit Tests** across 41 test files — 100% pass rate
