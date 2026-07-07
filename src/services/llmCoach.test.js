@@ -385,4 +385,62 @@ describe('requestPostGameAnalysis', () => {
         });
         await expect(requestPostGameAnalysis({ settings, snapshot, gameType: 'chess' })).rejects.toThrow('rate limited');
     });
+
+
+describe('requestLlmCoachAdvice difficulty-adaptive coaching', () => {
+    const settings = { enabled: true, baseUrl: 'https://api.test.com', model: 'gpt-4', apiKey: 'sk-test' };
+    const snapshot = { boardSize: 15, board: [], moveHistory: [{ row: 7, col: 7, color: 'black' }], currentPlayer: 'white', lastMove: null };
+
+    beforeEach(() => {
+        globalThis.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: () => Promise.resolve({
+                choices: [{ message: { content: JSON.stringify({
+                    recommended: { row: 7, col: 8 },
+                    alternatives: [],
+                    reason: 'test',
+                    risk: 'low',
+                    plan: 'test plan',
+                    confidence: 0.8
+                }) } }],
+                usage: null
+            })
+        });
+    });
+
+    it('should include easy difficulty hint in system prompt', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot, difficulty: 'easy', gameType: 'gomoku' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('beginner');
+    });
+
+    it('should include hard difficulty hint in system prompt', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot, difficulty: 'hard', gameType: 'gomoku' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('advanced');
+    });
+
+    it('should default to medium difficulty when not specified', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot, gameType: 'gomoku' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        expect(body.messages[0].content).toContain('intermediate');
+    });
+
+    it('should include move history when available', async () => {
+        await requestLlmCoachAdvice({ settings, snapshot, difficulty: 'medium', gameType: 'gomoku' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        const userText = body.messages[1].content[0].text;
+        expect(userText).toContain('Move history');
+        expect(userText).toContain('1 moves');
+    });
+
+    it('should not include move history when empty', async () => {
+        const emptySnapshot = { ...snapshot, moveHistory: [] };
+        await requestLlmCoachAdvice({ settings, snapshot: emptySnapshot, difficulty: 'medium', gameType: 'gomoku' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        const userText = body.messages[1].content[0].text;
+        expect(userText).not.toContain('Move history');
+    });
+});
+
 });
