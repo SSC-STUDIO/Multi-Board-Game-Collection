@@ -184,3 +184,12 @@ Use cameraController.focusOnCell(row, col, size, cellSize, true) to smoothly zoo
 - **Context**: Difficulty level buttons need side effects (e.g., updating description text)
 - **Rule**: Add post-selection logic in bindOptionGroup callback by checking `dataAttribute === 'level'` and calling `updateDifficultyDesc()`
 - **Files**: SettingsController.js
+
+## Rule: LLM Post-Game GameType Threading
+
+When adding gameType to LLM Coach request functions:
+1. buildPostGameRequest was generic - used fallback board game analyst
+2. Adding gameType param and POST_GAME_ADVICE map per game provides tailored analysis
+3. buildChatCompletionRequest already used GAME_COACH_CONFIG[gameType] correctly
+4. Pattern: always thread gameType from requestPostGameAnalysis -> buildPostGameRequest -> system message
+5. Test validates system message contains game-specific text

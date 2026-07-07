@@ -113,3 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ .game-coach-hint glassmorphism UI styles
 - ✅ playVictorySequence() added to BoardGameRenderer3D base class
 - ✅ 995 tests passing across 41 test files
+
+### Game-Specific Post-Game Analysis
+- LLM Coach post-game analysis now uses game-specific strategic prompts
+- Each of 5 games gets tailored expert analysis

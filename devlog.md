@@ -114,3 +114,10 @@ The AI coaching system now works in QI (指导) mode for every game:
 - **Junqi** — Flag protection, annihilation tactics, flip probability analysis
 
 Toggle QI Coach in any game's setup screen — the coach analyzes positions in real-time and provides natural-language strategic advice powered by any OpenAI-compatible LLM API.
+
+## Game-Specific Post-Game Analysis (2026-07-07)
+
+- LLM Coach buildPostGameRequest now accepts gameType and injects game-specific strategic prompts for all 5 games
+- System prompt dynamically selects the right game role and strategy focus
+- User message includes game type label for LLM context
+- Tests updated: 999 passing across 41 test files
