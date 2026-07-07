@@ -6,6 +6,8 @@
  * @module games/chess/ChessApp
  */
 
+import { CoachController } from '../../app/controllers/CoachController.js';
+import { buildGameCoachMapping } from '../../ui/dom.js';
 import { i18n } from '../../utils/i18n.js';
 import { BoardGameApp } from '../../app/BoardGameApp.js';
 import { createChessState, createChessOptions } from './state.js';
@@ -20,6 +22,7 @@ import {
 } from './rules.js';
 import { getChessAIMove, getChessAIDelay } from './ai.js';
 import { ChessRenderer3D } from './render3d/ChessRenderer3D.js';
+import { loadLlmCoachSettings } from '../../services/llmCoach.js';
 
 const PIECE_GLYPH = {
     wK: '♔', wQ: '♕', wR: '♖', wB: '♗', wN: '♘', wP: '♙',
@@ -41,6 +44,10 @@ export class ChessApp extends BoardGameApp {
         super(root, createChessOptions());
         this.renderer3d = null;
         this.use3D = true;
+        this.llmSettings = loadLlmCoachSettings();
+        this.llmCoachRequestId = 0;
+        this.llmCoachAbortController = null;
+        this.coach = new CoachController(this);
     }
 
     queryDom(root) {
@@ -85,7 +92,8 @@ export class ChessApp extends BoardGameApp {
             promotion: {
                 overlay: root.getElementById('chess-promotion-overlay'),
                 buttons: root.getElementById('chess-promotion-buttons')
-            }
+            },
+            guidance: buildGameCoachMapping(root, 'chess'),
         };
     }
 
@@ -380,6 +388,35 @@ export class ChessApp extends BoardGameApp {
     }
 
     // === Rendering ===
+
+
+    isGuidedMode() { return this.options.mode === 'qi'; }
+
+    cancelLlmCoachRequest() {
+        if (this.llmCoachAbortController) {
+            this.llmCoachAbortController.abort();
+            this.llmCoachAbortController = null;
+        }
+    }
+
+    refreshCoachGuidance(a) { return this.coach ? this.coach.refreshCoachGuidance(a) : null; }
+
+    clearCoachState(o) { return this.coach ? this.coach.clearCoachState(o) : null; }
+
+    renderGameCoach() {
+        if (!this.coach) return;
+        const g = this.dom && this.dom.guidance;
+        if (!g || !g.card) return;
+        const s = this.state;
+        const guided = this.isGuidedMode();
+        g.card.classList.toggle('hidden', !guided);
+        if (!guided) return;
+        if (g.move) g.move.textContent = s.coachSuggestion ? (s.coachSuggestion.row + ',' + s.coachSuggestion.col) : '-';
+        if (g.source) g.source.textContent = s.coachSource === 'llm' ? 'LLM' : 'Local';
+        if (g.status) g.status.textContent = s.coachLlmStatus || '-';
+        if (g.insight) g.insight.textContent = s.coachInsight || 'Waiting...';
+        if (g.risk) g.risk.textContent = s.coachRisk || 'Waiting...';
+    }
 
     renderBoard() {
         this.dom.game?.board?.classList.add('hidden');

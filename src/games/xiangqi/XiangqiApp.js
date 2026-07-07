@@ -6,6 +6,8 @@
  * @module games/xiangqi/XiangqiApp
  */
 
+import { CoachController } from '../../app/controllers/CoachController.js';
+import { buildGameCoachMapping } from '../../ui/dom.js';
 import { i18n } from '../../utils/i18n.js';
 import { BoardGameApp } from '../../app/BoardGameApp.js';
 import { createXiangqiState, createXiangqiOptions } from './state.js';
@@ -18,6 +20,7 @@ import {
 } from './rules.js';
 import { getXiangqiAIMove, getXiangqiAIDelay } from './ai.js';
 import { XiangqiRenderer3D } from './render3d/XiangqiRenderer3D.js';
+import { loadLlmCoachSettings } from '../../services/llmCoach.js';
 
 const PIECE_GLYPH = {
     rK: '帅', rA: '仕', rE: '相', rN: '马', rR: '车', rC: '炮', rP: '兵',
@@ -44,6 +47,10 @@ export class XiangqiApp extends BoardGameApp {
         super(root, createXiangqiOptions());
         this.renderer3d = null;
         this.use3D = true;
+        this.llmSettings = loadLlmCoachSettings();
+        this.llmCoachRequestId = 0;
+        this.llmCoachAbortController = null;
+        this.coach = new CoachController(this);
     }
 
     queryDom(root) {
@@ -82,7 +89,8 @@ export class XiangqiApp extends BoardGameApp {
                 postgameBtn: root.getElementById('xiangqi-result-postgame-btn'),
                 postgamePanel: root.getElementById('xiangqi-result-postgame-panel'),
                 postgameContent: root.getElementById('xiangqi-result-postgame-content')
-            }
+            },
+            guidance: buildGameCoachMapping(root, 'xiangqi'),
         };
     }
 
@@ -302,6 +310,35 @@ export class XiangqiApp extends BoardGameApp {
     }
 
     // === Rendering ===
+
+
+    isGuidedMode() { return this.options.mode === 'qi'; }
+
+    cancelLlmCoachRequest() {
+        if (this.llmCoachAbortController) {
+            this.llmCoachAbortController.abort();
+            this.llmCoachAbortController = null;
+        }
+    }
+
+    refreshCoachGuidance(a) { return this.coach ? this.coach.refreshCoachGuidance(a) : null; }
+
+    clearCoachState(o) { return this.coach ? this.coach.clearCoachState(o) : null; }
+
+    renderGameCoach() {
+        if (!this.coach) return;
+        const g = this.dom && this.dom.guidance;
+        if (!g || !g.card) return;
+        const s = this.state;
+        const guided = this.isGuidedMode();
+        g.card.classList.toggle('hidden', !guided);
+        if (!guided) return;
+        if (g.move) g.move.textContent = s.coachSuggestion ? (s.coachSuggestion.row + ',' + s.coachSuggestion.col) : '-';
+        if (g.source) g.source.textContent = s.coachSource === 'llm' ? 'LLM' : 'Local';
+        if (g.status) g.status.textContent = s.coachLlmStatus || '-';
+        if (g.insight) g.insight.textContent = s.coachInsight || 'Waiting...';
+        if (g.risk) g.risk.textContent = s.coachRisk || 'Waiting...';
+    }
 
     renderBoard() {
         this.dom.game?.board?.classList.add('hidden');
