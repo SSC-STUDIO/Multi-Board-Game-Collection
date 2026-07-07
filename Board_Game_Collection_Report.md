@@ -140,3 +140,23 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 - 139 build output files
 - 0 build errors
 - 100% pass rate on all rule engines (Renju, Chinese/Japanese Go scoring, Chess castling/en passant, Xiangqi river/palace rules, Junqi flip mechanics)
+
+## Sprint Update 2026-07-07
+
+### Highlights
+- 999 unit tests passing across 41 test files (up from 995)
+- Chess/Xiangqi AI hard difficulty bumped from depth 4 to depth 5
+- LLM Coach post-game analysis now game-specific for all 5 games
+- playVictorySequence unit tests added for 3D renderer
+- i18n keys fully synchronized between en-US and zh-CN
+
+### Test Coverage
+| Module | Tests |
+|--------|-------|
+| Gomoku rules | Renju forbidden moves, opening theory |
+| Go scoring | Chinese/Japanese territory evaluation |
+| Chess rules | Castling, en passant, check/checkmate |
+| Xiangqi rules | River, palace, cannon jump |
+| Junqi rules | Flip mechanics, rank hierarchy |
+| LLM Coach | Config, advice, post-game analysis |
+| 3D Renderer | Victory celebrations, particle effects |
