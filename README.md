@@ -6,6 +6,7 @@
 
 [![Stars](https://img.shields.io/github/stars/SSC-STUDIO/Multi-Board-Game-Collection?style=social)](https://github.com/SSC-STUDIO/Multi-Board-Game-Collection)
 [![Steam](https://img.shields.io/badge/Steam-Wishlist-blue?logo=steam&logoColor=white)](https://store.steampowered.com/)
+[![Demo](https://img.shields.io/badge/Live-Demo-black?logo=githubpages&logoColor=white)](https://ssc-studio.github.io/Multi-Board-Game-Collection/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0-orange.svg)](version.json)
 [![Tests](https://img.shields.io/badge/Tests-1005%20-passing-brightgreen.svg)]()
