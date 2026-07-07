@@ -193,3 +193,14 @@ When adding gameType to LLM Coach request functions:
 3. buildChatCompletionRequest already used GAME_COACH_CONFIG[gameType] correctly
 4. Pattern: always thread gameType from requestPostGameAnalysis -> buildPostGameRequest -> system message
 5. Test validates system message contains game-specific text
+
+## Rule: AI Depth Settings per Game
+
+Each game has a depthForLevel function mapping difficulty to search depth:
+- Gomoku: easy=random top-6, medium=minimax depth 2, hard=adaptive depth 2/3/4 + opening book
+- Go: easy=random top-6, medium=random top-3, hard=2-ply minimax evaluation
+- Chess: easy=depth 1, medium=depth 3, hard=depth 5 with MVV-LVA move ordering
+- Xiangqi: easy=depth 1, medium=depth 3, hard=depth 5
+- Junqi: easy=random top-6, medium=random top-3, hard=best-move-only + defensive flag protection
+
+When bumping depth, always run npm run test to verify no timeout. Depth 5 is safe max for browsers.
