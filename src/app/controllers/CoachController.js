@@ -172,7 +172,8 @@ export class CoachController {
                 settings: this.app.llmSettings,
                 snapshot: this.createLlmCoachSnapshot(localSuggestion),
                 signal: this.app.llmCoachAbortController.signal,
-                gameType: this.getGameType()
+                gameType: this.getGameType(),
+                difficulty: this.app.options?.difficulty || 'medium'
             });
 
             if (!this.isCurrentLlmCoachRequest(requestId, positionKey)) {
