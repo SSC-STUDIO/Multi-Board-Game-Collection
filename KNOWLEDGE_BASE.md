@@ -204,3 +204,23 @@ Each game has a depthForLevel function mapping difficulty to search depth:
 - Junqi: easy=random top-6, medium=random top-3, hard=best-move-only + defensive flag protection
 
 When bumping depth, always run npm run test to verify no timeout. Depth 5 is safe max for browsers.
+
+## Rule: SoundManager Integration in 3D Renderer
+
+When wiring SoundManager to BoardGameRenderer3D:
+1. Add 	his.soundManager = null in constructor
+2. Accept soundManager from options: 	his.soundManager = options.soundManager || null
+3. In addPiece(), after camera shake and particles, call: 	his.soundManager?.playMove(moveColor, options.source || human)
+4. Color mapping: dark/black -> black, else -> white
+5. Source param: human (default) or ai for AI moves
+6. Optional chaining ensures safe no-op when no soundManager
+7. Each App must pass soundManager: this.sound in renderer options
+
+## Rule: LLM Coach Difficulty-Adaptive Coaching
+
+When adding difficulty levels to LLM Coach:
+1. Add DIFFICULTY_CONFIG with easy/medium/hard objects
+2. Add difficulty parameter to buildChatCompletionRequest and requestLlmCoachAdvice
+3. Insert difficulty hint into system prompt
+4. Default to medium when difficulty is undefined
+
