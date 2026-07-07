@@ -28,6 +28,21 @@ export function getChessAIDelay(level) {
 
 const PIECE_VALUES = { P: 100, N: 320, B: 330, R: 500, Q: 900, K: 20000 };
 
+// Killer move heuristic: store best non-capture moves per depth
+const MAX_KILLERS = 2;
+const MAX_DEPTH = 8;
+let killerMoves = Array.from({ length: MAX_DEPTH }, () => []);
+
+function storeKiller(move, depth) {
+    if (depth < 0 || depth >= MAX_DEPTH) return;
+    const killers = killerMoves[depth];
+    if (killers.some(k => k.from[0] === move.from[0] && k.from[1] === move.from[1]
+        && k.to[0] === move.to[0] && k.to[1] === move.to[1])) return;
+    killers.unshift(move);
+    if (killers.length > MAX_KILLERS) killers.pop();
+}
+
+
 // piece-square tables（从白方视角；黑方镜像）
 const PST_P = [
     [0, 0, 0, 0, 0, 0, 0, 0],
@@ -125,14 +140,23 @@ export function evaluate(board) {
 /**
  * 走法排序：先看吃子（MVV-LVA）、升变、王车易位，有助于 alpha-beta 剪枝效率。
  */
-function orderMoves(moves) {
+function orderMoves(moves, depth = 0) {
+    const killers = (depth >= 0 && depth < MAX_DEPTH) ? killerMoves[depth] : [];
     return moves
         .map((mv) => {
             let score = 0;
             if (mv.capture) {
                 const vic = PIECE_VALUES[mv.capture[1]] || 0;
                 const agr = PIECE_VALUES[mv.piece[1]] || 0;
-                score += 10 * vic - agr;
+                score += 1000 + 10 * vic - agr;
+            } else {
+                for (let k = 0; k < killers.length; k++) {
+                    if (killers[k].from[0] === mv.from[0] && killers[k].from[1] === mv.from[1]
+                        && killers[k].to[0] === mv.to[0] && killers[k].to[1] === mv.to[1]) {
+                        score += 500 - k * 10;
+                        break;
+                    }
+                }
             }
             if (mv.promotion) score += 900;
             if (mv.castle) score += 50;
@@ -157,7 +181,7 @@ function search(board, state, depth, alpha, beta) {
         return { score: evaluate(board), move: null };
     }
 
-    const moves = orderMoves(getLegalMoves(board, state));
+    const moves = orderMoves(getLegalMoves(board, state), depth);
     if (moves.length === 0) {
         return { score: evaluate(board), move: null };
     }
@@ -173,7 +197,10 @@ function search(board, state, depth, alpha, beta) {
                 bestMove = mv;
             }
             alpha = Math.max(alpha, value);
-            if (alpha >= beta) break;
+            if (alpha >= beta) {
+                if (!mv.capture) storeKiller(mv, depth);
+                break;
+            }
         }
         return { score: value, move: bestMove };
     }
@@ -187,7 +214,10 @@ function search(board, state, depth, alpha, beta) {
             bestMove = mv;
         }
         beta = Math.min(beta, value);
-        if (alpha >= beta) break;
+        if (alpha >= beta) {
+            if (!mv.capture) storeKiller(mv, depth);
+            break;
+        }
     }
     return { score: value, move: bestMove };
 }
