@@ -431,7 +431,7 @@ renderBoard() {
     ensureRenderer3D() {
         if (this.renderer3d || !this.dom.game?.board3d) return;
         try {
-            this.renderer3d = new GoRenderer3D(this.dom.game.board3d, { boardSize: this.options.size });
+            this.renderer3d = new GoRenderer3D(this.dom.game.board3d, { boardSize: this.options.size, soundManager: this.sound });
             this.renderer3d.onCellClick(({ row, col }) => this.handleCellClick(row, col));
         } catch (err) {
             console.warn('[GoApp] 3D renderer init failed.', err);

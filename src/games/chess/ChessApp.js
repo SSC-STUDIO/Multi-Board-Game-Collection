@@ -437,7 +437,7 @@ export class ChessApp extends BoardGameApp {
     ensureRenderer3D() {
         if (this.renderer3d || !this.dom.game?.board3d) return;
         try {
-            this.renderer3d = new ChessRenderer3D(this.dom.game.board3d);
+            this.renderer3d = new ChessRenderer3D(this.dom.game.board3d, { soundManager: this.sound });
             this.renderer3d.onCellClick(({ row, col }) => this.handleSquareClick(row, col));
         } catch (err) {
             console.warn('[ChessApp] 3D renderer unavailable.', err);

@@ -359,7 +359,7 @@ export class XiangqiApp extends BoardGameApp {
     ensureRenderer3D() {
         if (this.renderer3d || !this.dom.game?.board3d) return;
         try {
-            this.renderer3d = new XiangqiRenderer3D(this.dom.game.board3d);
+            this.renderer3d = new XiangqiRenderer3D(this.dom.game.board3d, { soundManager: this.sound });
             this.renderer3d.onCellClick(({ row, col }) => this.handleCellClick(row, col));
         } catch (err) {
             console.warn('[XiangqiApp] 3D renderer unavailable.', err);

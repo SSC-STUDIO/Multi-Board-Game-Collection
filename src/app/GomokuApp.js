@@ -136,7 +136,8 @@ export class GomokuApp {
             try {
                 this.renderer3d = new GomokuRenderer3D(board3DContainer, {
                     scenePreset: this.options.scene,
-                    presentationMode: 'setup'
+                    presentationMode: 'setup',
+                    soundManager: this.sound
                 });
                 this.use3D = true;
                 this.renderer3d.setInteractionEnabled(false);

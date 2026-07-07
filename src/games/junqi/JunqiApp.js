@@ -483,7 +483,7 @@ export class JunqiApp extends BoardGameApp {
         this.renderer3d?.dispose();
         this.renderer3d = null;
         try {
-            this.renderer3d = new JunqiRenderer3D(this.dom.game.board3d, { variant: this.variant });
+            this.renderer3d = new JunqiRenderer3D(this.dom.game.board3d, { variant: this.variant, soundManager: this.sound });
             this.rendererVariant = this.variant;
             this.renderer3d.onCellClick(({ row, col }) => this.handleCellClick(row, col));
         } catch (err) {
