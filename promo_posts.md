@@ -27,7 +27,10 @@ I've been working on **Multi-Board-Game-Collection** — an open-source suite th
 - **Bilingual UI** (English & Chinese)
 - **Cross-platform**: Web, Electron Desktop, Android (Capacitor)
 
-Tech stack: vanilla JS + Three.js + Vite + Vitest (1005 tests passing).
+Tech stack: vanilla JS + Three.js + Vite + Vitest (1009 tests passing).
+- **Piece drop audio SFX** with color-coded sounds and directional panning via SoundManager
+- **Difficulty-adaptive coaching** (Easy/Medium/Hard) for beginners to advanced players
+- **Move history context** — AI coach sees your recent moves for smarter strategic advice
 - **Camera shake** on piece drops for tactile feedback
 - **Monte Carlo territory evaluation** in Go AI for stronger hard mode
 - **Expanded opening book** for Gomoku with 3-move strategic responses
