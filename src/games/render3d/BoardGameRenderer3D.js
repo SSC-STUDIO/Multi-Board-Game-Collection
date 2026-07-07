@@ -683,6 +683,7 @@ export class BoardGameRenderer3D {
 
     playCameraShake(intensity = 0.05, duration = 0.16) {
         if (!this.sceneManager?.camera) return;
+        if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
         const cam = this.sceneManager.camera;
         const originalPos = cam.position.clone();
         const startTime = performance.now();
