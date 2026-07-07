@@ -416,7 +416,9 @@ This project is licensed under the [MIT License](LICENSE).
 - [ ] AI commentary during games
 - [ ] Tournament mode with bracket system
 - [ ] Custom piece themes and board skins
-- [ ] Sound effects for piece placement
+- [x] Sound effects for piece placement (SoundManager integrated)
+- [x] Difficulty-adaptive LLM coaching (Easy/Medium/Hard)
+- [x] Move history context in coaching prompts
 - [ ] Keyboard navigation and accessibility improvements
 - [ ] iOS app via Capacitor
 
