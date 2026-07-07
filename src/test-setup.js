@@ -52,7 +52,11 @@ if (typeof globalThis.document === 'undefined') {
         querySelector: () => null,
         querySelectorAll: () => [],
         documentElement: { lang: 'zh-CN', classList: { add: () => {}, remove: () => {} } },
-        createElement: (tag) => ({ style: {}, classList: { add: () => {}, remove: () => {}, toggle: () => {}, contains: () => false }, dataset: {}, textContent: '', appendChild: () => {}, replaceChildren: () => {}, closest: () => null, matches: () => false, remove: () => {}, focus: () => {}, disabled: false, checked: false, value: '', className: '', scrollTop: 0, scrollLeft: 0, offsetWidth: 100, getAttribute: () => null, setAttribute: () => {}, removeAttribute: () => {}, addEventListener: () => {}, removeEventListener: () => {} }),
+        createElement: (tag) => {
+            const el = { style: {}, classList: { add: () => {}, remove: () => {}, toggle: () => {}, contains: () => false }, dataset: {}, textContent: '', appendChild: () => {}, replaceChildren: () => {}, closest: () => null, matches: () => false, remove: () => {}, focus: () => {}, disabled: false, checked: false, value: '', className: '', scrollTop: 0, scrollLeft: 0, offsetWidth: 100, getAttribute: () => null, setAttribute: () => {}, removeAttribute: () => {}, addEventListener: () => {}, removeEventListener: () => {} };
+            if (tag === 'canvas') { el.getContext = () => ({ clearRect: () => {}, fillText: () => {}, fillStyle: '', font: '', textAlign: '', textBaseline: '', shadowColor: '', shadowBlur: 0 }); }
+            return el;
+        },
         createDocumentFragment: () => ({
             appendChild: () => {},
             replaceChildren: () => {},
