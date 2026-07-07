@@ -87,6 +87,18 @@ export function getBestMove(state, color) {
         return { row: bestMove.row, col: bestMove.col, score: bestScore };
     }
 
+    // Hard: opening book - first move always center
+    if (moveHistory.length === 0) {
+        const center = Math.floor(size / 2);
+        return { row: center, col: center, score: 1000 };
+    }
+    // Second move: if center is free, claim it
+    if (moveHistory.length === 1) {
+        const center = Math.floor(size / 2);
+        if (!board[center][center]) {
+            return { row: center, col: center, score: 900 };
+        }
+    }
     // Hard: minimax with alpha-beta, adaptive depth, top 15 candidates
     const moveCount = moveHistory.length;
     const depth = moveCount < 6 ? 2 : moveCount < 20 ? 3 : 4;
