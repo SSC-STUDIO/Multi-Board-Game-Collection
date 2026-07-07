@@ -9,7 +9,7 @@
 [![Demo](https://img.shields.io/badge/Live-Demo-black?logo=githubpages&logoColor=white)](https://ssc-studio.github.io/Multi-Board-Game-Collection/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.0-orange.svg)](version.json)
-[![Tests](https://img.shields.io/badge/Tests-1005%20-passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-1009%20-passing-brightgreen.svg)]()
 [![3D](https://img.shields.io/badge/Three.js-3D%20Rendering-blueviolet.svg)](https://threejs.org/)
 
 [English](#english) | [简体中文](#简体中文)
@@ -283,7 +283,7 @@ This is a multi-board game collection featuring Gomoku, Go, Chess, Xiangqi, and 
 
 
 #### Quality Assurance
-- **1005 unit tests** across 41 test files — 100% pass rate
+- **1009 unit tests** across 41 test files — 100% pass rate
 - Rule engine tests: Renju forbidden moves, Chinese/Japanese Go scoring, Chess castling/en passant, Xiangqi river/palace rules, Junqi flip mechanics
 - Three.js renderer tests with mock DOM
 - LLM Coach service tests with API mocking
