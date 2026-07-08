@@ -30,7 +30,7 @@
                          "game.restart":  "Restart",
                          "game.resign":  "Resign",
                          "game.back":  "Back to Setup",
-                         "result.title":  "Game Over",
+                         "result.title":  "Game Complete",
                          "result.blackWins":  "Black Wins",
                          "result.whiteWins":  "White Wins",
                          "result.draw":  "Draw",
