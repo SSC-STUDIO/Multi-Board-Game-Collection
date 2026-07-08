@@ -1,4 +1,4 @@
-﻿/** LLM Coach 鏈嶅姟锛氳缃鐞嗐€丄PI 璇锋眰銆佽繛鎺ユ祴锟?@module services/llmCoach */
+/** LLM Coach 鏈嶅姟锛氳缃鐞嗐€丄PI 璇锋眰銆佽繛鎺ユ祴锟?@module services/llmCoach */
 
 // === Constants ===
 const STORAGE_KEY = 'gomoku-llm-coach-settings';
@@ -50,6 +50,18 @@ const GAME_COACH_CONFIG = {
         rules: 'Junqi Flip: All pieces start face-down. Players flip one piece per turn to determine sides, then alternate moves. Higher rank captures lower. Bombs destroy attackers. Mines block all except engineers. Flag capture wins.',
         moveHint: 'For Junqi, recommended move uses {action: "flip"|"move", row, col, to?: {row, col}}. Flipping reveals a hidden piece.',
         analyzePrefix: 'Analyze this Junqi position for the human player.'
+    },
+    othello: {
+        role: 'You are an Othello (Reversi) teaching coach.',
+        rules: 'Othello: 8x8 board. Black moves first. A move places a disc on an empty square and must bracket one or more opponent discs in a straight line; all bracketed discs flip to the current player color. If a player has no legal move, they pass. Game ends when neither player can move. Player with the most discs wins. Corners are the most valuable squares; X-squares and C-squares next to corners are dangerous.',
+        moveHint: 'For Othello, recommended move uses {row, col} for an empty square that legally flips at least one opponent disc. Alternatives are other high-value legal moves, prioritizing corners and edges.',
+        analyzePrefix: 'Analyze this Othello position for the human player.'
+    },
+    shogi: {
+        role: 'You are a Shogi (Japanese Chess) teaching coach.',
+        rules: 'Shogi: 9x9 board. Sente (first player) moves first. Pieces are captured and may be dropped back onto empty squares (drops are unique to Shogi). Promotion applies in the last three ranks; a moved piece may promote unless it is a King or Gold. Promoted pieces gain new movement. Checkmate of the king wins; the TwoPawn (doubling unpromoted pawns on a file) and similar illegal drop rules apply.',
+        moveHint: 'For Shogi, recommended move uses {from: {row, col}, to: {row, col}, promote?: true|false} for a board move, or {drop: true, type, to: {row, col}} to drop a captured piece. Row 0 is the far side (Gote back rank), row 8 is Sente back rank.',
+        analyzePrefix: 'Analyze this Shogi position for the human player.'
     }
 };
 
@@ -548,6 +560,12 @@ function createBoardImageDataUrl(snapshot, gameType) {
     if (gt === 'chess' || gt === 'xiangqi') {
         return createGridBoardImageUrl(snapshot, gt);
     }
+    if (gt === 'othello') {
+        return createOthelloBoardImageUrl(snapshot);
+    }
+    if (gt === 'shogi') {
+        return createShogiBoardImageUrl(snapshot);
+    }
     return createIntersectionBoardImageUrl(snapshot, gt);
 }
 
@@ -732,4 +750,225 @@ function createIntersectionBoardImageUrl(snapshot, gameType) {
 function getBoardImageStarPoints(size) {
     const points = size === 19 ? [3, 9, 15] : [3, 7, 11];
     return points.flatMap((row) => points.map((col) => [row, col]));
+}
+
+
+/**
+ * Render an Othello (Reversi) 8x8 board with green felt and black/white discs.
+ * Board cells are 'black' | 'white' | null.
+ */
+function createOthelloBoardImageUrl(snapshot) {
+    const size = 8;
+    const canvasSize = 768;
+    const padding = 58;
+    const cell = (canvasSize - padding * 2) / size;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0d3b1f';
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
+    ctx.fillStyle = '#e8e8e8';
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i <= size; i += 1) {
+        const pos = padding + i * cell;
+        ctx.beginPath();
+        ctx.moveTo(padding, pos);
+        ctx.lineTo(canvasSize - padding, pos);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos, padding);
+        ctx.lineTo(pos, canvasSize - padding);
+        ctx.stroke();
+    }
+
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    [[2, 2], [2, 6], [6, 2], [6, 6]].forEach(([row, col]) => {
+        const x = padding + col * cell;
+        const y = padding + row * cell;
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    ctx.font = '14px sans-serif';
+    ctx.fillStyle = '#cfcfcf';
+    for (let i = 0; i < size; i += 1) {
+        ctx.fillText(String.fromCharCode(65 + i), padding + i * cell + cell / 2, padding - 22);
+        ctx.fillText(String(8 - i), padding - 22, padding + i * cell + cell / 2);
+    }
+
+    const board = snapshot.board;
+    if (board) {
+        for (let row = 0; row < size; row += 1) {
+            for (let col = 0; col < size; col += 1) {
+                const disc = board[row] && board[row][col];
+                if (!disc) continue;
+                const x = padding + col * cell + cell / 2;
+                const y = padding + row * cell + cell / 2;
+                const radius = cell * 0.4;
+                const gradient = ctx.createRadialGradient(
+                    x - radius * 0.35, y - radius * 0.4, radius * 0.2, x, y, radius
+                );
+                if (disc === 'black') {
+                    gradient.addColorStop(0, '#5a5a5a');
+                    gradient.addColorStop(1, '#0a0a0a');
+                } else {
+                    gradient.addColorStop(0, '#ffffff');
+                    gradient.addColorStop(1, '#c9c4ba');
+                }
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = disc === 'black' ? 'rgba(0,0,0,0.6)' : 'rgba(120,110,90,0.5)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        }
+    }
+
+    if (snapshot.lastMove) {
+        const x = padding + snapshot.lastMove.col * cell + cell / 2;
+        const y = padding + snapshot.lastMove.row * cell + cell / 2;
+        ctx.strokeStyle = '#f1c75c';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(x, y, cell * 0.46, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    return canvas.toDataURL('image/png');
+}
+
+/**
+ * Render a Shogi (Japanese Chess) 9x9 board with traditional kanji piece labels
+ * and promotion zone shading. Cells are {type, side} | null.
+ * Row 0 = top (Gote back rank), row 8 = bottom (Sente back rank).
+ */
+function createShogiBoardImageUrl(snapshot) {
+    const size = 9;
+    const canvasSize = 768;
+    const padding = 58;
+    const cell = (canvasSize - padding * 2) / size;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#d4a853';
+    ctx.fillRect(0, 0, canvasSize, canvasSize);
+    ctx.strokeStyle = 'rgba(47,36,25,0.85)';
+    ctx.lineWidth = 1.5;
+
+    for (let i = 0; i <= size; i += 1) {
+        const pos = padding + i * cell;
+        ctx.beginPath();
+        ctx.moveTo(padding, pos);
+        ctx.lineTo(canvasSize - padding, pos);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos, padding);
+        ctx.lineTo(pos, canvasSize - padding);
+        ctx.stroke();
+    }
+
+    ctx.fillStyle = 'rgba(255,200,100,0.35)';
+    ctx.fillRect(padding, padding, canvasSize - padding * 2, cell * 3);
+    ctx.fillRect(padding, canvasSize - padding - cell * 3, canvasSize - padding * 2, cell * 3);
+
+    ctx.fillStyle = '#2f2419';
+    ctx.font = '13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    var cols = ['9','8','7','6','5','4','3','2','1'];
+    for (let i = 0; i < size; i += 1) {
+        ctx.fillText(cols[i], padding + i * cell + cell / 2, padding - 22);
+        ctx.fillText(String(1 + i), padding - 22, padding + i * cell + cell / 2);
+    }
+
+    var kanjiMap = {
+        K: '\u738B', R: '\u98DB\u8ECA', B: '\u89D2\u884C', G: '\u91D1',
+        S: '\u9280', N: '\u69D8\u99AC', L: '\u9999\u8F66', P: '\u6B69\u5175',
+        DR: '\u9F8D\u738B', DB: '\u9F8D\u9A6C', PS: '\u6210\u9280',
+        PN: '\u6210\u69D8', PL: '\u6210\u9999', PP: '\u6210\u6B69'
+    };
+
+    var board = snapshot.board;
+    if (board) {
+        for (let row = 0; row < size; row += 1) {
+            for (let col = 0; col < size; col += 1) {
+                var piece = board[row] && board[row][col];
+                if (!piece || !piece.type) continue;
+                var x = padding + col * cell + cell / 2;
+                var y = padding + row * cell + cell / 2;
+                var label = kanjiMap[piece.type] || piece.type;
+
+                var isSente = piece.side === 'sente';
+                ctx.save();
+                ctx.translate(x, y);
+                if (!isSente) {
+                    ctx.rotate(Math.PI);
+                }
+
+                ctx.fillStyle = '#2f2419';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.beginPath();
+                var triW = cell * 0.2;
+                var triH = cell * 0.08;
+                if (isSente) {
+                    ctx.moveTo(-triW, -cell * 0.35);
+                    ctx.lineTo(triW, -cell * 0.35);
+                    ctx.lineTo(0, -cell * 0.35 + triH);
+                } else {
+                    ctx.moveTo(-triW, cell * 0.35);
+                    ctx.lineTo(triW, cell * 0.35);
+                    ctx.lineTo(0, cell * 0.35 - triH);
+                }
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.font = 'bold 26px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                var gradient = ctx.createRadialGradient(0, -4, 2, 0, 0, cell * 0.4);
+                gradient.addColorStop(0, '#faf4e4');
+                gradient.addColorStop(1, '#d4a853');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.moveTo(0, -cell * 0.35);
+                ctx.lineTo(cell * 0.22, -cell * 0.1);
+                ctx.lineTo(cell * 0.15, cell * 0.32);
+                ctx.lineTo(-cell * 0.15, cell * 0.32);
+                ctx.lineTo(-cell * 0.22, -cell * 0.1);
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = '#2f2419';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.fillStyle = '#1a0e05';
+                ctx.fillText(label, 0, isSente ? 2 : -2);
+                ctx.restore();
+            }
+        }
+    }
+
+    if (snapshot.lastMove) {
+        var lx = padding + snapshot.lastMove.col * cell + cell / 2;
+        var ly = padding + snapshot.lastMove.row * cell + cell / 2;
+        ctx.strokeStyle = '#f1c75c';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(lx, ly, cell * 0.42, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    return canvas.toDataURL('image/png');
 }

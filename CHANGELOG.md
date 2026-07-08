@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to this project are documented in this file.
 
@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- LLM Coach support for Othello (8x8 board image with green felt and disc rendering) and Shogi (9x9 board with kanji piece labels and promotion zones)
+- Comprehensive unit tests for Othello and Shogi coach prompts and board image rendering (6 new tests)
 - Shogi (Japanese Chess) with 9x9 board, 14 piece types, promotion, and drop mechanics
 - Othello (Reversi) with 8x8 board, disc flipping, and minimax AI
 - AI commentary service for real-time move explanations across all games
@@ -31,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- LLM Coach support for Othello (8x8 board image with green felt and disc rendering) and Shogi (9x9 board with kanji piece labels and promotion zones)
+- Comprehensive unit tests for Othello and Shogi coach prompts and board image rendering (6 new tests)
 - Shogi (Japanese Chess) with 9x9 board, 14 piece types, promotion, and drop mechanics
 - Othello (Reversi) with 8x8 board, disc flipping, and minimax AI
 - AI commentary service for real-time move explanations across all games

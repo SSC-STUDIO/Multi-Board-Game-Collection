@@ -1,4 +1,3 @@
-# Bug Reports ¡ª Archived
+# Bug Reports â€” Archived
 
 > Old resolved bugs moved here.
-

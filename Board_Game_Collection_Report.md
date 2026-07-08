@@ -1,4 +1,4 @@
-﻿# Board Game Collection — Development Report
+# Board Game Collection — Development Report
 
 **Date**: 2026-07-08
 **Version**: 1.0.0
@@ -18,7 +18,7 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 - **Difficulty-Adaptive Coaching** (Easy/Medium/Hard) with move history context for smarter advice
 - **Multi-platform**: Web (Vite), Electron Desktop, Android (Capacitor)
 - **Bilingual UI**: English / 简体中文 with zero text clipping
-- **1126 Unit Tests** across 48 test files
+- **1132 Unit Tests** across 48 test files
 - **Premium CSS Design System**: 35+ semantic tokens in :root with zero hardcoded hex in components.css
 - **Full Dark Mode**: @media (prefers-color-scheme: dark) with comprehensive variable overrides
 - **Micro-Interactions**: Cell hover scale, panel card lift, board frame glow, piece placement ripple, title gradient shimmer
@@ -34,15 +34,15 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 |------|-------|-------|-----------|-----|-----------|
 | Gomoku | 15×15 | Classic + Renju forbidden moves | 3 (Easy/Medium/Hard) | Yes (Home/Park/Competition) | Yes (local + LLM) |
 | Go | 9/13/19 | Chinese + Japanese scoring | 3 (Easy/Medium/Hard) | Yes (3 scenes) | Yes (LLM-only) |
-| Chess | 8×8 | Full FIDE rules | 3 (Easy/Medium/Hard) | No (2D) | Yes (LLM-only) |
-| Xiangqi | 9×10 | Full traditional rules | 3 (Easy/Medium/Hard) | No (2D) | Yes (LLM-only) |
-| Junqi | 6×10 | Classic flip mechanics | 3 (Easy/Medium/Hard) | No (2D) | Yes (LLM-only) |
+| Chess | 8×8 | Full FIDE rules | 3 (Easy/Medium/Hard) | Yes (3D) | Yes (LLM-only) |
+| Xiangqi | 9×10 | Full traditional rules | 3 (Easy/Medium/Hard) | Yes (3D) | Yes (LLM-only) |
+| Junqi | 6×10 | Classic flip mechanics | 3 (Easy/Medium/Hard) | Yes (3D) | Yes (LLM-only) |
 
 ### Tech Stack
 - **Frontend**: Vanilla JavaScript (ES Modules), CSS Variables
 - **3D Engine**: Three.js ^0.164.0
 - **Build**: Vite ^8.0.10, custom Node.js scripts
-- **Testing**: Vitest ^4.1.5 — 1126 tests, 40 test files
+- **Testing**: Vitest ^4.1.5 — 1132 tests, 48 test files
 - **Desktop**: Electron ^28.0.0 + electron-builder
 - **Mobile**: Capacitor ^8.3.1 (Android APK)
 - **i18n**: English / 简体中文
@@ -60,17 +60,17 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 ### What Changed
 The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games:
 
-1. **Game-specific system prompts** for each game (role, rules, move format, analysis prefix)
-2. **Multi-game board rendering**: Chess/Xiangqi use rectangular grid boards with piece labels; Gomoku/Go/Junqi use intersection boards with stones
+1. **Game-specific system prompts** for all 7 games (role, rules, move format, analysis prefix) including Othello and Shogi
+2. **Multi-game board rendering**: Chess/Xiangqi use rectangular grid boards with piece labels; Gomoku/Go/Junqi use intersection boards with stones; Othello uses 8x8 green felt with black/white discs; Shogi uses 9x9 board with kanji piece labels
 3. **Dynamic game detection**: getGameType() reads from ody.dataset.activeGame — no hardcoding
 4. **Non-Gomoku LLM path**: Chess, Xiangqi, Junqi bypass local AI and go directly to LLM coaching
 5. **Full test coverage**: 6 new tests verifying each game's system prompt and fallback behavior
 
 ### Files Modified
-- src/services/llmCoach.js — Split createBoardImageDataUrl into grid + intersection renderers
+- src/services/llmCoach.js — Split createBoardImageDataUrl into grid, intersection, Othello, and Shogi renderers
 - src/app/controllers/CoachController.js — Added getGameType(), gameType passthrough, non-Gomoku LLM path
 - src/games/registry.js — Added llm-coach capability to Go, Chess, Xiangqi, Junqi
-- src/services/llmCoach.test.js — 6 new multi-game tests with canvas mock
+- src/services/llmCoach.test.js — 12 new multi-game tests with canvas mock
 
 ---
 
@@ -125,7 +125,7 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 - **Drop Particle Dust**: Immersive stone/piece placement particle effects
 - **Camera Follow-Zoom**: Automatic focus on the last move for enhanced gameplay experience
 - **Multi-Game LLM Coach**: Full support for all 5 games with game-specific prompts and board image rendering
-- **Test Coverage**: 1126 tests across 40 test files, 111 modules verified
+- **Test Coverage**: 1132 tests across 48 test files, 111 modules verified
 
 ---
 

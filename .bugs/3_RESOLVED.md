@@ -1,4 +1,4 @@
-﻿# Bug Reports — Resolved
+# Bug Reports — Resolved
 
 > Bugs verified and closed.
 
