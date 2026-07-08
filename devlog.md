@@ -32,7 +32,7 @@ A complete board game suite featuring **5 classic games** — Gomoku, Go, Chess,
 - **LLM Coach** — An AI teaching coach powered by any OpenAI-compatible API. It analyzes your position, suggests moves, explains strategy, and provides risk assessment — in natural language. Now supports all 5 games!
 - **3 Difficulty Levels** — Easy, Medium, Hard AI opponents for every game. Gomoku uses Minimax + Alpha-Beta pruning; Go evaluates territory; Chess uses piece-square tables; Xiangqi has palace/river-aware evaluation.
 - **Full Rules** — Renju forbidden moves in Gomoku, Chinese/Japanese scoring in Go, castling/en passant in Chess, river/palace rules in Xiangqi, flip mechanics in Junqi.
-- **1020 Unit Tests** — 100% pass rate across 41 test files. Every rule engine is tested.
+- **1126 Unit Tests** — 100% pass rate across 48 test files. Every rule engine is tested.
 - **Bilingual UI** — English and 简体中文, zero text clipping.
 - **Multi-Platform** — Web, Windows/Mac/Linux (Electron), Android APK.
 
@@ -113,7 +113,7 @@ If you find this useful, please give us a star on GitHub. It helps us keep build
 - Wired into `playVictorySequence()` with a 400ms delay after camera victory focus
 
 ### Test & Build Status
-- **1020/1020 tests passing** across 41 test files
+- **1126/1126 tests passing** across 48 test files
 - **Build clean**: 139 files, zero errors
 
 ## New: 3D Victory Celebrations (All Games)
@@ -141,7 +141,7 @@ Toggle QI Coach in any game's setup screen — the coach analyzes positions in r
 - LLM Coach buildPostGameRequest now accepts gameType and injects game-specific strategic prompts for all 5 games
 - System prompt dynamically selects the right game role and strategy focus
 - User message includes game type label for LLM context
-- Tests updated: 1020 passing across 41 test files
+- Tests updated: 1126 passing across 48 test files
 
 ## Go AI 2-Ply Minimax + Gomoku Opening Book (2026-07-07)
 
@@ -149,8 +149,8 @@ Toggle QI Coach in any game's setup screen — the coach analyzes positions in r
 - Gomoku AI hard mode includes center-first opening book, second-move response, and third-move diagonal/orthogonal counter
 - Both improvements make hard difficulty significantly more challenging
 
-## 1002 Tests Milestone (2026-07-08)
+## 1126 Tests Milestone (2026-07-08)
 
 - Junqi AI defensive mode tests added (hard/medium/empty board)
-- Total test count now 1002 across 41 test files
+- Total test count now 1126 across 48 test files
 - All 5 games now have AI engine tests

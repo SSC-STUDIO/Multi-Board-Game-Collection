@@ -27,7 +27,7 @@ I've been working on **Multi-Board-Game-Collection** — an open-source suite th
 - **Bilingual UI** (English & Chinese)
 - **Cross-platform**: Web, Electron Desktop, Android (Capacitor)
 
-Tech stack: vanilla JS + Three.js + Vite + Vitest (1020 tests passing).
+Tech stack: vanilla JS + Three.js + Vite + Vitest (1126 tests passing).
 - **Piece drop audio SFX** with color-coded sounds and directional panning via SoundManager
 - **Difficulty-adaptive coaching** (Easy/Medium/Hard) for beginners to advanced players
 - **Move history context** — AI coach sees your recent moves for smarter strategic advice
@@ -114,7 +114,7 @@ GitHub 地址：https://github.com/SSC-STUDIO/Multi-Board-Game-Collection
 - **Post-Game Analysis for All Games**: After any game ends, request a detailed AI review covering turning points, mistakes, strengths, and a performance rating
 - **5 Complete Games**: Gomoku (Renju), Go (Chinese/Japanese scoring), Chess (FIDE), Xiangqi, Junqi (Flip Chess)
 - **Three.js 3D Scenes**: Home Study, Park Pavilion, Tournament Hall with dynamic lighting, shadows, and particle effects
-- **995 Unit Tests**: 100% pass rate across 41 test files
+- **1126 Unit Tests**: 100% pass rate across 48 test files
 - **Bilingual UI**: English and 简体中文 throughout
 
 ## Latest Features for Promotion
@@ -127,7 +127,7 @@ Real-time AI coaching powered by any OpenAI-compatible API. Toggle "QI Coach" in
 
 ### Stats
 - 995 unit tests, 100% pass rate
-- 41 test files covering all 5 rule engines
+- 48 test files covering all 5 rule engines
 - 5 games in one launcher
 - 3D scenes: Home Study, Park Pavilion, Tournament Hall
 
@@ -164,7 +164,7 @@ GitHub: https://github.com/SSC-STUDIO/Multi-Board-Game-Collection
 欢迎交流技术细节！
 ## Updated Feature List (2026-07-07)
 
-- 999 unit tests passing across 41 test files
+- 1126 unit tests passing across 48 test files
 - LLM Coach now game-specific for all 5 games (Gomoku, Go, Chess, Xiangqi, Junqi)
 - Go AI hard mode: 2-ply minimax for stronger territorial play
 - Gomoku AI hard mode: center-first opening book + second-move response
