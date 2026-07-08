@@ -6790,3 +6790,54 @@ a:focus-visible {
     0% { opacity: 0.8; filter: drop-shadow(0 0 4px rgba(241,199,92,0.4)); }
     100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(241,199,92,0.7)); }
 }
+
+/* === OS Dark Mode Preference === */
+@media (prefers-color-scheme: dark) {
+    html {
+        color-scheme: dark;
+    }
+
+    /* Adjust result card backgrounds for dark mode */
+    .result-card {
+        background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
+        color: #f0ede4;
+    }
+
+    .result-title {
+        color: #f0ede4;
+    }
+
+    .result-detail {
+        color: rgba(240, 237, 228, 0.72);
+    }
+
+    .result-stat {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .result-stat-value {
+        color: #f0ede4;
+    }
+
+    .message {
+        background: rgba(40, 40, 40, 0.86);
+        color: rgba(240, 237, 228, 0.8);
+    }
+
+    .chess-board-shell {
+        background: linear-gradient(140deg, #2a1d12, #120c06);
+    }
+
+    .xiangqi-piece {
+        background: radial-gradient(circle at 30% 28%, #e8d4a8, #a07840 72%);
+    }
+
+    .junqi-piece-back {
+        background: radial-gradient(circle at 34% 28%, rgba(255, 229, 154, 0.36), transparent 38%),
+            linear-gradient(135deg, #6b5228, #2a1e0e);
+    }
+
+    .junqi-piece-face {
+        background: radial-gradient(circle at 30% 28%, #e8d4a8, #a07840 78%);
+    }
+}
