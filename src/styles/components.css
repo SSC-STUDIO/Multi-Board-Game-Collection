@@ -17,7 +17,7 @@
 
 .stage-title {
     font-size: 1.55rem;
-    color: #4c2610;
+    color: var(--heading-color);
     margin-bottom: 8px;
 }
 
@@ -34,22 +34,22 @@
     gap: 8px;
     padding: 18px 18px;
     border-radius: 18px;
-    color: #fffaf2;
+    color: var(--card-warm-bg);
     box-shadow: 0 22px 38px rgba(74, 35, 12, 0.18);
     transition: transform 0.25s ease, background 0.25s ease;
 }
 
 .turn-spotlight.turn-black {
-    background: linear-gradient(135deg, #292525, #5b4333);
+    background: linear-gradient(135deg, var(--card-dark-bg), var(--card-dark-mid));
 }
 
 .turn-spotlight.turn-white {
-    background: linear-gradient(135deg, #c98c52, #f3d4af);
-    color: #4b2810;
+    background: linear-gradient(135deg, var(--card-warm-light), var(--card-warm-pale));
+    color: var(--heading-color);
 }
 
 .turn-spotlight.turn-finished {
-    background: linear-gradient(135deg, #8c5123, #d38d45);
+    background: linear-gradient(135deg, var(--card-finished-dark), var(--card-finished-light));
 }
 
 .spotlight-label {
@@ -95,9 +95,9 @@
 }
 
 .option-btn.active {
-    background: linear-gradient(135deg, #f6c37a, #d17b30);
-    border-color: #c8722d;
-    color: #2c1404;
+    background: linear-gradient(135deg, var(--option-active-start), var(--option-active-end));
+    border-color: var(--option-active-border);
+    color: var(--option-active-text);
     box-shadow: 0 10px 18px rgba(193, 110, 40, 0.35);
 }
 
@@ -108,7 +108,7 @@
     border: none;
     border-radius: 14px;
     background: linear-gradient(135deg, var(--accent), var(--accent-deep));
-    color: #fffaf2;
+    color: var(--card-warm-bg);
     cursor: pointer;
     transition: 0.25s ease;
 }
@@ -229,7 +229,7 @@
     position: absolute;
     inset: 4px -6px -10px 4px;
     border-radius: 16px 16px 20px 20px;
-    background: linear-gradient(180deg, #8b6914, #5a3d0a);
+    background: linear-gradient(180deg, var(--board-depth-start), var(--board-depth-end));
     transform: translateZ(-10px);
     z-index: -1;
     box-shadow: 0 12px 24px rgba(60, 30, 5, 0.4);
@@ -257,7 +257,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #2b1a0a;
+    background: var(--dot-marker);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -335,7 +335,7 @@
 .stone.black {
     background:
         radial-gradient(ellipse 60% 50% at 35% 30%, rgba(100, 100, 100, 0.8), transparent),
-        radial-gradient(circle at 40% 35%, #4a4a4a, #1a1a1a 50%, #0a0a0a 80%);
+        radial-gradient(circle at 40% 35%, var(--stone-black-start), var(--stone-black-mid) 50%, var(--stone-black-end) 80%);
     box-shadow:
         0 4px 8px rgba(0, 0, 0, 0.35),
         0 8px 16px rgba(0, 0, 0, 0.2),
@@ -346,7 +346,7 @@
 .stone.white {
     background:
         radial-gradient(ellipse 60% 50% at 35% 30%, rgba(255, 255, 255, 0.9), transparent),
-        radial-gradient(circle at 40% 35%, #ffffff, #e8e8e8 40%, #c8c8c8 80%);
+        radial-gradient(circle at 40% 35%, var(--stone-white-start), var(--stone-white-mid) 40%, var(--stone-white-end) 80%);
     border: 1px solid rgba(100, 100, 100, 0.3);
     box-shadow:
         0 4px 8px rgba(0, 0, 0, 0.2),
@@ -362,7 +362,7 @@
 }
 
 .stone.last {
-    outline: 2px solid #ffb347;
+    outline: 2px solid var(--focus-ring-color);
     outline-offset: 2px;
     box-shadow: 0 0 0 4px rgba(255, 179, 71, 0.2), 0 6px 12px rgba(0, 0, 0, 0.35);
 }
@@ -405,8 +405,8 @@
     padding: 10px 18px;
     border-radius: 12px;
     border: none;
-    background: #2f2f2f;
-    color: #fff5e8;
+    background: var(--control-btn-bg);
+    color: var(--control-btn-text);
     cursor: pointer;
     transition: 0.2s ease;
     font-size: 1rem;
@@ -420,7 +420,7 @@
 }
 
 .control-btn.danger {
-    background: #a43a3a;
+    background: var(--control-btn-danger);
 }
 
 .message {
@@ -440,17 +440,17 @@
 }
 
 .message.success {
-    color: #2f5f36;
+    color: var(--message-success-text);
     background: rgba(213, 241, 220, 0.9);
 }
 
 .message.error {
-    color: #7a2525;
+    color: var(--message-error-text);
     background: rgba(255, 224, 224, 0.95);
 }
 
 .message.info {
-    color: #5a4e42;
+    color: var(--muted);
 }
 
 @keyframes messagePulse {
@@ -495,7 +495,7 @@
 
 .panel-card-value {
     font-size: 1.3rem;
-    color: #4a2812;
+    color: var(--panel-card-value-color);
     margin-bottom: 8px;
 }
 
@@ -540,7 +540,7 @@
 
 .result-title {
     font-size: 2rem;
-    color: #4d2810;
+    color: var(--result-title-color);
     margin-bottom: 8px;
 }
 
@@ -572,7 +572,7 @@
 
 .result-stat-value {
     font-size: 1.2rem;
-    color: #43200d;
+    color: var(--result-stat-value-color);
 }
 
 .result-actions {

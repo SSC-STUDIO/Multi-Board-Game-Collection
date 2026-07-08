@@ -6793,51 +6793,55 @@ a:focus-visible {
 
 /* === OS Dark Mode Preference === */
 @media (prefers-color-scheme: dark) {
-    html {
-        color-scheme: dark;
+    html { color-scheme: dark; }
+    :root {
+        --bg-start: #1a1410; --bg-end: #120e08;
+        --ink: #e8e0d4; --muted: #a89882;
+        --accent: #e8953e; --accent-deep: #c46828;
+        --panel: rgba(30,25,18,0.92); --panel-strong: rgba(38,32,24,0.98);
+        --shadow: 0 18px 40px rgba(0,0,0,0.45);
+        --wood: #8a6238; --wood-deep: #6a4828;
+        --heading-color: #f0dcc0;
+        --card-warm-bg: #2a2218; --card-dark-bg: #1a1410;
+        --card-dark-mid: #2e2218; --card-warm-light: #8a6238;
+        --card-warm-pale: #3a2e20;
+        --card-finished-dark: #5a3a18; --card-finished-light: #8a6238;
+        --option-active-start: #c46828; --option-active-end: #e8953e;
+        --option-active-border: #a45820; --option-active-text: #f0dcc0;
+        --btn-primary-text: #f0dcc0; --btn-ghost-hover: rgba(255,255,255,0.08);
+        --focus-ring-color: #e8953e;
+        --control-btn-bg: #2e2218; --control-btn-text: #e8dcc8;
+        --control-btn-danger: #8a2a2a;
+        --message-success-text: #6abf72; --message-success-bg: rgba(30,60,35,0.9);
+        --message-error-text: #e85a5a; --message-error-bg: rgba(60,20,20,0.95);
+        --panel-card-value-color: #e8d4b8;
+        --result-title-color: #f0dcc0; --result-stat-value-color: #e8d4b8;
+        --board-depth-start: #5a4020; --board-depth-end: #2e1e10;
+        --dot-marker: #8a7a60;
     }
-
-    /* Adjust result card backgrounds for dark mode */
-    .result-card {
-        background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.95));
-        color: #f0ede4;
-    }
-
-    .result-title {
-        color: #f0ede4;
-    }
-
-    .result-detail {
-        color: rgba(240, 237, 228, 0.72);
-    }
-
-    .result-stat {
-        background: rgba(255, 255, 255, 0.06);
-    }
-
-    .result-stat-value {
-        color: #f0ede4;
-    }
-
-    .message {
-        background: rgba(40, 40, 40, 0.86);
-        color: rgba(240, 237, 228, 0.8);
-    }
-
-    .chess-board-shell {
-        background: linear-gradient(140deg, #2a1d12, #120c06);
-    }
-
-    .xiangqi-piece {
-        background: radial-gradient(circle at 30% 28%, #e8d4a8, #a07840 72%);
-    }
-
-    .junqi-piece-back {
-        background: radial-gradient(circle at 34% 28%, rgba(255, 229, 154, 0.36), transparent 38%),
-            linear-gradient(135deg, #6b5228, #2a1e0e);
-    }
-
-    .junqi-piece-face {
-        background: radial-gradient(circle at 30% 28%, #e8d4a8, #a07840 78%);
-    }
+    body { background: radial-gradient(circle at top, var(--bg-start), var(--bg-end)); }
+    .hero-kicker { background: rgba(30,25,18,0.76); color: var(--accent); }
+    .panel { background: var(--panel); }
+    .stage-copy { background: linear-gradient(135deg, rgba(40,32,22,0.95), rgba(50,38,26,0.9)); }
+    .status-bar { background: rgba(38,32,24,0.75); }
+    .board-frame { background: linear-gradient(145deg, rgba(40,32,22,0.7), rgba(50,38,26,0.22)); }
+    .board-glow { background: radial-gradient(circle at center, rgba(100,70,30,0.22), rgba(100,70,30,0)); }
+    .result-card { background: linear-gradient(145deg, rgba(35,28,20,0.98), rgba(28,22,16,0.98)); color: #f0dcc0; }
+    .result-title { color: #f0dcc0; }
+    .result-detail { color: rgba(240,220,192,0.72); }
+    .result-stat { background: rgba(255,255,255,0.06); }
+    .result-stat-value { color: #f0dcc0; }
+    .message { background: rgba(38,32,24,0.86); color: rgba(240,220,192,0.8); }
+    .panel-card { background: rgba(38,32,24,0.76); }
+    .panel-card-accent { background: linear-gradient(145deg, rgba(50,38,26,0.94), rgba(70,50,30,0.7)); }
+    .ghost-btn:hover { background: rgba(255,255,255,0.08); }
+    .option-btn { border-color: rgba(160,120,60,0.2); }
+    .chess-board-shell { background: linear-gradient(140deg, #2a1d12, #120c06); }
+    .xiangqi-piece { background: radial-gradient(circle at 30% 28%, #e8d4a8, #a07840 72%); }
+    .junqi-piece-back { background: radial-gradient(circle at 34% 28%, rgba(255,229,154,0.36), transparent 38%), linear-gradient(135deg, #6b5228, #2a1e0e); }
+    .junqi-piece-face { background: radial-gradient(circle at 30% 28%, #e8d4a8, #a07840 78%); }
+    .result-win .result-card { background: linear-gradient(145deg, rgba(40,32,22,0.98), rgba(60,42,24,0.98)); }
+    .result-draw .result-card { background: linear-gradient(145deg, rgba(38,32,26,0.98), rgba(45,38,30,0.98)); }
+    .result-resign .result-card { background: linear-gradient(145deg, rgba(35,28,20,0.98), rgba(50,35,22,0.98)); }
+    .move-list { scrollbar-color: #5a4a38 transparent; }
 }
