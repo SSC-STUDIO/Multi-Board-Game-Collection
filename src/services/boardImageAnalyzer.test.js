@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock browser-only APIs before importing the module
 class MockFileReader {
@@ -27,8 +27,13 @@ class MockImage {
     this.onerror = null;
     this.naturalWidth = 100;
     this.naturalHeight = 100;
-    this.src = '';
+    this._src = '';
   }
+  set src(value) {
+    this._src = value;
+    queueMicrotask(() => { this.onload && this.onload(); });
+  }
+  get src() { return this._src; }
 }
 if (typeof globalThis.Image === 'undefined') {
   globalThis.Image = MockImage;
@@ -99,9 +104,6 @@ function makeMockResponse(content, usage = null) {
 describe('boardImageAnalyzer Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.resetAllMocks();
-    // re-set behaviors
-    fetchWithTimeout.mockClear();
   });
 
   describe('fileToDataUrl', () => {
