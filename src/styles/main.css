@@ -6898,6 +6898,10 @@ a:focus-visible {
         --result-title-color: #f0dcc0; --result-stat-value-color: #e8d4b8;
         --board-depth-start: #5a4020; --board-depth-end: #2e1e10;
         --dot-marker: #8a7a60;
+        --chess-white: #f5f0e8;
+        --chess-white-stroke: #2a2520;
+        --chess-black: #d8d0c0;
+        --chess-black-stroke: rgba(20,16,10,0.3);
     }
     body { background: radial-gradient(circle at top, var(--bg-start), var(--bg-end)); }
     .hero-kicker { background: rgba(30,25,18,0.76); color: var(--accent); }
