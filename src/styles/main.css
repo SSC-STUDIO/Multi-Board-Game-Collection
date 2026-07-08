@@ -6696,3 +6696,40 @@ a:focus-visible {
     0% { transform: translate(-50%,-50%) scale(0); opacity: 0.6; }
     100% { transform: translate(-50%,-50%) scale(2.5); opacity: 0; }
 }
+
+/* === Mobile Coach Hint Touch Improvements === */
+@media (max-width: 640px) {
+    .game-coach-hint {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.78rem;
+        border-radius: 8px;
+    }
+    .coach-hint-title {
+        font-size: 0.82rem;
+    }
+    .coach-action-btn,
+    .coach-mini-btn {
+        min-height: 40px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+    }
+    .coach-candidate-btn {
+        min-height: 40px;
+        padding: 8px 12px;
+    }
+    .postgame-panel {
+        padding: 10px;
+        font-size: 0.82rem;
+    }
+}
+
+/* === Smooth Theme Transitions === */
+* {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+}
+
+.board, .stone, .cell, .result-card, .launcher-card {
+    transition-property: transform, opacity, box-shadow;
+}
