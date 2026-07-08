@@ -6645,3 +6645,54 @@ a:focus-visible {
         min-height: 44px;
     }
 }
+
+/* === Victory Celebration Shimmer === */
+@keyframes victoryShimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+.result-win .result-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,215,0,0.08) 25%, rgba(255,215,0,0.15) 50%, rgba(255,215,0,0.08) 75%, transparent 100%);
+    background-size: 200% 100%;
+    animation: victoryShimmer 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 28px;
+}
+
+/* === Smooth Card Entrance === */
+@keyframes resultCardSlideUp {
+    0% { opacity: 0; transform: translateY(30px) scale(0.94); filter: blur(4px); }
+    60% { opacity: 1; transform: translateY(-4px) scale(1.01); filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.result-card {
+    animation: resultCardSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* === Primary Button Shine === */
+.primary-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.primary-btn:hover::after {
+    opacity: 1;
+}
+
+/* === Stone Drop Ripple === */
+@keyframes stoneRipple {
+    0% { transform: translate(-50%,-50%) scale(0); opacity: 0.6; }
+    100% { transform: translate(-50%,-50%) scale(2.5); opacity: 0; }
+}
