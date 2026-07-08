@@ -18,7 +18,11 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 - **Difficulty-Adaptive Coaching** (Easy/Medium/Hard) with move history context for smarter advice
 - **Multi-platform**: Web (Vite), Electron Desktop, Android (Capacitor)
 - **Bilingual UI**: English / 简体中文 with zero text clipping
-- **1126 Unit Tests** across 41 test files — 100% pass rate
+- **1126 Unit Tests** across 48 test files
+- **Premium CSS Design System**: 35+ semantic tokens in :root with zero hardcoded hex in components.css
+- **Full Dark Mode**: @media (prefers-color-scheme: dark) with comprehensive variable overrides
+- **Micro-Interactions**: Cell hover scale, panel card lift, board frame glow, piece placement ripple, title gradient shimmer
+- **Accessibility**: WCAG 2.5.8 touch targets, keyboard navigation with focus rings, skip-link, prefers-reduced-motion — 100% pass rate
 
 ---
 
