@@ -46,6 +46,10 @@
     --board-depth-start: #8b6914;
     --board-depth-end: #5a3d0a;
     --dot-marker: #2b1a0a;
+    --chess-white: #fdfaf3;
+    --chess-white-stroke: #000000;
+    --chess-black: #1a1814;
+    --chess-black-stroke: rgba(255,255,255,0.3);
 }
 
 * {
