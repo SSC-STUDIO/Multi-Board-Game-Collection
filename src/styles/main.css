@@ -6733,3 +6733,33 @@ a:focus-visible {
 .board, .stone, .cell, .result-card, .launcher-card {
     transition-property: transform, opacity, box-shadow;
 }
+
+/* === Loading Skeleton Shimmer === */
+@keyframes skeletonShimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+
+.setup-scene-preview.is-loading .scene-preview-image {
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 75%);
+    background-size: 800px 100%;
+    animation: skeletonShimmer 1.5s infinite;
+    opacity: 1;
+    filter: none;
+    transform: none;
+}
+
+.coach-status-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.coach-status-loading::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(230,177,91,0.08), transparent);
+    background-size: 400px 100%;
+    animation: skeletonShimmer 2s infinite;
+    pointer-events: none;
+}
