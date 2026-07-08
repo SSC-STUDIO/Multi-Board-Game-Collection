@@ -6763,3 +6763,30 @@ a:focus-visible {
     animation: skeletonShimmer 2s infinite;
     pointer-events: none;
 }
+
+/* === Control Button Transition Polish === */
+.control-btn {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.control-btn:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+/* === Coach Card Glassmorphism Polish === */
+.coach-card {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+}
+
+/* === Last Move Marker Glow === */
+.last-move-marker {
+    animation: markerGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes markerGlow {
+    0% { opacity: 0.8; filter: drop-shadow(0 0 4px rgba(241,199,92,0.4)); }
+    100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(241,199,92,0.7)); }
+}
