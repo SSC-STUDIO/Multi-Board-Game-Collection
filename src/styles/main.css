@@ -4231,7 +4231,7 @@ body[data-device-form="mobile"][data-screen-shape="short"] .result-actions {
 }
 
 .preview-stone.white {
-    background: radial-gradient(circle at 35% 30%, #ffffff, #cfc7b8 70%);
+    background: radial-gradient(circle at 35% 30%, var(--go-stone-white-start), var(--go-stone-white-end) 70%);
 }
 
 body.coach-preview-active .board {
@@ -5357,7 +5357,7 @@ body.launcher-open .hud-bottom {
 
 .go-stone.black {
     background:
-        radial-gradient(circle at 35% 30%, #4a4a4a, #0a0a0a 75%);
+        radial-gradient(circle at 35% 30%, var(--go-stone-black-start), var(--go-stone-black-end) 75%);
 }
 
 .go-stone.white {
@@ -5369,7 +5369,7 @@ body.launcher-open .hud-bottom {
 }
 
 .go-stone-last {
-    outline: 2px solid #ffb347;
+    outline: 2px solid var(--focus-ring-color);
     outline-offset: 2px;
 }
 
@@ -6902,6 +6902,10 @@ a:focus-visible {
         --chess-white-stroke: #2a2520;
         --chess-black: #d8d0c0;
         --chess-black-stroke: rgba(20,16,10,0.3);
+        --go-stone-black-start: #3a3a3a;
+        --go-stone-black-end: #050505;
+        --go-stone-white-start: #f0ede4;
+        --go-stone-white-end: #b8b0a0;
     }
     body { background: radial-gradient(circle at top, var(--bg-start), var(--bg-end)); }
     .hero-kicker { background: rgba(30,25,18,0.76); color: var(--accent); }
