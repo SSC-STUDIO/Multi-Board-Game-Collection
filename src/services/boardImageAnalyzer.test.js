@@ -6,12 +6,14 @@ class MockFileReader {
     this.onload = null;
     this.onerror = null;
     this._file = null;
+    this.result = null;
   }
   readAsDataURL(file) {
     this._file = file;
+    this.result = 'data:image/png;base64,AAAA';
     // Async resolution simulating FileReader
     queueMicrotask(() => {
-      this.onload && this.onload({ target: { result: 'data:image/png;base64,AAAA' } });
+      this.onload && this.onload({ target: { result: this.result } });
     });
   }
 }

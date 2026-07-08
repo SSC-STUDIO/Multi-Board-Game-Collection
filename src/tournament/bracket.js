@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Tournament bracket system.
  * Supports single-elimination brackets with configurable sizes.
  * @module tournament/bracket
@@ -11,11 +11,19 @@
  */
 export function createBracket(players) {
     const size = nextPowerOf2(players.length);
-    const seeds = [...players];
+    const byesNeeded = size - players.length;
+    const seeds = [];
+    let playerIdx = 0;
+    let byesPlaced = 0;
 
-    // Add byes if needed
-    while (seeds.length < size) {
-        seeds.push({ name: "BYE", id: "bye" });
+    // Interleave BYEs at player2 (odd) slots so top seeds receive byes
+    for (let i = 0; i < size; i++) {
+        if (i % 2 === 1 && byesPlaced < byesNeeded) {
+            seeds.push({ name: "BYE", id: "bye" });
+            byesPlaced++;
+        } else {
+            seeds.push(players[playerIdx++]);
+        }
     }
 
     const rounds = [];

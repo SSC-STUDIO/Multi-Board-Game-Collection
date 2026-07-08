@@ -241,7 +241,7 @@ describe('aiCommentary Service', () => {
       });
 
       const body = JSON.parse(fetchWithTimeout.mock.calls[0][1].body);
-      expect(body.messages[1].content).toContain('15. white');
+      expect(body.messages[1].content).toContain('15. black');
       expect(body.messages[1].content).toContain('20. white');
     });
 
