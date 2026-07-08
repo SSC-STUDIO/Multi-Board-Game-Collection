@@ -18,7 +18,7 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 - **Difficulty-Adaptive Coaching** (Easy/Medium/Hard) with move history context for smarter advice
 - **Multi-platform**: Web (Vite), Electron Desktop, Android (Capacitor)
 - **Bilingual UI**: English / 简体中文 with zero text clipping
-- **1020 Unit Tests** across 41 test files — 100% pass rate
+- **1126 Unit Tests** across 41 test files — 100% pass rate
 
 ---
 
@@ -38,13 +38,13 @@ Multi-Board-Game-Collection is a premium 5-in-1 board game suite featuring Gomok
 - **Frontend**: Vanilla JavaScript (ES Modules), CSS Variables
 - **3D Engine**: Three.js ^0.164.0
 - **Build**: Vite ^8.0.10, custom Node.js scripts
-- **Testing**: Vitest ^4.1.5 — 1020 tests, 40 test files
+- **Testing**: Vitest ^4.1.5 — 1126 tests, 40 test files
 - **Desktop**: Electron ^28.0.0 + electron-builder
 - **Mobile**: Capacitor ^8.3.1 (Android APK)
 - **i18n**: English / 简体中文
 
 ### Code Quality Metrics
-- **Test Coverage**: 40 test files, 1020 tests, 100% pass rate
+- **Test Coverage**: 40 test files, 1126 tests, 100% pass rate
 - **Module Check**: 111 JavaScript modules verified
 - **Build**: 139 files in 322ms, zero errors
 - **Architecture**: Clean layered design (Game → App → UI → Render3D)
@@ -98,7 +98,7 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 - [x] Registry: llm-coach capability for all games
 - [x] CoachController: non-Gomoku LLM-only path
 - [x] 6 new multi-game LLM Coach tests
-- [x] All 1020 tests pass, 111 modules verified, build clean
+- [x] All 1126 tests pass, 111 modules verified, build clean
 
 ### In Progress
 - [ ] Phase 4: Marketing report & promotional content
@@ -121,7 +121,7 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 - **Drop Particle Dust**: Immersive stone/piece placement particle effects
 - **Camera Follow-Zoom**: Automatic focus on the last move for enhanced gameplay experience
 - **Multi-Game LLM Coach**: Full support for all 5 games with game-specific prompts and board image rendering
-- **Test Coverage**: 989 tests across 40 test files, 111 modules verified
+- **Test Coverage**: 1126 tests across 40 test files, 111 modules verified
 
 ---
 
@@ -148,12 +148,38 @@ The LLM Coach previously only supported Gomoku. We've expanded it to all 5 games
 ## Sprint Update 2026-07-07
 
 ### Highlights
-- 999 unit tests passing across 41 test files (up from 1020)
+- 1126 tests passing across 48 test files (up from 1020)
 - Chess/Xiangqi AI hard difficulty bumped from depth 4 to depth 5
 - LLM Coach post-game analysis now game-specific for all 5 games
 - playVictorySequence unit tests added for 3D renderer
 - i18n keys fully synchronized between en-US and zh-CN
 
+
+
+## UI/UX Polish Sprint (2026-07-08)
+
+### Accessibility
+- Global :focus-visible outlines on all interactive elements
+- Skip navigation link for keyboard users
+- WCAG 2.5.8 touch target compliance (44px minimum)
+- prefers-reduced-motion support
+
+### Human-Centric Copy (Pillar D)
+- Warm game-over messages (zh/en) replacing cold technical text
+- English: Game Complete, Great match!, The king has fallen.
+- Chinese: 对局完成, 对局已结束，这一局很精彩！
+
+### Visual Polish
+- Victory shimmer animation on win result cards
+- Smooth cubic-bezier card entrance with blur-to-focus
+- Primary button hover shine effect
+- 200ms ease theme transitions
+- Mobile coach hint 40px touch targets
+
+### Marketing
+- Steam store page: Why You'll Love It hook section
+- README: Why Star This Project? highlights
+- i18n: skipToGame accessibility key
 ### Test Coverage
 | Module | Tests |
 |--------|-------|
