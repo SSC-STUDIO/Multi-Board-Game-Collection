@@ -39,6 +39,7 @@ const translations = {
     zh: {
         // 设置界面
         appTitle: '多棋类合集 · Board Games',
+        skipToGame: '跳转到棋盘',
         setupTitle: '五子棋',
         setupSubtitle: '进入五子棋 3D 棋盘，直接开局。',
         mode: '游戏模式',
@@ -538,6 +539,7 @@ const translations = {
     en: {
         // Setup
         appTitle: 'Board Games Collection',
+        skipToGame: 'Skip to Game',
         setupTitle: 'Gomoku',
         setupSubtitle: 'Enter the Gomoku 3D board and start at once.',
         mode: 'Game Mode',
