@@ -359,7 +359,9 @@ const POST_GAME_ADVICE = {
     go: "For Go: evaluate territory vs influence, life-and-death, ko fights, and endgame scoring.",
     chess: "For Chess: evaluate material balance, king safety, pawn structure, piece activity, and tactical motifs.",
     xiangqi: "For Xiangqi: evaluate material, river-crossing advantages, palace defense, and checkmate nets.",
-    junqi: "For Junqi: evaluate flag protection, rank hierarchy, railway mobility, and tactical reveals."
+    junqi: "For Junqi: evaluate flag protection, rank hierarchy, railway mobility, and tactical reveals.",
+    othello: "For Othello: evaluate corner control, disc parity, mobility, frontier discs (X/C-square risks), and stable disc endgame counting.",
+    shogi: "For Shogi: evaluate material balance, promotions, king safety (castle formations), tempo, drop tactics, and endgame mate nets."
 };
 
 function buildPostGameRequest(snapshot, boardImageDataUrl, model, gameType) {
