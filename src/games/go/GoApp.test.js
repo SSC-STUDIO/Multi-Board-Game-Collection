@@ -132,6 +132,7 @@ vi.mock('./render3d/GoRenderer3D.js', () => ({
         syncBoard() {}
         highlightLastMove() {}
         highlightKo() {}
+        highlightHint() {}
         showTerritory() {}
         hideTerritory() {}
         show() {}

@@ -34,6 +34,7 @@ const LAST_MOVE_COLOR = 0x22cc44;
 const KO_MARKER_COLOR = 0xcc2222;
 const TERRITORY_BLACK = 0x1a1a1a;
 const TERRITORY_WHITE = 0xf0f0f0;
+const HINT_MARKER_COLOR = 0xff9800;
 
 /** 不同路数的星位。坐标是 (row, col)。 */
 export function getStarPoints(size) {
@@ -394,6 +395,28 @@ export class GoRenderer3D {
         dot.rotation.x = -Math.PI / 2;
         dot.position.set(x, thickness / 2 + 0.02, z);
         marker.add(dot);
+        this.stoneBuilder.stonesGroup.add(marker);
+        this.sceneManager.needsRender = true;
+    }
+
+    /**
+     * 在 AI 提示位置显示琥珀色高亮标记。
+     * @param {{row:number,col:number}|null} hint - pass 或 null 时移除标记
+     */
+    highlightHint(hint) {
+        this._removeMarkerGroup('go_hint_marker');
+        if (!hint || hint.row == null) return;
+        const { x, z } = goBoardToWorld(hint.row, hint.col, this.boardSize, this.cellSize);
+        const { thickness } = this.sceneManager.config.board;
+        const marker = new THREE.Group();
+        marker.name = 'go_hint_marker';
+        const ring = new THREE.Mesh(
+            new THREE.RingGeometry(0.28, 0.38, 32),
+            new THREE.MeshBasicMaterial({ color: HINT_MARKER_COLOR, side: THREE.DoubleSide })
+        );
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.set(x, thickness / 2 + 0.02, z);
+        marker.add(ring);
         this.stoneBuilder.stonesGroup.add(marker);
         this.sceneManager.needsRender = true;
     }

@@ -76,6 +76,7 @@ export class GoApp extends BoardGameApp {
                 moveCount: root.getElementById('go-move-count'),
                 capturedBlack: root.getElementById('go-captures-black'),
                 capturedWhite: root.getElementById('go-captures-white'),
+                hintBtn: root.getElementById('go-hint-btn'),
                 pass: root.getElementById('go-pass-btn'),
                 undo: root.getElementById('go-undo-btn'),
                 resign: root.getElementById('go-resign-btn'),
@@ -139,6 +140,7 @@ export class GoApp extends BoardGameApp {
         });
         game.pass?.addEventListener('click', () => this.handlePass());
         game.undo?.addEventListener('click', () => this.handleUndo());
+        game.hintBtn?.addEventListener('click', () => this.handleHint());
         game.resign?.addEventListener('click', () => this.resign());
         game.restart?.addEventListener('click', () => this.restart());
         this.bindBackToLauncher(game.back);
@@ -241,6 +243,8 @@ export class GoApp extends BoardGameApp {
             this.sound.play('error');
             return;
         }
+        // Clear hint highlight when user interacts
+        this.state.hintMove = null;
         this.playMove(row, col);
     }
 
@@ -322,6 +326,7 @@ export class GoApp extends BoardGameApp {
             this.sound.play('error');
             return;
         }
+        this.state.hintMove = null;
         const steps = this.options.mode === 'pve' && this.state.moveHistory.length >= 2 ? 2 : 1;
         const target = Math.max(0, this.state.moveHistory.length - steps);
         const prevHistory = this.state.moveHistory.slice(0, target);
@@ -353,6 +358,31 @@ export class GoApp extends BoardGameApp {
         this.sound.play('undo');
         this.renderBoard();
         this.renderStatus();
+    }
+
+    handleHint() {
+        if (this.state.gameOver || this.state.aiThinking) return;
+        if (!this.isHumanTurn()) return;
+
+        // Use the Go AI (hard mode = best suggestion)
+        const savedLevel = this.options.level;
+        this.options.level = 'hard';
+        const move = getGoAIMove(this.state);
+        this.options.level = savedLevel;
+
+        if (!move || move.pass) {
+            this.showMessage(i18n.t('noHintAvailable') || 'No hint available', 'warn');
+            return;
+        }
+        this.state.hintMove = { row: move.row, col: move.col };
+        this.sound.play('select');
+        this.renderBoard();
+        this.renderStatus();
+        this.showMessage(
+            i18n.t('hintSuggestionMessage', { move: formatGoMove(move.row, move.col) }) ||
+            `Suggested move: ${formatGoMove(move.row, move.col)}`,
+            'info'
+        );
     }
 
     finishByScoring() {
@@ -402,6 +432,7 @@ renderBoard() {
         this.renderer3d.syncBoard(this.state.board);
         this.renderer3d.highlightLastMove(this.state.lastMove);
         this.renderer3d.highlightKo(this.state.koPoint);
+        this.renderer3d.highlightHint(this.state.hintMove);
         // 非终局时清除领地标记
         if (!this.state.gameOver) {
             this.renderer3d.hideTerritory();
