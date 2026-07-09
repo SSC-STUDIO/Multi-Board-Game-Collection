@@ -355,6 +355,7 @@ function minimaxSearch(state, depth, alpha, beta, isMaximizing, aiColor, opponen
     })).sort((a, b) => b.score - a.score).slice(0, 20);
 
     if (isMaximizing) {
+        const alphaOrig = alpha;
         let maxEval = -Infinity;
         for (const move of scored) {
             board[move.row][move.col] = currentColor;
@@ -364,10 +365,11 @@ function minimaxSearch(state, depth, alpha, beta, isMaximizing, aiColor, opponen
             alpha = Math.max(alpha, eval_);
             if (beta <= alpha) break;
         }
-        const flag = maxEval >= beta ? ttLower : maxEval <= alpha ? ttUpper : ttExact;
+        const flag = maxEval >= beta ? ttLower : maxEval <= alphaOrig ? ttUpper : ttExact;
         ttStoreGomoku(hash, depth, maxEval, flag);
         return maxEval;
     } else {
+        const betaOrig = beta;
         let minEval = Infinity;
         for (const move of scored) {
             board[move.row][move.col] = currentColor;
@@ -377,7 +379,7 @@ function minimaxSearch(state, depth, alpha, beta, isMaximizing, aiColor, opponen
             beta = Math.min(beta, eval_);
             if (beta <= alpha) break;
         }
-        const flag = minEval >= beta ? ttLower : minEval <= alpha ? ttUpper : ttExact;
+        const flag = minEval >= betaOrig ? ttLower : minEval <= alpha ? ttUpper : ttExact;
         ttStoreGomoku(hash, depth, minEval, flag);
         return minEval;
     }

@@ -352,6 +352,7 @@ function search(board, side, hands, depth, alpha, beta) {
     }
 
     const ordered = orderMoves(moves, board);
+    const alphaOrig = alpha;
     let bestMove = ordered[0];
     let bestScore = -Infinity;
 
@@ -374,7 +375,7 @@ function search(board, side, hands, depth, alpha, beta) {
         }
     }
 
-    const flag = bestScore <= alpha ? ttUpper : bestScore >= beta ? ttLower : ttExact;
+    const flag = bestScore <= alphaOrig ? ttUpper : bestScore >= beta ? ttLower : ttExact;
     ttStore(hash, depth, bestScore, flag);
     return { score: bestScore, move: bestMove };
 }

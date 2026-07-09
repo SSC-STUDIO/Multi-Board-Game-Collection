@@ -234,6 +234,7 @@ function search(board, state, depth, alpha, beta) {
 
     let bestMove = null;
     if (state.turn === 'w') {
+        const alphaOrig = alpha;
         let value = -Infinity;
         for (const mv of moves) {
             const { board: b2, state: s2 } = applyMove(board, state, mv);
@@ -248,11 +249,12 @@ function search(board, state, depth, alpha, beta) {
                 break;
             }
         }
-        const flag = value <= alpha ? ttUpper : value >= beta ? ttLower : ttExact;
+        const flag = value <= alphaOrig ? ttUpper : value >= beta ? ttLower : ttExact;
         ttStore(hash, depth, value, flag, bestMove);
         return { score: value, move: bestMove };
     }
     // 黑方为最小化方
+    const betaOrig = beta;
     let value = Infinity;
     for (const mv of moves) {
         const { board: b2, state: s2 } = applyMove(board, state, mv);
@@ -267,7 +269,7 @@ function search(board, state, depth, alpha, beta) {
             break;
         }
     }
-    const flag = value >= beta ? ttLower : value <= alpha ? ttUpper : ttExact;
+    const flag = value >= betaOrig ? ttLower : value <= alpha ? ttUpper : ttExact;
     ttStore(hash, depth, value, flag, bestMove);
     return { score: value, move: bestMove };
 }
