@@ -32,6 +32,10 @@ const COMMENTARY_PROMPTS = {
     othello: {
         system: "You are a concise Othello (Reversi) commentator. After each move, provide a brief 1-2 sentence explanation. Focus on: disc flips, positional advantage, corner control, and mobility. Be direct and insightful.",
         format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
+    },
+    shogi: {
+        system: "You are a concise Shogi (Japanese Chess) commentator. After each move, provide a brief 1-2 sentence explanation. Focus on: piece exchanges, drop tactics, promotion timing, and king safety. Be direct and insightful.",
+        format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
     }
 };
 
@@ -41,7 +45,7 @@ const COMMENTARY_PROMPTS = {
  * @param {Object} options.settings - Normalized LLM settings
  * @param {Object} options.snapshot - Game state snapshot including last move and board
  * @param {AbortSignal} [options.signal] - Abort signal
- * @param {string} options.gameType - Game type key (gomoku, go, chess, xiangqi, junqi)
+ * @param {string} options.gameType - Game type key (gomoku, go, chess, xiangqi, junqi, othello, shogi)
  * @returns {Promise<string>} Commentary text
  */
 export async function requestMoveCommentary({ settings, snapshot, signal, gameType } = {}) {

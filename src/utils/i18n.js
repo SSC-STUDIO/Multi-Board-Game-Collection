@@ -187,7 +187,15 @@ const translations = {
         shogiGote: '後手',
         othelloBlack: '黑棋',
         othelloWhite: '白棋',
+        othelloResignBadge: '认输',
+        othelloResignTitle: '{player} 胜',
         othelloResignDetail: '认输结束本局，可以直接再开一局。',
+        othelloWinBadge: '终局',
+        othelloWinTitle: '{player} 胜',
+        othelloWinDetail: '棋盘已满或双方连续虚手，按棋子数定胜负。',
+        othelloDrawBadge: '平局',
+        othelloDrawTitle: '平局',
+        othelloDrawDetail: '双方棋子数量相同，握手言和。',
 
         // 围棋
         goSetupTitle: '开始一局围棋',
@@ -703,7 +711,15 @@ const translations = {
         shogiGote: 'Gote',
         othelloBlack: 'Black',
         othelloWhite: 'White',
+        othelloResignBadge: 'Resigned',
+        othelloResignTitle: '{player} wins',
         othelloResignDetail: 'The game was resigned. Start a new match anytime.',
+        othelloWinBadge: 'Final',
+        othelloWinTitle: '{player} wins',
+        othelloWinDetail: 'Board full or double pass — winner decided by disc count.',
+        othelloDrawBadge: 'Draw',
+        othelloDrawTitle: 'Draw',
+        othelloDrawDetail: 'Both sides finished with equal discs.',
 
         // Go
         goSetupTitle: 'Start a Go match',

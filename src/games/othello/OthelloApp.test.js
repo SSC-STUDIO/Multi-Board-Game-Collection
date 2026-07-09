@@ -463,6 +463,119 @@ describe('OthelloApp', () => {
             expect(app.state.gameOver).toBe(true);
             expect(app.state.resultWinnerColor).toBe('white');
         });
+
+        it('handleResign should set state.result and show result overlay', () => {
+            app.startGame();
+            app.state.currentPlayer = 'black';
+            app.handleResign();
+            expect(app.state.result).toBeDefined();
+            expect(app.state.result.type).toBe('resign');
+            expect(app.state.result.winner).toBe('white');
+            expect(app.state.result.badge).toBe('othelloResignBadge');
+            expect(app.dom.result.overlay.classList.remove).toHaveBeenCalledWith('hidden');
+        });
+
+        it('handleResign should not show overlay when game already over', () => {
+            app.startGame();
+            app.state.gameOver = true;
+            const callsBefore = app.dom.result.overlay.classList.remove.mock.calls.length;
+            app.handleResign();
+            expect(app.dom.result.overlay.classList.remove.mock.calls.length).toBe(callsBefore);
+        });
+    });
+
+    describe('result overlay on game end', () => {
+        it('should set state.result and show overlay on board-full win', async () => {
+            const { isGameOver, getWinner } = await import('./rules.js');
+            isGameOver.mockReturnValueOnce(true);
+            getWinner.mockReturnValueOnce('black');
+            app.startGame();
+            app.commitMove(2, 3, 'black');
+            expect(app.state.gameOver).toBe(true);
+            expect(app.state.result).toBeDefined();
+            expect(app.state.result.type).toBe('win');
+            expect(app.state.result.winner).toBe('black');
+            expect(app.state.result.badge).toBe('othelloWinBadge');
+            expect(app.dom.result.overlay.classList.remove).toHaveBeenCalledWith('hidden');
+        });
+
+        it('should set state.result and show overlay on board-full draw', async () => {
+            const { isGameOver, getWinner } = await import('./rules.js');
+            isGameOver.mockReturnValueOnce(true);
+            getWinner.mockReturnValueOnce('draw');
+            app.startGame();
+            app.commitMove(2, 3, 'black');
+            expect(app.state.gameOver).toBe(true);
+            expect(app.state.result).toBeDefined();
+            expect(app.state.result.type).toBe('draw');
+            expect(app.state.result.winner).toBeNull();
+            expect(app.state.result.badge).toBe('othelloDrawBadge');
+            expect(app.dom.result.overlay.classList.remove).toHaveBeenCalledWith('hidden');
+        });
+
+        it('should set state.result and show overlay on double-pass game end', async () => {
+            const { getLegalMoves, getWinner } = await import('./rules.js');
+            app.startGame();
+            getLegalMoves.mockReturnValue([]);
+            getWinner.mockReturnValueOnce('black');
+            app.commitMove(2, 3, 'black');
+            expect(app.state.passCount).toBe(1);
+            app.state.currentPlayer = 'black';
+            app.commitMove(5, 4, 'black');
+            expect(app.state.passCount).toBe(2);
+            expect(app.state.gameOver).toBe(true);
+            expect(app.state.result).toBeDefined();
+            expect(app.state.result.type).toBe('win');
+            expect(app.state.result.winner).toBe('black');
+            expect(app.dom.result.overlay.classList.remove).toHaveBeenCalledWith('hidden');
+        });
+    });
+
+    describe('formatResult', () => {
+        it('should return empty strings when no result is set', () => {
+            app.startGame();
+            const formatted = app.formatResult();
+            expect(formatted.badge).toBe('');
+            expect(formatted.title).toBe('');
+            expect(formatted.detail).toBe('');
+        });
+
+        it('should format win result with localized player name', () => {
+            app.startGame();
+            app.state.result = {
+                type: 'win', winner: 'black',
+                badge: 'othelloWinBadge', title: 'othelloWinTitle', detail: 'othelloWinDetail'
+            };
+            const formatted = app.formatResult();
+            // i18n mock returns key as-is
+            expect(formatted.badge).toBe('othelloWinBadge');
+            expect(formatted.title).toBe('othelloWinTitle');
+            expect(formatted.detail).toBe('othelloWinDetail');
+        });
+
+        it('should format resign result with localized player name', () => {
+            app.startGame();
+            app.state.result = {
+                type: 'resign', winner: 'white',
+                badge: 'othelloResignBadge', title: 'othelloResignTitle', detail: 'othelloResignDetail'
+            };
+            const formatted = app.formatResult();
+            expect(formatted.badge).toBe('othelloResignBadge');
+            expect(formatted.title).toBe('othelloResignTitle');
+            expect(formatted.detail).toBe('othelloResignDetail');
+        });
+
+        it('should format draw result', () => {
+            app.startGame();
+            app.state.result = {
+                type: 'draw', winner: null,
+                badge: 'othelloDrawBadge', title: 'othelloDrawTitle', detail: 'othelloDrawDetail'
+            };
+            const formatted = app.formatResult();
+            expect(formatted.badge).toBe('othelloDrawBadge');
+            expect(formatted.title).toBe('othelloDrawTitle');
+            expect(formatted.detail).toBe('othelloDrawDetail');
+        });
     });
 
     describe('handleHint', () => {

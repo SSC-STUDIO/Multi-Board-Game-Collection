@@ -8,9 +8,17 @@ import { BoardGameApp } from "../../app/BoardGameApp.js";
 import { createOthelloState, createOthelloOptions } from "./state.js";
 import { createInitialBoard, getLegalMoves, makeMove, isGameOver, getWinner, countDiscs, BOARD_SIZE } from "./rules.js";
 import { getOthelloAIMove, getOthelloAIDelay } from "./ai.js";
+import { i18n } from "../../utils/i18n.js";
 
 const PIECE_GLYPH = { black: "\u25CF", white: "\u25CB" };
 const opponent = (c) => c === "black" ? "white" : "black";
+
+/** Return localized player label for result overlay */
+function getPlayerLabel(color) {
+    return color === "black"
+        ? (i18n.t("othelloBlack") || "Black")
+        : (i18n.t("othelloWhite") || "White");
+}
 
 export class OthelloApp extends BoardGameApp {
     constructor(root = document) {
@@ -154,6 +162,7 @@ export class OthelloApp extends BoardGameApp {
             const winner = getWinner(this.state.board);
             this.state.resultType = winner === "draw" ? "draw" : "win";
             this.state.resultWinnerColor = winner === "draw" ? null : winner;
+            this._finalizeResult(winner);
             this.render();
             this.renderMoveList();
             return true;
@@ -171,6 +180,7 @@ export class OthelloApp extends BoardGameApp {
                 const winner = getWinner(this.state.board);
                 this.state.resultType = winner === "draw" ? "draw" : "win";
                 this.state.resultWinnerColor = winner === "draw" ? null : winner;
+                this._finalizeResult(winner);
             }
             this.render();
             this.renderMoveList();
@@ -323,9 +333,59 @@ export class OthelloApp extends BoardGameApp {
 
     handleResign() {
         if (this.state.aiThinking || this.state.gameOver) return;
+        this.clearPendingAI();
         this.state.gameOver = true;
-        this.state.resultType = "win";
-        this.state.resultWinnerColor = opponent(this.state.currentPlayer);
+        this.state.resultType = "resign";
+        const winnerColor = opponent(this.state.currentPlayer);
+        this.state.resultWinnerColor = winnerColor;
+        this.state.result = {
+            type: "resign",
+            winner: winnerColor,
+            badge: "othelloResignBadge",
+            title: "othelloResignTitle",
+            detail: "othelloResignDetail"
+        };
+        this.showResult();
+        this.render();
+    }
+
+    // === Result overlay ===
+
+    /** Build state.result from resultType/resultWinnerColor and show the overlay. */
+    _finalizeResult(winner) {
+        const isDraw = winner === "draw" || winner === null || winner === undefined;
+
+        if (isDraw) {
+            this.state.result = {
+                type: "draw",
+                winner: null,
+                badge: "othelloDrawBadge",
+                title: "othelloDrawTitle",
+                detail: "othelloDrawDetail"
+            };
+        } else {
+            this.state.result = {
+                type: "win",
+                winner,
+                badge: "othelloWinBadge",
+                title: "othelloWinTitle",
+                detail: "othelloWinDetail"
+            };
+        }
+
+        this.showResult();
+    }
+
+    /** Format result data from state.result into i18n labels for the overlay. */
+    formatResult() {
+        const r = this.state?.result;
+        if (!r) return { badge: "", title: "", detail: "" };
+        const winnerLabel = r.winner ? getPlayerLabel(r.winner) : "";
+        return {
+            badge: (i18n.t(r.badge) || "").replace("{player}", winnerLabel),
+            title: (i18n.t(r.title) || "").replace("{player}", winnerLabel),
+            detail: i18n.t(r.detail) || ""
+        };
     }
 
     handleHint() {
