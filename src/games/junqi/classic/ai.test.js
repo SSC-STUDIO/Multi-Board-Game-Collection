@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import { getClassicAIMove, getClassicAIDelay } from './ai.js';
 import { getLegalMoves, createEmptyClassicBoard, createClassicPiece, RANK_LEVEL } from './rules.js';
@@ -28,7 +28,7 @@ function setLevel(state, level) {
 }
 
 describe('games/junqi/classic/ai', () => {
-    it('getClassicAIDelay 为各难度返回正数且 hard>medium>easy', () => {
+    it('getClassicAIDelay returns positive values with hard>medium>easy', () => {
         const easy = getClassicAIDelay('easy');
         const medium = getClassicAIDelay('medium');
         const hard = getClassicAIDelay('hard');
@@ -39,19 +39,16 @@ describe('games/junqi/classic/ai', () => {
         expect(medium).toBeGreaterThan(easy);
     });
 
-    it('未知难度回退到 medium 延迟', () => {
+    it('unknown difficulty falls back to medium delay', () => {
         const medium = getClassicAIDelay('medium');
         expect(getClassicAIDelay('ultra')).toBe(medium);
         expect(getClassicAIDelay(undefined)).toBe(medium);
     });
 
-    it('能吃对方军旗时 AI 优先夺旗', () => {
-        // 红司令(r, S) 在 (5,0)，黑军旗(b, F) 在 (4,0) 相邻可吃
-        // (4,0) 不是营(camp)，所以可以攻击
+    it('AI prioritizes capturing enemy flag when possible', () => {
         let board = placeEmpty();
         board = withPiece(board, 5, 0, 'r', 'S');
         board = withPiece(board, 4, 0, 'b', 'F');
-        // 给黑方留一颗子保证有对方棋存在（避免规则层提前判胜负）
         board = withPiece(board, 12, 4, 'b', 'G');
         let state = createClassicState({ level: 'hard', playerColor: 'r' });
         state = setLevel(state, 'hard');
@@ -63,10 +60,7 @@ describe('games/junqi/classic/ai', () => {
         expect(mv.to).toEqual([4, 0]);
     });
 
-    it('有高价值目标时优先吃大子而非走空格', () => {
-        // 红司令(r, S 级别9) 在 (5,0)
-        // 上(4,0)是黑军长(b, G 级别8，可吃)；右(5,1)空
-        // S(9) > G(8) → 红司令可吃黑军长；同时有空格可走但应优先吃大子
+    it('AI captures high-value target instead of moving to empty square', () => {
         let board = placeEmpty();
         board = withPiece(board, 5, 0, 'r', 'S');
         board = withPiece(board, 4, 0, 'b', 'G');
@@ -80,7 +74,7 @@ describe('games/junqi/classic/ai', () => {
         expect(mv.to).toEqual([4, 0]);
     });
 
-    it('AI 返回的走法始终是合法走法', () => {
+    it('AI always returns a legal move', () => {
         const state = setLevel({ ...createClassicState() }, 'medium');
         state.board = createClassicState().board;
         state.turn = 'r';
@@ -92,18 +86,14 @@ describe('games/junqi/classic/ai', () => {
         }
     });
 
-    it('无合法走法时返回 null', () => {
-        // 空棋盘：没有可移动棋子 → getLegalMoves 返回 [] → AI 返回 null
+    it('returns null when no legal moves exist', () => {
         const state = setLevel({ ...createClassicState() }, 'hard');
         state.board = createEmptyClassicBoard();
         state.turn = 'r';
         expect(getClassicAIMove(state)).toBeNull();
     });
 
-    it('炸弹(X)攻击目标获得额外评分加权', () => {
-        // 红炸弹(r, X) 在 (1,1)：上(0,1)黑团长(b, T)可吃（炸弹同归），下(2,1)是黑工兵(b, E)可吃
-        // 炸弹发起攻击评分 += 80（高于普通吃工兵 E 的分），尽管两目标都会同归
-        // 间接验证：选一个 capture 走法吃到目标
+    it('bomb captures get priority scoring for high-value targets', () => {
         let board = placeEmpty();
         board = withPiece(board, 1, 1, 'r', 'X');
         board = withPiece(board, 0, 1, 'b', 'T');
@@ -115,15 +105,12 @@ describe('games/junqi/classic/ai', () => {
         const mv = getClassicAIMove(state);
         expect(mv).not.toBeNull();
         expect(mv.kind).toBe('capture');
-        // target = T（团长，rank级别5）评分应高于 E（工兵1）+ 加权80
-        // 然而两者都有 X 加权；这里至少确认选到了较高级别目标（T 级别5 > E 级别1）
         const [tr] = mv.to;
         const targetRank = board[tr][mv.to[1]].rank;
         expect(RANK_LEVEL[targetRank]).toBe(RANK_LEVEL.T);
     });
 
-    it('easy 级别允许从更大候选池选择（随机性），hard 取最优', () => {
-        // 同一棋盘跑多次 hard：topN=1 → 每次应选同一最高分走法（确定性，除非并列）
+    it('easy mode picks from larger pool, hard picks best', () => {
         const state = setLevel({ ...createClassicState() }, 'hard');
         let board = placeEmpty();
         board = withPiece(board, 1, 1, 'r', 'G');
@@ -136,7 +123,62 @@ describe('games/junqi/classic/ai', () => {
             const mv = getClassicAIMove(state);
             picks.add(`${mv.kind}::`);
         }
-        // hard topN=1 → 仅在浮点并列时可能多于一种；这里吃黑车评分突出，应稳定选吃
         expect(picks.size).toBeLessThanOrEqual(2);
+    });
+
+    it('hard mode threat avoidance: low-rank piece avoids exposed high-rank enemy', () => {
+        // T(rank=5) at (8,2); exposed D(rank=7) at (7,1) -> threatens (7,2)
+        // T should avoid moving to (7,2) and prefer safe direction
+        let board = placeEmpty();
+        board = withPiece(board, 8, 2, 'r', 'T');
+        board[7][1] = { color: 'b', rank: 'D', revealed: true };
+        board = withPiece(board, 12, 4, 'b', 'P');
+        const state = setLevel({ ...createClassicState({ level: 'hard' }) }, 'hard');
+        state.board = board;
+        state.turn = 'r';
+        const mv = getClassicAIMove(state);
+        expect(mv).not.toBeNull();
+        if (mv.kind === 'move') {
+            expect(mv.to).not.toEqual([7, 2]);
+        }
+    });
+
+    it('bomb prefers high-value target over low-value target', () => {
+        // X at (1,2) can capture D(rank=7) at (0,2) or P(rank=2) at (2,2)
+        // Should prioritize D
+        let board = placeEmpty();
+        board = withPiece(board, 1, 2, 'r', 'X');
+        board = withPiece(board, 0, 2, 'b', 'D');
+        board = withPiece(board, 2, 2, 'b', 'P');
+        board = withPiece(board, 12, 4, 'b', 'G');
+        const state = setLevel({ ...createClassicState({ level: 'hard' }) }, 'hard');
+        state.board = board;
+        state.turn = 'r';
+        const mv = getClassicAIMove(state);
+        expect(mv).not.toBeNull();
+        expect(mv.kind).toBe('capture');
+        const targetRank = board[mv.to[0]][mv.to[1]].rank;
+        expect(RANK_LEVEL[targetRank]).toBeGreaterThanOrEqual(RANK_LEVEL.D);
+    });
+
+    it('medium mode also has threat awareness', () => {
+        // R(rank=6) at (8,2); exposed G(rank=8) at (7,1) -> threatens (7,2)
+        let board = placeEmpty();
+        board = withPiece(board, 8, 2, 'r', 'R');
+        board[7][1] = { color: 'b', rank: 'G', revealed: true };
+        board = withPiece(board, 12, 4, 'b', 'E');
+        const state = setLevel({ ...createClassicState({ level: 'medium' }) }, 'medium');
+        state.board = board;
+        state.turn = 'r';
+        const mv = getClassicAIMove(state);
+        expect(mv).not.toBeNull();
+        if (mv.kind === 'move') {
+            let dangerCount = 0;
+            for (let i = 0; i < 10; i++) {
+                const m = getClassicAIMove(state);
+                if (m.kind === 'move' && m.to[0] === 7 && m.to[1] === 2) dangerCount++;
+            }
+            expect(dangerCount).toBeLessThan(8);
+        }
     });
 });
