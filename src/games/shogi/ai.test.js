@@ -60,6 +60,9 @@ describe('games/shogi/ai', () => {
         board[8][4] = { type: 'K', side: 'sente' };
         board[4][4] = { type: 'R', side: 'sente' };
         board[4][5] = { type: 'B', side: 'gote' };
+        // A sente pawn blocks the rook file so the gote king cannot be
+        // captured directly, leaving the bishop on (4,5) as the best catch.
+        board[3][4] = { type: 'P', side: 'sente' };
         board[0][4] = { type: 'K', side: 'gote' };
         board[0][0] = { type: 'L', side: 'gote' };
         const move = getShogiAIMove(board, 'sente', emptyHands(), 'hard');
@@ -117,11 +120,13 @@ describe('games/shogi/ai', () => {
     });
 
     it('returns null when the side to move has no legal moves', () => {
+        // Sente king trapped in the corner (0,0): three gote Golds on (0,1),
+        // (1,0) and (1,1) cover every escape square, so sente is checkmated.
         const board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(null));
-        board[0][0] = { type: 'G', side: 'gote' };
+        board[0][0] = { type: 'K', side: 'sente' };
         board[0][1] = { type: 'G', side: 'gote' };
         board[1][0] = { type: 'G', side: 'gote' };
-        board[1][1] = { type: 'K', side: 'sente' };
+        board[1][1] = { type: 'G', side: 'gote' };
         board[8][8] = { type: 'K', side: 'gote' };
         const move = getShogiAIMove(board, 'sente', emptyHands(), 'medium');
         expect(move).toBeNull();
