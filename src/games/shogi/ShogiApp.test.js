@@ -143,8 +143,9 @@ vi.mock('./rules.js', () => ({
     makeDrop: vi.fn((board, type, side, toRow, toCol) => board),
     isInCheck: vi.fn(() => false),
     getPieceLabel: vi.fn((type) => {
-        const labels = { K: '玉', R: '飛', B: '角', G: '金', S: '銀', N: '桂', L: '香', P: '歩' };
-        return labels[type] || type;
+        const labels = { K: '王', R: '飛', B: '角', G: '金', S: '銀', N: '桂', L: '香', P: '歩',
+                          DR: '龍', DB: '馬', PS: '全', PN: '圭', PL: '杏', PP: 'と' };
+        return labels[type] || '?';
     }),
     BOARD_SIZE,
     PIECES: {

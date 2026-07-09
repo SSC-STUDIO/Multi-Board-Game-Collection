@@ -98,6 +98,48 @@ describe("Shogi rules", () => {
             const success = makeDrop(board, "P", "sente", 4, 3);
             expect(success).toBe(false);
         });
+
+        it("should prevent dropping pawn on last rank (sente)", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            expect(makeDrop(board, "P", "sente", 0, 0)).toBe(false);
+        });
+
+        it("should prevent dropping lance on last rank (sente)", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            expect(makeDrop(board, "L", "sente", 0, 0)).toBe(false);
+        });
+
+        it("should prevent dropping knight on last two ranks (sente)", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            expect(makeDrop(board, "N", "sente", 0, 0)).toBe(false);
+            expect(makeDrop(board, "N", "sente", 1, 0)).toBe(false);
+        });
+
+        it("should prevent dropping pawn on last rank (gote)", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            expect(makeDrop(board, "P", "gote", 8, 0)).toBe(false);
+        });
+
+        it("should prevent dropping lance on last rank (gote)", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            expect(makeDrop(board, "L", "gote", 8, 0)).toBe(false);
+        });
+
+        it("should prevent dropping knight on last two ranks (gote)", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            expect(makeDrop(board, "N", "gote", 8, 0)).toBe(false);
+            expect(makeDrop(board, "N", "gote", 7, 0)).toBe(false);
+        });
+
+        it("should allow dropping gold on last rank (no movement restriction)", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            expect(makeDrop(board, "G", "sente", 0, 0)).toBe(true);
+        });
+
+        it("should allow dropping knight on valid rank (sente row 2)", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            expect(makeDrop(board, "N", "sente", 2, 0)).toBe(true);
+        });
     });
 
     describe("isInCheck", () => {
@@ -118,8 +160,23 @@ describe("Shogi rules", () => {
 
     describe("getPieceLabel", () => {
         it("should return kanji for known piece", () => {
-            expect(getPieceLabel("K")).toBe("?");
-            expect(getPieceLabel("P")).toBe("?");
+            expect(getPieceLabel("K")).toBe("王");
+            expect(getPieceLabel("P")).toBe("歩");
+            expect(getPieceLabel("R")).toBe("飛");
+            expect(getPieceLabel("B")).toBe("角");
+            expect(getPieceLabel("G")).toBe("金");
+            expect(getPieceLabel("S")).toBe("銀");
+            expect(getPieceLabel("N")).toBe("桂");
+            expect(getPieceLabel("L")).toBe("香");
+        });
+
+        it("should return kanji for promoted pieces", () => {
+            expect(getPieceLabel("DR")).toBe("龍");
+            expect(getPieceLabel("DB")).toBe("馬");
+            expect(getPieceLabel("PS")).toBe("全");
+            expect(getPieceLabel("PN")).toBe("圭");
+            expect(getPieceLabel("PL")).toBe("杏");
+            expect(getPieceLabel("PP")).toBe("と");
         });
 
         it("should return ? for unknown piece", () => {

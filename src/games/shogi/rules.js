@@ -15,20 +15,20 @@ export const PROMOTION_ZONE_GOTE = [6, 7, 8];
 // Piece types with their movement patterns
 // direction: 1 = forward (toward row 0 for sente), -1 = forward (toward row 8 for gote)
 export const PIECES = {
-    K: { name: "King", kanji: "?", promoted: null, value: 15000 },
-    R: { name: "Rook", kanji: "?", promoted: "DR", value: 4770 },
-    B: { name: "Bishop", kanji: "?", promoted: "DB", value: 4130 },
-    G: { name: "Gold", kanji: "?", promoted: null, value: 2460 },
-    S: { name: "Silver", kanji: "?", promoted: "PS", value: 1830 },
-    N: { name: "Knight", kanji: "?", promoted: "PN", value: 1120 },
-    L: { name: "Lance", kanji: "?", promoted: "PL", value: 1100 },
-    P: { name: "Pawn", kanji: "?", promoted: "PP", value: 1050 },
-    DR: { name: "Dragon King", kanji: "?", promoted: null, value: 6270 },
-    DB: { name: "Dragon Horse", kanji: "?", promoted: null, value: 5230 },
-    PS: { name: "Promoted Silver", kanji: "?", promoted: null, value: 2460 },
-    PN: { name: "Promoted Knight", kanji: "?", promoted: null, value: 2460 },
-    PL: { name: "Promoted Lance", kanji: "?", promoted: null, value: 2460 },
-    PP: { name: "Promoted Pawn", kanji: "?", promoted: null, value: 2460 }
+    K: { name: "King", kanji: "王", promoted: null, value: 15000 },
+    R: { name: "Rook", kanji: "飛", promoted: "DR", value: 4770 },
+    B: { name: "Bishop", kanji: "角", promoted: "DB", value: 4130 },
+    G: { name: "Gold", kanji: "金", promoted: null, value: 2460 },
+    S: { name: "Silver", kanji: "銀", promoted: "PS", value: 1830 },
+    N: { name: "Knight", kanji: "桂", promoted: "PN", value: 1120 },
+    L: { name: "Lance", kanji: "香", promoted: "PL", value: 1100 },
+    P: { name: "Pawn", kanji: "歩", promoted: "PP", value: 1050 },
+    DR: { name: "Dragon King", kanji: "龍", promoted: null, value: 6270 },
+    DB: { name: "Dragon Horse", kanji: "馬", promoted: null, value: 5230 },
+    PS: { name: "Promoted Silver", kanji: "全", promoted: null, value: 2460 },
+    PN: { name: "Promoted Knight", kanji: "圭", promoted: null, value: 2460 },
+    PL: { name: "Promoted Lance", kanji: "杏", promoted: null, value: 2460 },
+    PP: { name: "Promoted Pawn", kanji: "と", promoted: null, value: 2460 }
 };
 
 // Gold general movement (6 directions)
@@ -226,7 +226,7 @@ export function makeDrop(board, type, side, toRow, toCol) {
     if (toRow < 0 || toRow >= BOARD_SIZE || toCol < 0 || toCol >= BOARD_SIZE) return false;
     if (board[toRow][toCol]) return false;
 
-    // Cannot drop pawn on column where unpromoted pawn of same side already exists (tokins)
+    // Cannot drop pawn on column where unpromoted pawn of same side already exists (二歩 nifu)
     if (type === "P") {
         for (let r = 0; r < BOARD_SIZE; r++) {
             if (board[r][toCol] && board[r][toCol].side === side && board[r][toCol].type === "P") {
@@ -235,7 +235,20 @@ export function makeDrop(board, type, side, toRow, toCol) {
         }
     }
 
-    // Cannot drop pawn to give immediate checkmate (?????)
+    // 行き所のない駒 (Uchidokoro naru koma): cannot drop a piece where it would
+    // have no legal moves. Pawn/Lance cannot be dropped on the last rank;
+    // Knight cannot be dropped on the last two ranks (it needs 2 rows to jump).
+    if (side === "sente") {
+        // Sente moves toward row 0
+        if ((type === "P" || type === "L") && toRow === 0) return false;
+        if (type === "N" && toRow <= 1) return false;
+    } else {
+        // Gote moves toward row 8
+        if ((type === "P" || type === "L") && toRow === BOARD_SIZE - 1) return false;
+        if (type === "N" && toRow >= BOARD_SIZE - 2) return false;
+    }
+
+    // Cannot drop pawn to give immediate checkmate (打ち歩詰め uchifuzume)
     // (simplified: skip this check for now)
 
     board[toRow][toCol] = { type, side };
