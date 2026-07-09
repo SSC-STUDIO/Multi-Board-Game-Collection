@@ -318,6 +318,7 @@ export class ChessApp extends BoardGameApp {
         }];
         this.selected = null;
         this.highlightMoves = [];
+        this.state.hintMove = null;
         this.sound.play('move', { color: move.piece[0] === 'w' ? 'white' : 'black', source: 'human' });
         this.renderBoard();
         this.renderStatus();
@@ -353,6 +354,7 @@ export class ChessApp extends BoardGameApp {
         });
         this.selected = null;
         this.highlightMoves = [];
+        this.state.hintMove = null;
         this.sound.play('undo');
         this.renderBoard();
         this.renderStatus();
