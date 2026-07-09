@@ -138,7 +138,7 @@ function cloneHands(hands) {
  *
  * @returns {Array<object>} legal candidate moves
  */
-function generateAllMoves(board, side, hands) {
+export function generateAllMoves(board, side, hands) {
     const candidates = [];
 
     // Board moves

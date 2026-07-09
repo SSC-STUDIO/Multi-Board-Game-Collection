@@ -7,7 +7,8 @@
 import { BoardGameApp } from "../../app/BoardGameApp.js";
 import { createShogiState, createShogiOptions } from "./state.js";
 import { createInitialBoard, getLegalMoves, makeMove, makeDrop, isInCheck, getPieceLabel, BOARD_SIZE, PIECES } from "./rules.js";
-import { getShogiAIMove, getShogiAIDelay } from "./ai.js";
+import { getShogiAIMove, getShogiAIDelay, generateAllMoves } from "./ai.js";
+import { i18n } from "../../utils/i18n.js";
 
 /** Demote a promoted piece type back to its unpromoted form on capture */
 function demoteType(type) {
@@ -152,6 +153,16 @@ export class ShogiApp extends BoardGameApp {
                 cell.dataset.row = String(row);
                 cell.dataset.col = String(col);
 
+                // Highlight selected piece
+                if (this.selected && this.selected.row === row && this.selected.col === col) {
+                    cell.classList.add("selected");
+                }
+                // Highlight legal move destinations
+                const isTarget = this.highlightMoves.some(mv => mv.row === row && mv.col === col);
+                if (isTarget) {
+                    cell.classList.add(this.state.board[row][col] ? "capture-target" : "move-target");
+                }
+
                 const piece = this.state.board[row][col];
                 if (piece) {
                     const stone = document.createElement("div");
@@ -172,36 +183,140 @@ export class ShogiApp extends BoardGameApp {
     renderStatus() {
         const el = this.dom.game?.status;
         if (!el || !this.state) return;
-        const turnLabel = this.state.turn === 'sente' ? '先手 (Sente)' : '後手 (Gote)';
+        if (this.state.gameOver) {
+            el.textContent = i18n.t('gameEnd') || 'Game Over';
+            return;
+        }
+        const turnLabel = this.state.turn === 'sente'
+            ? (i18n.t('shogiSente') || '先手') + ' (Sente)'
+            : (i18n.t('shogiGote') || '後手') + ' (Gote)';
         const aiLabel = this.state.aiThinking ? ' — AI thinking…' : '';
         el.textContent = turnLabel + aiLabel;
     }
 
-    renderMoveList() {}
+    renderMoveList() {
+        const el = this.dom.game?.moveList;
+        if (!el) return;
+        el.replaceChildren();
+        for (const [i, mv] of this.state.moveHistory.entries()) {
+            const span = document.createElement("span");
+            span.className = "move-entry";
+            const side = mv.kind === 'drop' ? mv.side : this.state.board[mv.to[0]][mv.to[1]]?.side || '?';
+            const tag = side === 'sente' ? '▲' : '△';
+            const dest = `(${mv.to[0]},${mv.to[1]})`;
+            if (mv.kind === 'drop') {
+                span.textContent = `${i + 1}. ${tag} 打${getPieceLabel(mv.type)} ${dest}`;
+            } else {
+                const piece = this.state.board[mv.to[0]][mv.to[1]];
+                const label = piece ? getPieceLabel(piece.type) : '?';
+                const promo = mv.promote ? '成' : '';
+                span.textContent = `${i + 1}. ${tag} ${label}${promo} ${dest}`;
+            }
+            el.appendChild(span);
+        }
+    }
 
     /** Handle a click on a board cell */
     handleCellClick(row, col) {
         if (!this.state || this.state.gameOver || this.state.aiThinking) return;
         if (!this.isHumanTurn()) return;
 
-        const side = this.state.turn;
-        const err = this.validateMove(row, col, side);
-        if (err) { this.showMessage(err, 'warn'); return; }
+        const piece = this.state.board[row][col];
 
-        this.selected = { row, col };
-        const legalMoves = getLegalMoves(this.state.board, row, col);
-        this.highlightMoves = legalMoves;
+        if (this.selected) {
+            const { row: sr, col: sc } = this.selected;
+            // Click same cell → deselect
+            if (sr === row && sc === col) {
+                this.selected = null;
+                this.highlightMoves = [];
+                this.render();
+                return;
+            }
+            // Click a highlighted destination → commit move
+            const candidate = this.highlightMoves.find(mv => mv.row === row && mv.col === col);
+            if (candidate) {
+                this.commitMove({
+                    kind: 'board',
+                    from: [sr, sc],
+                    to: [row, col],
+                    promote: candidate.promote || false
+                });
+                return;
+            }
+            // Click another own piece → switch selection
+            if (piece && piece.side === this.state.turn) {
+                this.selectPiece(row, col);
+                return;
+            }
+            // Click elsewhere → deselect
+            this.selected = null;
+            this.highlightMoves = [];
+            this.render();
+            return;
+        }
 
-        if (legalMoves.length > 0) {
-            const mv = legalMoves[0];
-            this.commitMove({ kind: 'board', from: [row, col], to: [mv.row, mv.col], promote: mv.promote || false });
-        } else {
-            this.showMessage('No legal moves from this cell', 'warn');
+        // No piece selected: click own piece to select
+        if (piece && piece.side === this.state.turn) {
+            this.selectPiece(row, col);
         }
     }
 
+    /** Select a piece and compute/highlight its legal moves */
+    selectPiece(row, col) {
+        this.selected = { row, col };
+        const legalMoves = getLegalMoves(this.state.board, row, col);
+        this.highlightMoves = legalMoves;
+        if (legalMoves.length === 0) {
+            this.showMessage('No legal moves from this piece', 'warn');
+        }
+        this.render();
+    }
+
+    /** Undo: in PvE mode revert 2 steps (AI + human), in PvP revert 1 step */
     handleUndo() {
-        // Placeholder for undo stack integration
+        if (this.state.aiThinking || this.state.gameOver) return;
+        const stepCount = this.options.mode === 'pve' ? 2 : 1;
+        if (this.state.moveHistory.length < stepCount) return;
+        this.clearPendingAI();
+
+        for (let i = 0; i < stepCount; i++) {
+            this.state.moveHistory.pop();
+        }
+        // Replay from initial board to reconstruct correct state
+        const freshBoard = createInitialBoard();
+        const freshHands = { sente: [], gote: [] };
+        this.state.board = freshBoard;
+        this.state.hands = freshHands;
+        this.state.turn = 'sente';
+        this.state.gameOver = false;
+        this.state.lastMove = null;
+
+        for (const mv of this.state.moveHistory) {
+            if (mv.kind === 'drop') {
+                const handArr = this.state.hands[mv.side];
+                const idx = handArr.findIndex(p => p.type === mv.type);
+                if (idx !== -1) handArr.splice(idx, 1);
+                makeDrop(this.state.board, mv.type, mv.side, mv.to[0], mv.to[1]);
+            } else {
+                const piece = this.state.board[mv.from[0]][mv.from[1]];
+                const captured = this.state.board[mv.to[0]][mv.to[1]];
+                if (captured) {
+                    const demoted = demoteType(captured.type);
+                    this.state.hands[mv.side].push({ type: demoted, side: captured.side });
+                }
+                makeMove(this.state.board, mv.from[0], mv.from[1], mv.to[0], mv.to[1], mv.promote);
+            }
+            this.state.turn = this.state.turn === 'sente' ? 'gote' : 'sente';
+        }
+
+        const last = this.state.moveHistory[this.state.moveHistory.length - 1];
+        this.state.lastMove = last ? { row: last.to[0], col: last.to[1] } : null;
+        this.selected = null;
+        this.highlightMoves = [];
+        this.render();
+        this.renderStatus();
+        this.renderMoveList();
+        this.maybeScheduleAI();
     }
 
     validateMove(row, col, side) {
@@ -224,7 +339,7 @@ export class ShogiApp extends BoardGameApp {
             const captured = this.state.board[mv.to[0]][mv.to[1]];
             if (captured) {
                 const demoted = demoteType(captured.type);
-                this.state.hands[mv.from[0] < mv.to[0] ? 'sente' : 'gote'].push({ type: demoted, side: captured.side });
+                this.state.hands[mv.side].push({ type: demoted, side: captured.side });
             }
             makeMove(this.state.board, mv.from[0], mv.from[1], mv.to[0], mv.to[1], mv.promote);
         }
@@ -233,9 +348,65 @@ export class ShogiApp extends BoardGameApp {
         this.selected = null;
         this.highlightMoves = [];
         this.state.lastMove = { row: mv.to[0], col: mv.to[1] };
+
+        // Check for checkmate / stalemate before scheduling AI
+        this.checkGameEnd();
+        if (this.state.gameOver) {
+            this.render();
+            this.renderStatus();
+            return;
+        }
+
         this.render();
         this.renderStatus();
+        this.renderMoveList();
         this.maybeScheduleAI();
+    }
+
+    /** Check for checkmate or stalemate and finalize the game */
+    checkGameEnd() {
+        if (!this.state || this.state.gameOver) return;
+        const moves = generateAllMoves(this.state.board, this.state.turn, this.state.hands);
+        if (moves.length > 0) return;
+        this.state.gameOver = true;
+        if (isInCheck(this.state.board, this.state.turn)) {
+            const winner = this.state.turn === 'sente' ? 'gote' : 'sente';
+            this.state.result = {
+                type: 'checkmate',
+                winner,
+                badge: 'shogiCheckmateBadge',
+                title: 'shogiCheckmateTitle',
+                detail: 'shogiCheckmateDetail'
+            };
+        } else {
+            // In Shogi, a side with no legal moves and not in check still loses
+            const winner = this.state.turn === 'sente' ? 'gote' : 'sente';
+            this.state.result = {
+                type: 'stalemate',
+                winner,
+                badge: 'shogiStalemateBadge',
+                title: 'shogiStalemateTitle',
+                detail: 'shogiStalemateDetail'
+            };
+        }
+        this.sound.play('win');
+        this.render();
+        this.renderStatus();
+        this.showResult();
+    }
+
+    /** Format result overlay from state */
+    formatResult() {
+        const r = this.state?.result;
+        if (!r) return { badge: '', title: '', detail: '' };
+        const winnerLabel = r.winner === 'sente'
+            ? i18n.t('shogiSente') || '先手'
+            : i18n.t('shogiGote') || '後手';
+        return {
+            badge: i18n.t(r.badge) || '',
+            title: (i18n.t(r.title) || '').replace('{player}', winnerLabel),
+            detail: i18n.t(r.detail) || '',
+        };
     }
 
     // === AI integration ===
