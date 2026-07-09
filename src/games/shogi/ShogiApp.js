@@ -7,6 +7,15 @@
 import { BoardGameApp } from "../../app/BoardGameApp.js";
 import { createShogiState, createShogiOptions } from "./state.js";
 import { createInitialBoard, getLegalMoves, makeMove, makeDrop, isInCheck, getPieceLabel, BOARD_SIZE, PIECES } from "./rules.js";
+import { getShogiAIMove, getShogiAIDelay } from "./ai.js";
+
+/** Demote a promoted piece type back to its unpromoted form on capture */
+function demoteType(type) {
+    for (const [key, val] of Object.entries(PIECES)) {
+        if (val.promoted === type) return key;
+    }
+    return type;
+}
 
 export class ShogiApp extends BoardGameApp {
     constructor(root = document) {
@@ -23,12 +32,15 @@ export class ShogiApp extends BoardGameApp {
                 mode: root.getElementById("shogi-mode-options"),
                 level: root.getElementById("shogi-level-options"),
                 levelRow: root.getElementById("shogi-level-row"),
+                color: root.getElementById("shogi-color-options"),
+                colorRow: root.getElementById("shogi-color-row"),
                 size: null,
                 sizeRow: null,
-                startBtn: root.getElementById("shogi-start-btn"),
-                backBtn: root.getElementById("shogi-back-btn")
+                start: root.getElementById("shogi-start-btn"),
+                back: root.getElementById("shogi-back-btn")
             },
             game: {
+                panel: root.getElementById("shogi-game"),
                 board: root.getElementById("shogi-board"),
                 board3d: root.getElementById("shogi-board-3d"),
                 status: root.getElementById("shogi-status"),
@@ -56,33 +68,74 @@ export class ShogiApp extends BoardGameApp {
         };
     }
 
+    /** Bind setup panel events: mode/level/color option groups, start, back */
+    bindSetupEvents() {
+        const { setup } = this.dom;
+        if (!setup) return;
+        this.bindOptionGroup(setup.mode, 'mode', (v) => {
+            this.options.mode = v;
+            this.refreshSetupVisibility();
+        });
+        this.bindOptionGroup(setup.level, 'level', (v) => { this.options.level = v; });
+        if (setup.color) {
+            this.bindOptionGroup(setup.color, 'color', (v) => { this.options.playerColor = v; });
+        }
+        setup.start?.addEventListener('click', () => {
+            this.sound.play('start');
+            this.startGame();
+        });
+        this.bindBackToLauncher(setup.back);
+    }
+
+    /** Bind game panel events: board clicks, undo, resign, restart */
+    bindGameEvents() {
+        const { game, result } = this.dom;
+        if (!game) return;
+        game.board?.addEventListener('click', (event) => {
+            const cell = event.target.closest('.cell');
+            if (!cell) return;
+            const row = Number(cell.dataset.row);
+            const col = Number(cell.dataset.col);
+            this.handleCellClick(row, col);
+        });
+        game.undoBtn?.addEventListener('click', () => this.handleUndo());
+        game.resignBtn?.addEventListener('click', () => this.resign());
+        result?.newBtn?.addEventListener('click', () => this.restart());
+        result?.backBtn?.addEventListener('click', () => window.__returnToLauncher?.());
+    }
+
+    /** Toggle setup controls based on PvP / PvE mode */
+    refreshSetupVisibility() {
+        const pve = this.options.mode === 'pve';
+        this.dom.setup?.levelRow?.classList.toggle('hidden', !pve);
+        this.dom.setup?.colorRow?.classList.toggle('hidden', !pve);
+    }
+
     createFreshState() {
         this.state = createShogiState(this.options);
     }
 
+    /** Use base class enterSetup (panel toggles, hideResult, refreshSetupVisibility) */
     enterSetup() {
-        this.clearPendingAI();
-        this.clearCoachState();
-        this.state = createShogiState(this.options);
-        if (this.dom && this.dom.setup && this.dom.setup.panel) {
-            this.dom.setup.panel.classList.remove("hidden");
-        }
-        if (this.dom && this.dom.game && this.dom.game.board) {
-            this.dom.game.board.classList.add("hidden");
-        }
+        super.enterSetup();
     }
 
+    /** Use base class startGame (createInitialState, toggle panels, startGameImpl) */
     startGame() {
-        this.state.gameOver = false;
-        this.state.turn = "sente";
-        this.state.moveHistory = [];
-        this.state.hands = { sente: [], gote: [] };
-        if (this.dom && this.dom.setup && this.dom.setup.panel) {
-            this.dom.setup.panel.classList.add("hidden");
-        }
-        if (this.dom && this.dom.game && this.dom.game.board) {
-            this.dom.game.board.classList.remove("hidden");
-        }
+        super.startGame();
+    }
+
+    /** Post-start logic: schedule AI if PvE mode */
+    startGameImpl() {
+        this.maybeScheduleAI();
+    }
+
+    createInitialState() {
+        return createShogiState(this.options);
+    }
+
+    /** Delegate renderBoard to render() */
+    renderBoard() {
         this.render();
     }
 
@@ -115,33 +168,100 @@ export class ShogiApp extends BoardGameApp {
         }
     }
 
-    validateMove(row, col, side) {
-        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return "Invalid position";
-        if (this.state.board[row][col] && this.state.board[row][col].side === side) return "Cell occupied by own piece";
-        return "";
-    }
-
-    commitMove(row, col, side, opts = {}) {
-        const piece = this.state.board[row][col];
-        if (piece && piece.side !== side) {
-            // Capture
-            const captured = { type: piece.type, side: piece.side };
-            this.state.hands[side].push(captured);
-        }
-        makeMove(this.state.board, row, col, row, col);
-    }
-
-    scheduleAIMove() {
-        // Placeholder for AI integration
+    /** Board status display (turn indicator + AI thinking) */
+    renderStatus() {
+        const el = this.dom.game?.status;
+        if (!el || !this.state) return;
+        const turnLabel = this.state.turn === 'sente' ? '先手 (Sente)' : '後手 (Gote)';
+        const aiLabel = this.state.aiThinking ? ' — AI thinking…' : '';
+        el.textContent = turnLabel + aiLabel;
     }
 
     renderMoveList() {}
-    updateStatus() {}
-    showMessageKey(key, params, type) {}
+
+    /** Handle a click on a board cell */
+    handleCellClick(row, col) {
+        if (!this.state || this.state.gameOver || this.state.aiThinking) return;
+        if (!this.isHumanTurn()) return;
+
+        const side = this.state.turn;
+        const err = this.validateMove(row, col, side);
+        if (err) { this.showMessage(err, 'warn'); return; }
+
+        this.selected = { row, col };
+        const legalMoves = getLegalMoves(this.state.board, row, col);
+        this.highlightMoves = legalMoves;
+
+        if (legalMoves.length > 0) {
+            const mv = legalMoves[0];
+            this.commitMove({ kind: 'board', from: [row, col], to: [mv.row, mv.col], promote: mv.promote || false });
+        } else {
+            this.showMessage('No legal moves from this cell', 'warn');
+        }
+    }
+
+    handleUndo() {
+        // Placeholder for undo stack integration
+    }
+
+    validateMove(row, col, side) {
+        if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) return "Invalid position";
+        const piece = this.state.board[row][col];
+        if (piece && piece.side === side) return "Cell occupied by own piece";
+        return "";
+    }
+
+    /** Apply a move object (board move or drop) to the game state */
+    commitMove(mv) {
+        if (!mv) return;
+        if (mv.kind === 'drop') {
+            const handArr = this.state.hands[mv.side];
+            const idx = handArr.findIndex(p => p.type === mv.type);
+            if (idx !== -1) handArr.splice(idx, 1);
+            makeDrop(this.state.board, mv.type, mv.side, mv.to[0], mv.to[1]);
+        } else {
+            const piece = this.state.board[mv.from[0]][mv.from[1]];
+            const captured = this.state.board[mv.to[0]][mv.to[1]];
+            if (captured) {
+                const demoted = demoteType(captured.type);
+                this.state.hands[mv.from[0] < mv.to[0] ? 'sente' : 'gote'].push({ type: demoted, side: captured.side });
+            }
+            makeMove(this.state.board, mv.from[0], mv.from[1], mv.to[0], mv.to[1], mv.promote);
+        }
+        this.state.moveHistory.push(mv);
+        this.state.turn = this.state.turn === 'sente' ? 'gote' : 'sente';
+        this.selected = null;
+        this.highlightMoves = [];
+        this.state.lastMove = { row: mv.to[0], col: mv.to[1] };
+        this.render();
+        this.renderStatus();
+        this.maybeScheduleAI();
+    }
+
+    // === AI integration ===
+    isHumanTurn() {
+        if (this.options.mode !== 'pve') return true;
+        return this.state.turn === this.options.playerColor;
+    }
+
+    getAIDelay() {
+        return getShogiAIDelay(this.options.level);
+    }
+
+    getAIMove() {
+        return getShogiAIMove(this.state.board, this.state.turn, this.state.hands, this.options.level);
+    }
+
+    onResign() {
+        const winner = this.state.turn === 'sente' ? 'gote' : 'sente';
+        this.state.result = { type: 'resign', winner };
+    }
+
+    dispose() {}
+
     setAIThinking(v) { this.state.aiThinking = v; }
-    clearPendingAI() {}
+    clearPendingAI() { this.clearAITimer(); }
     clearCoachState() {}
-    cancelLlmCoachRequest() {}
     clearPreview() {}
     clearPlacementSelection() {}
     refreshImmersiveUi() {}

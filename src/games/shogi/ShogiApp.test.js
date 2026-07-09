@@ -34,12 +34,15 @@ const { makeMockElements } = vi.hoisted(() => ({
                 mode: el('shogi-mode-options'),
                 level: el('shogi-level-options'),
                 levelRow: el('shogi-level-row'),
+                color: el('shogi-color-options'),
+                colorRow: el('shogi-color-row'),
                 size: null,
                 sizeRow: null,
-                startBtn: el('shogi-start-btn'),
-                backBtn: el('shogi-back-btn'),
+                start: el('shogi-start-btn'),
+                back: el('shogi-back-btn'),
             },
             game: {
+                panel: el('shogi-game'),
                 board: el('shogi-board'),
                 board3d: el('shogi-board-3d'),
                 status: el('shogi-status'),
@@ -199,8 +202,8 @@ describe('ShogiApp', () => {
             expect(app.dom.setup.mode).toBeDefined();
             expect(app.dom.setup.level).toBeDefined();
             expect(app.dom.setup.levelRow).toBeDefined();
-            expect(app.dom.setup.startBtn).toBeDefined();
-            expect(app.dom.setup.backBtn).toBeDefined();
+            expect(app.dom.setup.start).toBeDefined();
+            expect(app.dom.setup.back).toBeDefined();
             expect(app.dom.game.board).toBeDefined();
             expect(app.dom.game.board3d).toBeDefined();
             expect(app.dom.game.undoBtn).toBeDefined();
@@ -228,7 +231,7 @@ describe('ShogiApp', () => {
         it('should switch panels and create state', () => {
             app.startGame();
             expect(app.dom.setup.panel.classList.add).toHaveBeenCalledWith('hidden');
-            expect(app.dom.game.board.classList.remove).toHaveBeenCalledWith('hidden');
+            expect(app.dom.game.panel.classList.remove).toHaveBeenCalledWith('hidden');
             expect(app.state.turn).toBe('sente');
             expect(app.state.gameOver).toBe(false);
             expect(app.state.moveHistory).toEqual([]);
@@ -246,7 +249,7 @@ describe('ShogiApp', () => {
         it('should show setup panel and hide game board', () => {
             app.enterSetup();
             expect(app.dom.setup.panel.classList.remove).toHaveBeenCalledWith('hidden');
-            expect(app.dom.game.board.classList.add).toHaveBeenCalledWith('hidden');
+            expect(app.dom.game.panel.classList.add).toHaveBeenCalledWith('hidden');
         });
 
         it('should create a fresh state', async () => {
@@ -258,6 +261,7 @@ describe('ShogiApp', () => {
 
     describe('validateMove', () => {
         it('should accept valid coordinates', () => {
+            app.startGame();
             expect(app.validateMove(5, 5, 'sente')).toBe('');
             expect(app.validateMove(0, 0, 'sente')).toBe('');
             expect(app.validateMove(8, 8, 'sente')).toBe('');
