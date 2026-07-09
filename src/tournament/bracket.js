@@ -13,16 +13,23 @@ export function createBracket(players) {
     const size = nextPowerOf2(players.length);
     const byesNeeded = size - players.length;
     const seeds = [];
-    let playerIdx = 0;
-    let byesPlaced = 0;
 
-    // Interleave BYEs at player2 (odd) slots so top seeds receive byes
-    for (let i = 0; i < size; i++) {
-        if (i % 2 === 1 && byesPlaced < byesNeeded) {
-            seeds.push({ name: "BYE", id: "bye" });
-            byesPlaced++;
+    // In seeded single-elimination brackets, byes are awarded to the TOP
+    // seeds so that the strongest players are protected in the first round.
+    // The previous interleave placed byes at odd (player2) slots starting
+    // from index 1, effectively awarding them to the *last* seeds — the
+    // exact opposite of correct seeding.
+    //
+    // Fix: the first `byesNeeded` seeds receive a bye, so we place each
+    // top seed in the player1 slot of a match and fill the matching
+    // player2 slot with BYE.  Remaining seeds fill the rest of the
+    // bracket in order.
+    let playerIdx = 0;
+    for ( let i = 0; i < size; i++ ) {
+        if ( i % 2 === 1 && (i >>> 1) < byesNeeded ) {
+            seeds.push( { name: "BYE", id: "bye" } );
         } else {
-            seeds.push(players[playerIdx++]);
+            seeds.push( players[playerIdx++] );
         }
     }
 

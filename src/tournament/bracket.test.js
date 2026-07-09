@@ -42,17 +42,21 @@ describe('Tournament Bracket System', () => {
       const players = [{ name: 'Alice' }, { name: 'Bob' }, { name: 'Carol' }];
       const bracket = createBracket(players);
 
-      // Next power of 2 = 4
+      // Next power of 2 = 4, so 1 bye needed.
+      // Top seed (Alice, index 0) should receive the bye — not the
+      // last seed, which was the previous (incorrect) behavior.
       expect(bracket.size).toBe(4);
       expect(bracket.numRounds).toBe(2);
 
-      // Find the BYE match
-      const byeMatch = bracket.rounds[0].find(
-        (m) => m.player2?.id === 'bye'
-      );
-      expect(byeMatch).toBeDefined();
+      // The BYE must be in match 0 (P1's match), not match 1.
+      const byeMatch = bracket.rounds[0][0];
+      expect(byeMatch.player1.name).toBe('Alice');
+      expect(byeMatch.player2?.id).toBe('bye');
       expect(byeMatch.completed).toBe(true);
       expect(byeMatch.winner.name).toBe('Alice');
+
+      // The other first-round match has two real players.
+      expect(bracket.rounds[0][1].player2?.id).not.toBe('bye');
     });
 
     it('should auto-advance through BYEs in first round', () => {
