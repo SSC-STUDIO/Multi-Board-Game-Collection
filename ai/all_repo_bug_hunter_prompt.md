@@ -1,4 +1,17 @@
-# [OPENCODE / CODEX COMPLIANT] Multi-Repository Autonomous Bug Hunter, Live Debugger & OCR Optimizer Protocol
+﻿# [OPENCODE / CODEX COMPLIANT] Multi-Repository Autonomous Bug Hunter, Live Debugger & OCR Optimizer Protocol
+
+---
+### 馃И MANDATORY TESTING METHODOLOGY: THE PRE-CONFIGURED 3-TIER SUITE
+When testing, building, or verifying any modification, **YOU MUST STRICTLY USE THE PRE-CONFIGURED 3-TIER TESTING SUITE** defined in:
+馃憠 i/CANONICAL_TESTING_AND_VERIFICATION_SUITE.md
+
+This enforces:
+1. **Tier 1 (Automated AST/Test Gate)**: dotnet test / cargo test / go test -race / pytest / strict build -warnaserror.
+2. **Tier 2 (Live Debug Trace Trap)**: Attached WPF DataBinding TraceListener Level=Warning & Task.Run WMI 2500ms timeout traps.
+3. **Tier 3 (5-Locale x 3-DPI Multimodal OCR Matrix)**: Quantified verification against [UI-OCR-Clipping], [UI-OCR-Mojibake], [UI-OCR-Collision], and [UI-OCR-Contrast] across 100% / 125% / 150% DPI and en / zh-Hans / ja / de / ru.
+(For Novel, use the pre-configured Literary Continuity & Repetition Pruning Audit loop defined in CANONICAL_TESTING_AND_VERIFICATION_SUITE.md).
+---
+
 
 You are authorized and instructed to execute a comprehensive, multi-phase batch inspection, real-device live debugging, OCR visual audit, and proactive performance optimization sweep across our three core repositories: **UniversalDeviceToolkit**, **UniversalDeviceToolkit-Plugins**, and **Veser**. Your objective is to systematically scan codebases, attach live debuggers, and run OCR character recognition on live UI windows to eliminate all concurrency hazards, memory leaks, runtime warnings, visual text truncations, and **High-ROI Project Optimization Opportunities (`[Optimization]`)**, logging all findings into structured queues.
 
@@ -14,7 +27,7 @@ You are authorized and instructed to execute a comprehensive, multi-phase batch 
 - **Pillar B: Veser (Rust / TypeScript / React / Gateway) Audit & Optimization**:
   - *Backend Defects (`[Bug]`)*: Hunt for memory leaks in rate limiters (`SlidingWindowLimiter`), missing request body size limits, unhandled DB transaction rollbacks, or `.unwrap()`/`.expect()` calls that could panic production threads.
   - *Backend Optimizations (`[Optimization]`)*: Hunt for coarse `Arc<Mutex<T>>` / `RwLock<T>` held across `.await` points and propose `DashMap<K, V>` or `moka::future::Cache`. Hunt for heavy JSON serialization across high-frequency IPC and propose zero-copy `Box<RawValue>` or Tauri 2 binary streams. Replace unbounded channels (`mpsc::unbounded_channel`) with bounded backpressure channels (`mpsc::channel`).
-  - *Frontend Defects (`[Bug]`)*: Hunt for mojibake (`??`) in `src/locales/`, missing nullish coalescing (`??`/`?.`), unhandled Promise rejections, and check if internal engineering telemetry (`KV 缓存命中`) is exposed on user home screens.
+  - *Frontend Defects (`[Bug]`)*: Hunt for mojibake (`??`) in `src/locales/`, missing nullish coalescing (`??`/`?.`), unhandled Promise rejections, and check if internal engineering telemetry (`KV 缂撳瓨鍛戒腑`) is exposed on user home screens.
   - *Frontend Optimizations (`[Optimization]`)*: Hunt for long lists (>50 items) lacking `@tanstack/react-virtual` virtualization (`useVirtualizer`). Hunt for heavy UI modals lacking `React.lazy()` dynamic import code-splitting. Mandate `React.memo` and `useCallback`/`useMemo` on child components subscribed to high-frequency IPC state streams.
 - **Pillar C: Real-Device Live Debugging (`[Live-Debug-Warning]`)**:
   - Launch applications in **Debug Mode** (`dotnet run -c Debug` / `cargo tauri dev --debug`) and attach `TraceListener` or console logger.
@@ -34,3 +47,4 @@ You are authorized and instructed to execute a comprehensive, multi-phase batch 
 
 ## 2. BATCH EXECUTION WORKFLOW
 Execute sequentially: `Phase 1: Scan, Debug & OCR UDT -> Phase 2: cd ../UniversalDeviceToolkit-Plugins -> Scan, Debug & OCR PLG -> Phase 3: cd ../Veser -> Scan, Debug & OCR Veser -> Output Final Triage Summary & Yield Control`.
+

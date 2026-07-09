@@ -1,4 +1,17 @@
-# Live Debugging & OCR UI Visual Inspector Prompt (Real-Device Execution & Step-by-Step Trace Protocol)
+﻿# Live Debugging & OCR UI Visual Inspector Prompt (Real-Device Execution & Step-by-Step Trace Protocol)
+
+---
+### 馃И MANDATORY TESTING METHODOLOGY: THE PRE-CONFIGURED 3-TIER SUITE
+When testing, building, or verifying any modification, **YOU MUST STRICTLY USE THE PRE-CONFIGURED 3-TIER TESTING SUITE** defined in:
+馃憠 i/CANONICAL_TESTING_AND_VERIFICATION_SUITE.md
+
+This enforces:
+1. **Tier 1 (Automated AST/Test Gate)**: dotnet test / cargo test / go test -race / pytest / strict build -warnaserror.
+2. **Tier 2 (Live Debug Trace Trap)**: Attached WPF DataBinding TraceListener Level=Warning & Task.Run WMI 2500ms timeout traps.
+3. **Tier 3 (5-Locale x 3-DPI Multimodal OCR Matrix)**: Quantified verification against [UI-OCR-Clipping], [UI-OCR-Mojibake], [UI-OCR-Collision], and [UI-OCR-Contrast] across 100% / 125% / 150% DPI and en / zh-Hans / ja / de / ru.
+(For Novel, use the pre-configured Literary Continuity & Repetition Pruning Audit loop defined in CANONICAL_TESTING_AND_VERIFICATION_SUITE.md).
+---
+
 
 This document provides a specialized, industrial-grade prompt designed for **OpenCode**, **Codex**, **Claude Code**, and **Cursor / Multi-Agent Watchdogs** to transition from static code scanning (`AST / grep / unit tests`) into **Dynamic Live Debugging & OCR-Driven UI Visual Auditing** across our **Tri-Repo Ecosystem**:
 1. `UniversalDeviceToolkit` (Main C#/WPF Repo)
@@ -7,7 +20,7 @@ This document provides a specialized, industrial-grade prompt designed for **Ope
 
 ---
 
-## ⚡ Section 1: Ultra-Compact Prompt (精简实战版 - 专为自动化多智能体与调试终端设计)
+## 鈿?Section 1: Ultra-Compact Prompt (绮剧畝瀹炴垬鐗?- 涓撲负鑷姩鍖栧鏅鸿兘浣撲笌璋冭瘯缁堢璁捐)
 
 *(Copy and paste this prompt directly into your autonomous agent CLI to initiate real-device debugging and OCR UI inspection)*
 
@@ -35,7 +48,7 @@ Do not rely solely on static code search! You must launch the actual application
 Once the live application window is rendered on screen, capture desktop/window screenshots (`screencapture`, `PowerShell Graphics.CopyFromScreen`, or browser/canvas capture tools) and execute **OCR (Optical Character Recognition) + Multimodal Vision Analysis** on every UI view:
 - **Text Truncation & Clipping (`[OCR-Clipping]`)**: Scan all rendered labels, buttons, cards, and data grids. Detect truncated text ending in ellipses (`Networ...`, `Temp...`) or vertically/horizontally clipped numbers (e.g., `450` showing as `45` due to `Width="40"`).
 - **Layout Overlap & DPI Collision (`[OCR-Layout]`)**: Inspect UI alignment under simulated or real Windows scaling (125%, 150%, 200%). Flag any text colliding with icons, overlapping bounding boxes, or squeezed controls.
-- **Mojibake & Placeholder Leaks (`[OCR-I18n]`)**: Run character recognition across Chinese (`zh-Hans`), English (`en`), Japanese (`ja`), German (`de`), and Russian (`ru`) views. Detect any garbled characters (`??`, `□□`, `ï¿½`), unrendered translation placeholders (`activity.workflowSchema.kindPreflight`, `{{count}}`), or stray hardcoded CJK text inside English/European locale views.
+- **Mojibake & Placeholder Leaks (`[OCR-I18n]`)**: Run character recognition across Chinese (`zh-Hans`), English (`en`), Japanese (`ja`), German (`de`), and Russian (`ru`) views. Detect any garbled characters (`??`, `鈻♀枴`, `茂驴陆`), unrendered translation placeholders (`activity.workflowSchema.kindPreflight`, `{{count}}`), or stray hardcoded CJK text inside English/European locale views.
 - **Contrast & Visual Hierarchy (`[OCR-Contrast]`)**: Verify dark mode and light mode contrast ratios (WCAG AA compliance). Flag unreadable dark-gray text on dark backgrounds or white-on-white button states.
 
 ## 4. PHASE 3: REMEDIATION & LEDGER SYNC
@@ -52,7 +65,7 @@ Loop: `Launch Debug Build -> Trace Execution & Solve Runtime Warnings -> Capture
 
 ---
 
-## 📖 Section 2: Full Detailed Architecture & Execution Trace Protocol
+## 馃摉 Section 2: Full Detailed Architecture & Execution Trace Protocol
 
 ### A. Why Live Debugging + OCR Vision is the Ultimate Quality Standard
 While static AST grep and automated unit tests (`dotnet test` / `cargo test`) catch compilation breaks and unit logic errors, they **cannot detect**:
@@ -77,7 +90,7 @@ flowchart TD
         AutoSolveDebug --> CaptureScreen[Capture Desktop / Window Screenshot<br>screencapture / Graphics.CopyFromScreen]
         CaptureScreen --> OCRAnalysis[Run OCR & Multimodal Vision Analysis]
         OCRAnalysis --> DetectClipping[Detect Text Truncation (Networ...)]
-        OCRAnalysis --> DetectMojibake[Detect Mojibake (?? / □□) & Raw Keys]
+        OCRAnalysis --> DetectMojibake[Detect Mojibake (?? / 鈻♀枴) & Raw Keys]
         OCRAnalysis --> DetectOverlap[Detect Layout Overlap under 150% DPI]
         DetectClipping & DetectMojibake & DetectOverlap --> AutoSolveUI[Auto-Solve XAML/React Layout & I18n Keys]
     end
@@ -128,8 +141,9 @@ When analyzing window screenshots with OCR / Vision LLM tools, verify every sing
    - *Violation*: `CPU Load: 4...%` or `Network Acceleration...` (clipped).
    - *Fix*: Remove `Width="xx"` on the XAML `TextBlock` / React `div`; use `TextTrimming="None" TextWrapping="Wrap"` or flex/grid `Star` sizing (`Width="*"`).
 2. **100% I18n Rendering (`No Placeholder Raw Keys`)**:
-   - *Violation*: OCR sees `activity.workflowSchema.kindPreflight` or `chat.veserd.status.passed` on screen instead of `Preflight Check` or `预检`.
+   - *Violation*: OCR sees `activity.workflowSchema.kindPreflight` or `chat.veserd.status.passed` on screen instead of `Preflight Check` or `棰勬`.
    - *Fix*: Check the i18n locale file (`Resource.resx` or `src/locales/en/*.ts`), verify key spelling, and ensure `useTranslation()` / `DynamicResource` binding is correctly attached.
 3. **Multi-DPI Layout Integrity (`No Element Collisions at 150% Scaling`)**:
    - *Violation*: At 150% DPI, label text overlaps with the right-side toggle switch or input box border.
    - *Fix*: Replace fixed coordinate margins (`Margin="0,0,120,0"`) with proper container panels (`Grid` columns with `Auto`/`Star` widths, `DockPanel`, or `WrapPanel`).
+

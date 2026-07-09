@@ -1,4 +1,17 @@
-# [UNIVERSAL MASTER PROMPT] All-in-One Autonomous Engineering, Live Debugging & OCR Watchdog
+﻿# [UNIVERSAL MASTER PROMPT] All-in-One Autonomous Engineering, Live Debugging & OCR Watchdog
+
+---
+### 馃И MANDATORY TESTING METHODOLOGY: THE PRE-CONFIGURED 3-TIER SUITE
+When testing, building, or verifying any modification, **YOU MUST STRICTLY USE THE PRE-CONFIGURED 3-TIER TESTING SUITE** defined in:
+馃憠 i/CANONICAL_TESTING_AND_VERIFICATION_SUITE.md
+
+This enforces:
+1. **Tier 1 (Automated AST/Test Gate)**: dotnet test / cargo test / go test -race / pytest / strict build -warnaserror.
+2. **Tier 2 (Live Debug Trace Trap)**: Attached WPF DataBinding TraceListener Level=Warning & Task.Run WMI 2500ms timeout traps.
+3. **Tier 3 (5-Locale x 3-DPI Multimodal OCR Matrix)**: Quantified verification against [UI-OCR-Clipping], [UI-OCR-Mojibake], [UI-OCR-Collision], and [UI-OCR-Contrast] across 100% / 125% / 150% DPI and en / zh-Hans / ja / de / ru.
+(For Novel, use the pre-configured Literary Continuity & Repetition Pruning Audit loop defined in CANONICAL_TESTING_AND_VERIFICATION_SUITE.md).
+---
+
 
 *(Copy and paste this single prompt into OpenCode, Codex, Claude Code, Cursor, or any Multi-Agent CLI when working inside ANY project directory under `D:\EliuaK_Csy\Working-Paper\My-Program\<ProjectName>`)*
 
@@ -35,9 +48,10 @@ Launch the actual application in **Debug Mode** (`dotnet run -c Debug` / `cargo 
 ### Track C: OCR & Multimodal Vision UI Auditing (`[UI-OCR-Bug]`)
 Once the live window renders, capture window/desktop screenshots (`screencapture` / `.CopyFromScreen()`) and run **OCR + Vision LLM analysis** across `en / zh-Hans / ja / de / ru` locale views:
 - **Text Truncation (`Networ...` / clipped numbers)**: Eliminate rigid widths (`Width="40"` / `Width="80"`); replace with `Star` grid columns (`Width="*"`) or `Auto / MinWidth="100"` container wrapping.
-- **Mojibake & Placeholder Leaks (`??` / `□□` / `activity.xxx`)**: Fix unrendered translation keys or garbled character encoding immediately.
+- **Mojibake & Placeholder Leaks (`??` / `鈻♀枴` / `activity.xxx`)**: Fix unrendered translation keys or garbled character encoding immediately.
 - **Layout Overlap & DPI Collisions**: Test element alignment under 125%/150% Windows display scaling to ensure zero overlapping boundaries.
 
-## 4. CONTINUOUS 7×24 EVOLUTION LOOP
+## 4. CONTINUOUS 7脳24 EVOLUTION LOOP
 Loop non-stop: `Read ./ai/ Specs -> Check .bugs/ Queue -> Execute Track A (Static/Tests) -> Execute Track B (Live Debug & Warnings) -> Execute Track C (OCR UI Vision) -> Auto-Solve Defects & Optimizations -> Verify 0 Warnings -> Repeat`. Act as a permanent, self-correcting engineering and visual quality guardian!
 ```
+

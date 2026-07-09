@@ -1,52 +1,51 @@
-# Universal Device Toolkit 深度性能优化与 AI Agent 批量重构指南
+﻿# Universal Device Toolkit 娣卞害鎬ц兘浼樺寲涓?AI Agent 鎵归噺閲嶆瀯鎸囧崡
 
-本指南基于通用设备工具箱 (`UniversalDeviceToolkit` / `LenovoLegionToolkit`) 在 Windows 10/11 (.NET 10 + WPF) 环境下长期的排查与深度优化实践总结而成。旨在为团队开发人员及后续接入的 **AI Agents** 提供一套标准化的性能排查、并发安全改造及代码重构规范。
+---
+### 馃И MANDATORY TESTING METHODOLOGY: THE PRE-CONFIGURED 3-TIER SUITE
+When testing, building, or verifying any modification, **YOU MUST STRICTLY USE THE PRE-CONFIGURED 3-TIER TESTING SUITE** defined in:
+馃憠 i/CANONICAL_TESTING_AND_VERIFICATION_SUITE.md
+
+This enforces:
+1. **Tier 1 (Automated AST/Test Gate)**: dotnet test / cargo test / go test -race / pytest / strict build -warnaserror.
+2. **Tier 2 (Live Debug Trace Trap)**: Attached WPF DataBinding TraceListener Level=Warning & Task.Run WMI 2500ms timeout traps.
+3. **Tier 3 (5-Locale x 3-DPI Multimodal OCR Matrix)**: Quantified verification against [UI-OCR-Clipping], [UI-OCR-Mojibake], [UI-OCR-Collision], and [UI-OCR-Contrast] across 100% / 125% / 150% DPI and en / zh-Hans / ja / de / ru.
+(For Novel, use the pre-configured Literary Continuity & Repetition Pruning Audit loop defined in CANONICAL_TESTING_AND_VERIFICATION_SUITE.md).
+---
+
+
+鏈寚鍗楀熀浜庨€氱敤璁惧宸ュ叿绠?(`UniversalDeviceToolkit` / `LenovoLegionToolkit`) 鍦?Windows 10/11 (.NET 10 + WPF) 鐜涓嬮暱鏈熺殑鎺掓煡涓庢繁搴︿紭鍖栧疄璺垫€荤粨鑰屾垚銆傛棬鍦ㄤ负鍥㈤槦寮€鍙戜汉鍛樺強鍚庣画鎺ュ叆鐨?**AI Agents** 鎻愪緵涓€濂楁爣鍑嗗寲鐨勬€ц兘鎺掓煡銆佸苟鍙戝畨鍏ㄦ敼閫犲強浠ｇ爜閲嶆瀯瑙勮寖銆?
+---
+
+## 鐩綍
+1. [绗竴閮ㄥ垎锛歐PF 绾跨▼妯″瀷涓庡紓姝ュ苟鍙戣鑼冿紙闃查棯閫€鏍稿績锛塢(#涓€wpf-绾跨▼妯″瀷涓庡紓姝ュ苟鍙戣鑼冮槻闂€€鏍稿績)
+2. [绗簩閮ㄥ垎锛歐MI 涓庣‖浠跺簳灞傞€氫俊浼樺寲锛堥槻鍗℃涓?RDP 浼樺寲锛塢(#浜寃mi-涓庣‖浠跺簳灞傞€氫俊浼樺寲闃插崱姝讳笌-rdp-浼樺寲)
+3. [绗笁閮ㄥ垎锛氬悗鍙拌疆璇€佷紶鎰熷櫒鐩戞帶涓庣鐩?I/O 娌荤悊](#涓夊悗鍙拌疆璇紶鎰熷櫒鐩戞帶涓庣鐩?io-娌荤悊)
+4. [绗洓閮ㄥ垎锛歐PF UI 娓叉煋涓庨珮棰戝搷搴斾紭鍖朷(#鍥泈pf-ui-娓叉煋涓庨珮棰戝搷搴斾紭鍖?
+5. [绗簲閮ㄥ垎锛氶潰鍚?AI Agent 鐨勬壒閲忔帓鏌ヤ笌鏀归€犳爣鍑嗘祦绋?(SOP)](#浜旈潰鍚?ai-agent-鐨勬壒閲忔帓鏌ヤ笌鏀归€犳爣鍑嗘祦绋?sop)
+6. [绗叚閮ㄥ垎锛氬彲浠ョ洿鎺ュ彂缁欏叾浠?Agent 鐨?Prompt 妯℃澘](#鍏彲浠ョ洿鎺ュ彂缁欏叾浠?agent-鐨?prompt-妯℃澘)
+7. [绗竷閮ㄥ垎锛氬椤圭洰鏈潵鍙戝睍鐨勫缓璁炬€ф剰瑙佷笌鏋舵瀯瑙勫垝](#涓冨椤圭洰鏈潵鍙戝睍鐨勫缓璁炬€ф剰瑙佷笌鏋舵瀯瑙勫垝)
 
 ---
 
-## 目录
-1. [第一部分：WPF 线程模型与异步并发规范（防闪退核心）](#一wpf-线程模型与异步并发规范防闪退核心)
-2. [第二部分：WMI 与硬件底层通信优化（防卡死与 RDP 优化）](#二wmi-与硬件底层通信优化防卡死与-rdp-优化)
-3. [第三部分：后台轮询、传感器监控与磁盘 I/O 治理](#三后台轮询传感器监控与磁盘-io-治理)
-4. [第四部分：WPF UI 渲染与高频响应优化](#四wpf-ui-渲染与高频响应优化)
-5. [第五部分：面向 AI Agent 的批量排查与改造标准流程 (SOP)](#五面向-ai-agent-的批量排查与改造标准流程-sop)
-6. [第六部分：可以直接发给其他 Agent 的 Prompt 模板](#六可以直接发给其他-agent-的-prompt-模板)
-7. [第七部分：对项目未来发展的建设性意见与架构规划](#七对项目未来发展的建设性意见与架构规划)
-
----
-
-## 一、WPF 线程模型与异步并发规范（防闪退核心）
-
-### 1. 严格划分 `.ConfigureAwait(false)` 的使用边界
-在 .NET 异步编程中，`.ConfigureAwait(false)` 用于指示不需要在调用方的 `SynchronizationContext`（同步上下文）上继续执行，从而减少上下文切换开销并防止死锁。然而在 WPF 应用程序中，滥用该方法是导致程序神秘闪退、无提示崩溃的**头号元凶**。
-
+## 涓€銆乄PF 绾跨▼妯″瀷涓庡紓姝ュ苟鍙戣鑼冿紙闃查棯閫€鏍稿績锛?
+### 1. 涓ユ牸鍒掑垎 `.ConfigureAwait(false)` 鐨勪娇鐢ㄨ竟鐣?鍦?.NET 寮傛缂栫▼涓紝`.ConfigureAwait(false)` 鐢ㄤ簬鎸囩ず涓嶉渶瑕佸湪璋冪敤鏂圭殑 `SynchronizationContext`锛堝悓姝ヤ笂涓嬫枃锛変笂缁х画鎵ц锛屼粠鑰屽噺灏戜笂涓嬫枃鍒囨崲寮€閿€骞堕槻姝㈡閿併€傜劧鑰屽湪 WPF 搴旂敤绋嬪簭涓紝婊ョ敤璇ユ柟娉曟槸瀵艰嚧绋嬪簭绁炵闂€€銆佹棤鎻愮ず宕╂簝鐨?*澶村彿鍏冨嚩**銆?
 > [!CAUTION]
-> **绝对禁止在 UI 视图层使用 `.ConfigureAwait(false)`！**
-> 一旦后台线程池试图读取或写入 `DependencyProperty`、更新 `Visibility`、操作控件文本或调用 UI 服务（如 `SnackbarHelper`），WPF 将立即抛出 `InvalidOperationException: The calling thread cannot access this object because a different thread owns it`。在 `async void` 事件中，此异常将直接摧毁主进程。
-
-#### 分层原则：
-* **🔴 UI 层（绝对禁止）**：
-  * 适用范围：`UniversalDeviceToolkit.WPF` 目录下的所有 `Pages/`、`Windows/`、`Controls/`、`ViewModels/` 以及任何包含 UI 绑定、事件处理（如 `Button_Click`、`Loaded`、`OnRefreshed`）的类。
-  * 规则：所有的 `await` 调用**必须保持默认**（即保留同步上下文），不得额外添加 `.ConfigureAwait(false)`。
-* **🟢 底层类库层（强烈推荐）**：
-  * 适用范围：`UniversalDeviceToolkit.Lib/`、`UniversalDeviceToolkit.CLI/`、`UniversalDeviceToolkit.Lib.Automation/` 等无 WPF 依赖、无 UI 绑定的底层核心服务库。
-  * 规则：所有的异步 I/O、硬件查询、文件读写 `await` 调用，**必须**追加 `.ConfigureAwait(false)`，以确保最大程度的并发性能与避免上层死锁。
-
+> **缁濆绂佹鍦?UI 瑙嗗浘灞備娇鐢?`.ConfigureAwait(false)`锛?*
+> 涓€鏃﹀悗鍙扮嚎绋嬫睜璇曞浘璇诲彇鎴栧啓鍏?`DependencyProperty`銆佹洿鏂?`Visibility`銆佹搷浣滄帶浠舵枃鏈垨璋冪敤 UI 鏈嶅姟锛堝 `SnackbarHelper`锛夛紝WPF 灏嗙珛鍗虫姏鍑?`InvalidOperationException: The calling thread cannot access this object because a different thread owns it`銆傚湪 `async void` 浜嬩欢涓紝姝ゅ紓甯稿皢鐩存帴鎽ф瘉涓昏繘绋嬨€?
+#### 鍒嗗眰鍘熷垯锛?* **馃敶 UI 灞傦紙缁濆绂佹锛?*锛?  * 閫傜敤鑼冨洿锛歚UniversalDeviceToolkit.WPF` 鐩綍涓嬬殑鎵€鏈?`Pages/`銆乣Windows/`銆乣Controls/`銆乣ViewModels/` 浠ュ強浠讳綍鍖呭惈 UI 缁戝畾銆佷簨浠跺鐞嗭紙濡?`Button_Click`銆乣Loaded`銆乣OnRefreshed`锛夌殑绫汇€?  * 瑙勫垯锛氭墍鏈夌殑 `await` 璋冪敤**蹇呴』淇濇寔榛樿**锛堝嵆淇濈暀鍚屾涓婁笅鏂囷級锛屼笉寰楅澶栨坊鍔?`.ConfigureAwait(false)`銆?* **馃煝 搴曞眰绫诲簱灞傦紙寮虹儓鎺ㄨ崘锛?*锛?  * 閫傜敤鑼冨洿锛歚UniversalDeviceToolkit.Lib/`銆乣UniversalDeviceToolkit.CLI/`銆乣UniversalDeviceToolkit.Lib.Automation/` 绛夋棤 WPF 渚濊禆銆佹棤 UI 缁戝畾鐨勫簳灞傛牳蹇冩湇鍔″簱銆?  * 瑙勫垯锛氭墍鏈夌殑寮傛 I/O銆佺‖浠舵煡璇€佹枃浠惰鍐?`await` 璋冪敤锛?*蹇呴』**杩藉姞 `.ConfigureAwait(false)`锛屼互纭繚鏈€澶х▼搴︾殑骞跺彂鎬ц兘涓庨伩鍏嶄笂灞傛閿併€?
 ---
 
-### 2. 后台任务安全更新 UI 的标准范式
-当底层的 `Task.Run`、定时器或硬件回调事件需要在后台线程向前台反馈进度或状态时，必须使用 UI 线程的分发器 (`Dispatcher`) 进行安全编组。
-
+### 2. 鍚庡彴浠诲姟瀹夊叏鏇存柊 UI 鐨勬爣鍑嗚寖寮?褰撳簳灞傜殑 `Task.Run`銆佸畾鏃跺櫒鎴栫‖浠跺洖璋冧簨浠堕渶瑕佸湪鍚庡彴绾跨▼鍚戝墠鍙板弽棣堣繘搴︽垨鐘舵€佹椂锛屽繀椤讳娇鐢?UI 绾跨▼鐨勫垎鍙戝櫒 (`Dispatcher`) 杩涜瀹夊叏缂栫粍銆?
 ```csharp
-// 推荐范式：使用 Dispatcher.BeginInvoke / Dispatcher.InvokeAsync
+// 鎺ㄨ崘鑼冨紡锛氫娇鐢?Dispatcher.BeginInvoke / Dispatcher.InvokeAsync
 Task.Run(async () =>
 {
     try
     {
-        // 1. 在后台线程执行耗时操作/底层查询 (加上 .ConfigureAwait(false))
+        // 1. 鍦ㄥ悗鍙扮嚎绋嬫墽琛岃€楁椂鎿嶄綔/搴曞眰鏌ヨ (鍔犱笂 .ConfigureAwait(false))
         var mi = await MachineCompatibility.GetMachineInformationAsync().ConfigureAwait(false);
         
-        // 2. 切回 UI 线程更新界面
+        // 2. 鍒囧洖 UI 绾跨▼鏇存柊鐣岄潰
         await Dispatcher.InvokeAsync(() =>
         {
             _deviceInfoIndicatorText.Text = mi.Model;
@@ -62,19 +61,16 @@ Task.Run(async () =>
 
 ---
 
-### 3. `async void` 事件处理器的防御性编程
-除了 WPF/WinForms 的顶级事件处理器（如 `Button_Click`、`Loaded`、`Unloaded`、`Closing`）外，绝对不要使用 `async void`。在事件处理器内部，必须用 `try-catch` 全面包裹保护。
-
+### 3. `async void` 浜嬩欢澶勭悊鍣ㄧ殑闃插尽鎬х紪绋?闄や簡 WPF/WinForms 鐨勯《绾т簨浠跺鐞嗗櫒锛堝 `Button_Click`銆乣Loaded`銆乣Unloaded`銆乣Closing`锛夊锛岀粷瀵逛笉瑕佷娇鐢?`async void`銆傚湪浜嬩欢澶勭悊鍣ㄥ唴閮紝蹇呴』鐢?`try-catch` 鍏ㄩ潰鍖呰９淇濇姢銆?
 > [!IMPORTANT]
-> `async void` 方法内的未捕获异常无法被外层的调用者或 `Task` 捕获，它们会直接被抛到 `SynchronizationContext` 的顶层，导致整个程序崩溃。
-
+> `async void` 鏂规硶鍐呯殑鏈崟鑾峰紓甯告棤娉曡澶栧眰鐨勮皟鐢ㄨ€呮垨 `Task` 鎹曡幏锛屽畠浠細鐩存帴琚姏鍒?`SynchronizationContext` 鐨勯《灞傦紝瀵艰嚧鏁翠釜绋嬪簭宕╂簝銆?
 ```csharp
-// 正确的事件处理器写法
+// 姝ｇ‘鐨勪簨浠跺鐞嗗櫒鍐欐硶
 private async void ScanButton_Click(object sender, RoutedEventArgs e)
 {
     try
     {
-        // 必须不加 ConfigureAwait(false)
+        // 蹇呴』涓嶅姞 ConfigureAwait(false)
         await ViewModel.ScanAsync(CancellationToken.None);
     }
     catch (Exception ex)
@@ -89,25 +85,16 @@ private async void ScanButton_Click(object sender, RoutedEventArgs e)
 
 ---
 
-## 二、WMI 与硬件底层通信优化（防卡死与 RDP 优化）
-
-### 1. 致命的 WMI 同步阻塞与远程桌面 (RDP) 锁死
-软件在启动时会通过 WMI（Windows Management Instrumentation）查询 ACPI、系统 BIOS、硬件配置以及监听系统注册表主题变化。在以下场景中，同步 WMI 调用的底层内核等待会陷入**内核态死循环或超时长等待**：
-* 通过远程桌面 (RDP) 连接计算机时；
-* 安装了虚拟显卡驱动（如 GameViewer Virtual Display / Parsec / 剪映虚拟串流驱动）时；
-* 联想笔记本处于特定的睡眠唤醒 / 节能状态时。
-
-现象为：`ManagementObjectSearcher.Get()` 或 `ManagementEventWatcher.Start()` 同步卡死数十秒，CPU 内核态占用飙升，主窗口迟迟不弹窗甚至导致远程桌面画面假死。
-
+## 浜屻€乄MI 涓庣‖浠跺簳灞傞€氫俊浼樺寲锛堥槻鍗℃涓?RDP 浼樺寲锛?
+### 1. 鑷村懡鐨?WMI 鍚屾闃诲涓庤繙绋嬫闈?(RDP) 閿佹
+杞欢鍦ㄥ惎鍔ㄦ椂浼氶€氳繃 WMI锛圵indows Management Instrumentation锛夋煡璇?ACPI銆佺郴缁?BIOS銆佺‖浠堕厤缃互鍙婄洃鍚郴缁熸敞鍐岃〃涓婚鍙樺寲銆傚湪浠ヤ笅鍦烘櫙涓紝鍚屾 WMI 璋冪敤鐨勫簳灞傚唴鏍哥瓑寰呬細闄峰叆**鍐呮牳鎬佹寰幆鎴栬秴鏃堕暱绛夊緟**锛?* 閫氳繃杩滅▼妗岄潰 (RDP) 杩炴帴璁＄畻鏈烘椂锛?* 瀹夎浜嗚櫄鎷熸樉鍗￠┍鍔紙濡?GameViewer Virtual Display / Parsec / 鍓槧铏氭嫙涓叉祦椹卞姩锛夋椂锛?* 鑱旀兂绗旇鏈浜庣壒瀹氱殑鐫＄湢鍞ら啋 / 鑺傝兘鐘舵€佹椂銆?
+鐜拌薄涓猴細`ManagementObjectSearcher.Get()` 鎴?`ManagementEventWatcher.Start()` 鍚屾鍗℃鏁板崄绉掞紝CPU 鍐呮牳鎬佸崰鐢ㄩ鍗囷紝涓荤獥鍙ｈ繜杩熶笉寮圭獥鐢氳嚦瀵艰嚧杩滅▼妗岄潰鐢婚潰鍋囨銆?
 ---
 
-### 2. WMI 改造黄金法则
-
-#### 规则 A：完全弃用同步 WMI 查询，必须附加超时保护
-禁止在代码中使用直接同步的 `mos.Get()`。必须通过异步 Task 包装，并使用 `CancellationTokenSource` 施加严格的超时限制（推荐 2500ms ~ 5000ms）。
-
+### 2. WMI 鏀归€犻粍閲戞硶鍒?
+#### 瑙勫垯 A锛氬畬鍏ㄥ純鐢ㄥ悓姝?WMI 鏌ヨ锛屽繀椤婚檮鍔犺秴鏃朵繚鎶?绂佹鍦ㄤ唬鐮佷腑浣跨敤鐩存帴鍚屾鐨?`mos.Get()`銆傚繀椤婚€氳繃寮傛 Task 鍖呰锛屽苟浣跨敤 `CancellationTokenSource` 鏂藉姞涓ユ牸鐨勮秴鏃堕檺鍒讹紙鎺ㄨ崘 2500ms ~ 5000ms锛夈€?
 ```csharp
-// 推荐范式：带超时的异步 WMI 查询封装
+// 鎺ㄨ崘鑼冨紡锛氬甫瓒呮椂鐨勫紓姝?WMI 鏌ヨ灏佽
 public static async Task<ManagementObjectCollection> GetAsyncWithTimeout(
     this ManagementObjectSearcher searcher, 
     int timeoutMs = 3000)
@@ -125,151 +112,86 @@ public static async Task<ManagementObjectCollection> GetAsyncWithTimeout(
 }
 ```
 
-#### 规则 B：禁用 WMI 监听系统事件，改用 Win32 API
-对于系统主题（深色/浅色模式）切换、注册表值变化等长期监听任务，**禁止使用 `ManagementEventWatcher`**。改用 Win32 系统的原生的 `PInvoke.RegNotifyChangeKeyValue` 或窗口消息 `WndProc` (WM_SETTINGCHANGE)，内存和 CPU 开销降低 95% 以上，且完全不会阻塞启动。
-
+#### 瑙勫垯 B锛氱鐢?WMI 鐩戝惉绯荤粺浜嬩欢锛屾敼鐢?Win32 API
+瀵逛簬绯荤粺涓婚锛堟繁鑹?娴呰壊妯″紡锛夊垏鎹€佹敞鍐岃〃鍊煎彉鍖栫瓑闀挎湡鐩戝惉浠诲姟锛?*绂佹浣跨敤 `ManagementEventWatcher`**銆傛敼鐢?Win32 绯荤粺鐨勫師鐢熺殑 `PInvoke.RegNotifyChangeKeyValue` 鎴栫獥鍙ｆ秷鎭?`WndProc` (WM_SETTINGCHANGE)锛屽唴瀛樺拰 CPU 寮€閿€闄嶄綆 95% 浠ヤ笂锛屼笖瀹屽叏涓嶄細闃诲鍚姩銆?
 ---
 
-## 三、后台轮询、传感器监控与磁盘 I/O 治理
+## 涓夈€佸悗鍙拌疆璇€佷紶鎰熷櫒鐩戞帶涓庣鐩?I/O 娌荤悊
 
-### 1. 杜绝高频后台轮询中的日志轰炸 (Log Spamming)
-硬件工具箱需高频轮询 CPU/GPU 功耗、风扇转速和温度传感器（通常每秒 1~2 次）。在高频执行的循环代码路径（如 `GetDataAsync`、`RefreshLoopAsync`）中：
-
+### 1. 鏉滅粷楂橀鍚庡彴杞涓殑鏃ュ織杞扮偢 (Log Spamming)
+纭欢宸ュ叿绠遍渶楂橀杞 CPU/GPU 鍔熻€椼€侀鎵囪浆閫熷拰娓╁害浼犳劅鍣紙閫氬父姣忕 1~2 娆★級銆傚湪楂橀鎵ц鐨勫惊鐜唬鐮佽矾寰勶紙濡?`GetDataAsync`銆乣RefreshLoopAsync`锛変腑锛?
 > [!WARNING]
-> **绝对禁止在高频轮询循环中输出常规 Trace / Debug 日志或格式化 JSON 字符串！**
-> 之前我们在传感器获取循环中每次输出 `SensorsData` JSON 序列化字符串，导致在几个小时的运行内存里产生数 GB 的磁盘写入日志，引发严重的磁盘 I/O 放大、内存 GC 频繁回收以及系统卡顿。
-
-* **整改标准**：只有在**状态发生重大改变**（如风扇模式切换、温度触发警告上限、硬件离线）或**捕捉到异常**时，才允许写入磁盘日志。正常轮询只需在内存中静默更新属性。
-
+> **缁濆绂佹鍦ㄩ珮棰戣疆璇㈠惊鐜腑杈撳嚭甯歌 Trace / Debug 鏃ュ織鎴栨牸寮忓寲 JSON 瀛楃涓诧紒**
+> 涔嬪墠鎴戜滑鍦ㄤ紶鎰熷櫒鑾峰彇寰幆涓瘡娆¤緭鍑?`SensorsData` JSON 搴忓垪鍖栧瓧绗︿覆锛屽鑷村湪鍑犱釜灏忔椂鐨勮繍琛屽唴瀛橀噷浜х敓鏁?GB 鐨勭鐩樺啓鍏ユ棩蹇楋紝寮曞彂涓ラ噸鐨勭鐩?I/O 鏀惧ぇ銆佸唴瀛?GC 棰戠箒鍥炴敹浠ュ強绯荤粺鍗￠】銆?
+* **鏁存敼鏍囧噯**锛氬彧鏈夊湪**鐘舵€佸彂鐢熼噸澶ф敼鍙?*锛堝椋庢墖妯″紡鍒囨崲銆佹俯搴﹁Е鍙戣鍛婁笂闄愩€佺‖浠剁绾匡級鎴?*鎹曟崏鍒板紓甯?*鏃讹紝鎵嶅厑璁稿啓鍏ョ鐩樻棩蹇椼€傛甯歌疆璇㈠彧闇€鍦ㄥ唴瀛樹腑闈欓粯鏇存柊灞炴€с€?
 ---
 
-### 2. 性能计数器 (Performance Counters) 的冷却熔断机制
-获取网络流量、磁盘读写等监控数据依赖 `System.Diagnostics.PerformanceCounter`。如果部分 Windows 系统（如精简版 Win10/11）损坏或缺失某些计数器，高频轮询会每秒触发并捕获多次底层异常，消耗大量 CPU。
-
-* **规范**：必须对底层的监控源加入**冷却熔断时间（Cooldown Timer）**。一旦读取失败或抛出异常，立即捕获并将该监控项标记为禁用，挂起 30~60 秒后再尝试重建；如果在冷却期内，直接返回默认值（0），不再频繁发起底层调用。
-
+### 2. 鎬ц兘璁℃暟鍣?(Performance Counters) 鐨勫喎鍗寸啍鏂満鍒?鑾峰彇缃戠粶娴侀噺銆佺鐩樿鍐欑瓑鐩戞帶鏁版嵁渚濊禆 `System.Diagnostics.PerformanceCounter`銆傚鏋滈儴鍒?Windows 绯荤粺锛堝绮剧畝鐗?Win10/11锛夋崯鍧忔垨缂哄け鏌愪簺璁℃暟鍣紝楂橀杞浼氭瘡绉掕Е鍙戝苟鎹曡幏澶氭搴曞眰寮傚父锛屾秷鑰楀ぇ閲?CPU銆?
+* **瑙勮寖**锛氬繀椤诲搴曞眰鐨勭洃鎺ф簮鍔犲叆**鍐峰嵈鐔旀柇鏃堕棿锛圕ooldown Timer锛?*銆備竴鏃﹁鍙栧け璐ユ垨鎶涘嚭寮傚父锛岀珛鍗虫崟鑾峰苟灏嗚鐩戞帶椤规爣璁颁负绂佺敤锛屾寕璧?30~60 绉掑悗鍐嶅皾璇曢噸寤猴紱濡傛灉鍦ㄥ喎鍗存湡鍐咃紝鐩存帴杩斿洖榛樿鍊硷紙0锛夛紝涓嶅啀棰戠箒鍙戣捣搴曞眰璋冪敤銆?
 ---
 
-### 3. CLI 进程与异步流重定向的资源回收
-在通过 `Process` 调用命令行（如 `powercfg`、`nvidiacli` 等）并异步读取 `StandardOutput` / `StandardError` 时：
-* 在处理任务取消 (`CancellationToken`) 或超时终止时，必须显式调用 `process.Kill(true)` 杀掉整个进程树。
-* 必须正确等待异步读取流完成，避免在流未关闭前强行释放进程对象而抛出 `NullReferenceException`。
-
+### 3. CLI 杩涚▼涓庡紓姝ユ祦閲嶅畾鍚戠殑璧勬簮鍥炴敹
+鍦ㄩ€氳繃 `Process` 璋冪敤鍛戒护琛岋紙濡?`powercfg`銆乣nvidiacli` 绛夛級骞跺紓姝ヨ鍙?`StandardOutput` / `StandardError` 鏃讹細
+* 鍦ㄥ鐞嗕换鍔″彇娑?(`CancellationToken`) 鎴栬秴鏃剁粓姝㈡椂锛屽繀椤绘樉寮忚皟鐢?`process.Kill(true)` 鏉€鎺夋暣涓繘绋嬫爲銆?* 蹇呴』姝ｇ‘绛夊緟寮傛璇诲彇娴佸畬鎴愶紝閬垮厤鍦ㄦ祦鏈叧闂墠寮鸿閲婃斁杩涚▼瀵硅薄鑰屾姏鍑?`NullReferenceException`銆?
 ---
 
-## 四、WPF UI 渲染与高频响应优化
-
-### 1. 高频事件的防抖 (Debounce) 与节流 (Throttle)
-对于用户调整滑动条（Slider）、输入搜索过滤文本、实时刷新折线图等高频触发 UI 事件：
-* **禁止直接进行实时重绘或底层I/O调用**。
-* **搜索/过滤文本框**：使用防抖（Debounce），等待用户停止按键 300ms ~ 500ms 后，再触发列表重载（参考 `WindowsOptimizationPage.Drivers.cs` 中的 `CancellationTokenSource` 防抖实现）。
-* **高频数值监控界面**：使用节流分发器（`ThrottleFirstDispatcher` / `ThrottleLastDispatcher`），将 UI 刷新频率控制在最高每秒 3~5 帧以内，确保主界面丝滑不掉帧。
-
-### 2. 消除视觉阴影与加速渲染瑕疵
-在 WPF 自定义圆角卡片边框（如 `AppStatusBanner`、警告框）中，如果外围 `Border` 具有圆角且内部嵌套复杂布局，往往会看到周遭出现黑色矩形阴影或裁剪边缘。
-* **规范**：在最外层的 `<UserControl>` 必须设置 `Background="Transparent"`；包裹圆角背景的容器必须设置 `BorderBrush="Transparent"` 与 `BorderThickness="0"`，防止硬件加速渲染时背景刷与裁剪区产生混色冲突。
-
+## 鍥涖€乄PF UI 娓叉煋涓庨珮棰戝搷搴斾紭鍖?
+### 1. 楂橀浜嬩欢鐨勯槻鎶?(Debounce) 涓庤妭娴?(Throttle)
+瀵逛簬鐢ㄦ埛璋冩暣婊戝姩鏉★紙Slider锛夈€佽緭鍏ユ悳绱㈣繃婊ゆ枃鏈€佸疄鏃跺埛鏂版姌绾垮浘绛夐珮棰戣Е鍙?UI 浜嬩欢锛?* **绂佹鐩存帴杩涜瀹炴椂閲嶇粯鎴栧簳灞侷/O璋冪敤**銆?* **鎼滅储/杩囨护鏂囨湰妗?*锛氫娇鐢ㄩ槻鎶栵紙Debounce锛夛紝绛夊緟鐢ㄦ埛鍋滄鎸夐敭 300ms ~ 500ms 鍚庯紝鍐嶈Е鍙戝垪琛ㄩ噸杞斤紙鍙傝€?`WindowsOptimizationPage.Drivers.cs` 涓殑 `CancellationTokenSource` 闃叉姈瀹炵幇锛夈€?* **楂橀鏁板€肩洃鎺х晫闈?*锛氫娇鐢ㄨ妭娴佸垎鍙戝櫒锛坄ThrottleFirstDispatcher` / `ThrottleLastDispatcher`锛夛紝灏?UI 鍒锋柊棰戠巼鎺у埗鍦ㄦ渶楂樻瘡绉?3~5 甯т互鍐咃紝纭繚涓荤晫闈笣婊戜笉鎺夊抚銆?
+### 2. 娑堥櫎瑙嗚闃村奖涓庡姞閫熸覆鏌撶憰鐤?鍦?WPF 鑷畾涔夊渾瑙掑崱鐗囪竟妗嗭紙濡?`AppStatusBanner`銆佽鍛婃锛変腑锛屽鏋滃鍥?`Border` 鍏锋湁鍦嗚涓斿唴閮ㄥ祵濂楀鏉傚竷灞€锛屽線寰€浼氱湅鍒板懆閬嚭鐜伴粦鑹茬煩褰㈤槾褰辨垨瑁佸壀杈圭紭銆?* **瑙勮寖**锛氬湪鏈€澶栧眰鐨?`<UserControl>` 蹇呴』璁剧疆 `Background="Transparent"`锛涘寘瑁瑰渾瑙掕儗鏅殑瀹瑰櫒蹇呴』璁剧疆 `BorderBrush="Transparent"` 涓?`BorderThickness="0"`锛岄槻姝㈢‖浠跺姞閫熸覆鏌撴椂鑳屾櫙鍒蜂笌瑁佸壀鍖轰骇鐢熸贩鑹插啿绐併€?
 ---
 
-## 五、面向 AI Agent 的批量排查与改造标准流程 (SOP)
+## 浜斻€侀潰鍚?AI Agent 鐨勬壒閲忔帓鏌ヤ笌鏀归€犳爣鍑嗘祦绋?(SOP)
 
-为了让其他 AI Agent 能够自动、安全、批量地优化整个代码库，请指示它们严格遵循以下 **SOP 六步工作法**：
-
+涓轰簡璁╁叾浠?AI Agent 鑳藉鑷姩銆佸畨鍏ㄣ€佹壒閲忓湴浼樺寲鏁翠釜浠ｇ爜搴擄紝璇锋寚绀哄畠浠弗鏍奸伒寰互涓?**SOP 鍏宸ヤ綔娉?*锛?
 ```mermaid
 graph TD
-    A[步骤 1: Grep 定位高危代码模式] --> B[步骤 2: 确定所属的分层边界]
-    B --> C{是否在 WPF UI 层?}
-    C -- 是 --> D[步骤 3: 严格移除 .ConfigureAwait(false)]
-    C -- 否 --> E[步骤 3: 确保使用 .ConfigureAwait(false)]
-    D --> F[步骤 4: 检查并修复 async void 异常保护]
+    A[姝ラ 1: Grep 瀹氫綅楂樺嵄浠ｇ爜妯″紡] --> B[姝ラ 2: 纭畾鎵€灞炵殑鍒嗗眰杈圭晫]
+    B --> C{鏄惁鍦?WPF UI 灞?}
+    C -- 鏄?--> D[姝ラ 3: 涓ユ牸绉婚櫎 .ConfigureAwait(false)]
+    C -- 鍚?--> E[姝ラ 3: 纭繚浣跨敤 .ConfigureAwait(false)]
+    D --> F[姝ラ 4: 妫€鏌ュ苟淇 async void 寮傚父淇濇姢]
     E --> F
-    F --> G[步骤 5: 审计高频轮询与日志 I/O]
-    G --> H[步骤 6: 自动化编译与单测验证]
+    F --> G[姝ラ 5: 瀹¤楂橀杞涓庢棩蹇?I/O]
+    G --> H[姝ラ 6: 鑷姩鍖栫紪璇戜笌鍗曟祴楠岃瘉]
 ```
 
-### 1. 定位高危模式 (Grep Search)
-Agent 必须优先使用高精度工具 `grep_search`（绝对不要在终端用 bash `grep` / `cat`）全库搜索以下特征：
-* `ConfigureAwait\(false\)` （检查是否误用于 UI 层）
-* `async void` （检查是否缺少 `try-catch` 或被用于非事件处理器）
-* `ManagementObjectSearcher` / `ManagementEventWatcher` / `.Get\(\)` （检查是否有同步 WMI 调用）
-* `Log.Instance.(Trace|Debug|Info)` （检查是否在高频轮询循环中输出）
+### 1. 瀹氫綅楂樺嵄妯″紡 (Grep Search)
+Agent 蹇呴』浼樺厛浣跨敤楂樼簿搴﹀伐鍏?`grep_search`锛堢粷瀵逛笉瑕佸湪缁堢鐢?bash `grep` / `cat`锛夊叏搴撴悳绱互涓嬬壒寰侊細
+* `ConfigureAwait\(false\)` 锛堟鏌ユ槸鍚﹁鐢ㄤ簬 UI 灞傦級
+* `async void` 锛堟鏌ユ槸鍚︾己灏?`try-catch` 鎴栬鐢ㄤ簬闈炰簨浠跺鐞嗗櫒锛?* `ManagementObjectSearcher` / `ManagementEventWatcher` / `.Get\(\)` 锛堟鏌ユ槸鍚︽湁鍚屾 WMI 璋冪敤锛?* `Log.Instance.(Trace|Debug|Info)` 锛堟鏌ユ槸鍚﹀湪楂橀杞寰幆涓緭鍑猴級
 
-### 2. 判定所属分层边界
-* 读取文件绝对路径与顶层命名空间。
-* 判定为 **WPF UI 层** (`*.WPF/Pages`, `*.WPF/Windows`, `*.WPF/Controls`, `*.WPF/ViewModels`) 还是 **底层类库** (`*.Lib`, `*.CLI`, `*.Macro`, `*.Automation`)。
-
-### 3. 施加异步改造规则
-* 如果在 UI 层且调用方直接操作 UI 元素、依赖属性或触发数据绑定：使用 `replace_file_content` 或 `multi_replace_file_content` 批量移除 `.ConfigureAwait(false)`。
-* 如果在纯底层类库层：确保所有 `await` 均带上 `.ConfigureAwait(false)`。
-
-### 4. 补全安全防护
-* 为所有 `async void` 事件加上完善的 `try-catch` 结构，并在 `catch` 中通过 `SnackbarHelper` 提示用户，杜绝程序崩溃。
-* 将所有的同步 WMI 查询替换为带超时包装的异步 `GetAsyncWithTimeout()`。
-
-### 5. 高频 I/O 审计
-* 检查 `Timer`、`While(true)` 循环、`Task.Delay` 轮询内部的日志输出代码。将每次循环必打的常规日志移除，改为状态变更触发。
-
-### 6. 编译与单元测试验证
-* 执行命令 `dotnet build <SLN_PATH> -c Debug`，确保 **0 Error** 且没有引入新的严重警告。
-* 执行命令 `dotnet test`，运行自动化测试套件，保证核心逻辑无破损。
-
+### 2. 鍒ゅ畾鎵€灞炲垎灞傝竟鐣?* 璇诲彇鏂囦欢缁濆璺緞涓庨《灞傚懡鍚嶇┖闂淬€?* 鍒ゅ畾涓?**WPF UI 灞?* (`*.WPF/Pages`, `*.WPF/Windows`, `*.WPF/Controls`, `*.WPF/ViewModels`) 杩樻槸 **搴曞眰绫诲簱** (`*.Lib`, `*.CLI`, `*.Macro`, `*.Automation`)銆?
+### 3. 鏂藉姞寮傛鏀归€犺鍒?* 濡傛灉鍦?UI 灞備笖璋冪敤鏂圭洿鎺ユ搷浣?UI 鍏冪礌銆佷緷璧栧睘鎬ф垨瑙﹀彂鏁版嵁缁戝畾锛氫娇鐢?`replace_file_content` 鎴?`multi_replace_file_content` 鎵归噺绉婚櫎 `.ConfigureAwait(false)`銆?* 濡傛灉鍦ㄧ函搴曞眰绫诲簱灞傦細纭繚鎵€鏈?`await` 鍧囧甫涓?`.ConfigureAwait(false)`銆?
+### 4. 琛ュ叏瀹夊叏闃叉姢
+* 涓烘墍鏈?`async void` 浜嬩欢鍔犱笂瀹屽杽鐨?`try-catch` 缁撴瀯锛屽苟鍦?`catch` 涓€氳繃 `SnackbarHelper` 鎻愮ず鐢ㄦ埛锛屾潨缁濈▼搴忓穿婧冦€?* 灏嗘墍鏈夌殑鍚屾 WMI 鏌ヨ鏇挎崲涓哄甫瓒呮椂鍖呰鐨勫紓姝?`GetAsyncWithTimeout()`銆?
+### 5. 楂橀 I/O 瀹¤
+* 妫€鏌?`Timer`銆乣While(true)` 寰幆銆乣Task.Delay` 杞鍐呴儴鐨勬棩蹇楄緭鍑轰唬鐮併€傚皢姣忔寰幆蹇呮墦鐨勫父瑙勬棩蹇楃Щ闄わ紝鏀逛负鐘舵€佸彉鏇磋Е鍙戙€?
+### 6. 缂栬瘧涓庡崟鍏冩祴璇曢獙璇?* 鎵ц鍛戒护 `dotnet build <SLN_PATH> -c Debug`锛岀‘淇?**0 Error** 涓旀病鏈夊紩鍏ユ柊鐨勪弗閲嶈鍛娿€?* 鎵ц鍛戒护 `dotnet test`锛岃繍琛岃嚜鍔ㄥ寲娴嬭瘯濂椾欢锛屼繚璇佹牳蹇冮€昏緫鏃犵牬鎹熴€?
 ---
 
-## 六、可以直接发给其他 Agent 的 Prompt 模板
+## 鍏€佸彲浠ョ洿鎺ュ彂缁欏叾浠?Agent 鐨?Prompt 妯℃澘
 
-你可以直接复制以下 Prompt 模板，分发给其他 AI Agent 执行批量重构与排查任务：
+浣犲彲浠ョ洿鎺ュ鍒朵互涓?Prompt 妯℃澘锛屽垎鍙戠粰鍏朵粬 AI Agent 鎵ц鎵归噺閲嶆瀯涓庢帓鏌ヤ换鍔★細
 
 ```markdown
 <TASK_PROMPT>
-你是一个资深的 .NET 10 + WPF 桌面应用程序架构师与性能优化专家。现在请你按照《Universal Device Toolkit 深度性能优化与 AI Agent 批量重构指南》，对指定的模块/项目进行批量审查和性能优化。
-
-### 核心任务与约束：
-1. **WPF 异步线程规则（最优先）**：
-   - 严禁使用 bash `grep`，请使用高精度搜索工具（如 `grep_search`）扫描指定目录下所有文件中的 `ConfigureAwait(false)`。
-   - 如果文件属于 WPF UI 层（包含 `UserControl`、`Window`、`Page`、`ViewModel`、事件处理器、操作 UI 控件/依赖属性/Snackbar），你**必须**批量移除其中的 `.ConfigureAwait(false)`，让代码返回 UI 同步上下文，防止抛出跨线程异常导致程序闪退！
-   - 如果文件属于底层核心类库（没有 UI 依赖的纯服务/工具类），请确保其异步方法使用 `.ConfigureAwait(false)`。
-
-2. **WMI 与同步阻塞改造**：
-   - 检查代码中是否存在同步的 WMI 查询（如 `ManagementObjectSearcher.Get()`）或同步监听（`ManagementEventWatcher`）。
-   - 将同步 WMI 查询改为异步并附加超时限制（建议 3000ms），防止在远程桌面 (RDP) 或虚拟显卡驱动下卡死主程序。
-   - 对注册表和系统设置监听，优化为 Win32 `RegNotifyChangeKeyValue` 或异步防抖处理。
-
-3. **异常捕获与后台 I/O 治理**：
-   - 检查所有的 `async void` 事件处理器，确保内部有完整的 `try-catch` 结构保护，防止未捕获异常导致应用程序崩溃闪退。
-   - 检查高频轮询代码（如传感器读取、风扇/功耗监控循环），彻底移除循环内的常规数据打印日志（`Log.Instance.Trace/Debug`），杜绝磁盘 I/O 飙升。
-
-4. **安全编程与验证**：
-   - 不要破坏代码中无关的既有注释、业务逻辑及语言本地化资源。
-   - 每次重构完成后，务必使用 `run_command` 运行 `dotnet build` 检查编译错误，并确保编译通过（0 错误）。
-</TASK_PROMPT>
+浣犳槸涓€涓祫娣辩殑 .NET 10 + WPF 妗岄潰搴旂敤绋嬪簭鏋舵瀯甯堜笌鎬ц兘浼樺寲涓撳銆傜幇鍦ㄨ浣犳寜鐓с€奤niversal Device Toolkit 娣卞害鎬ц兘浼樺寲涓?AI Agent 鎵归噺閲嶆瀯鎸囧崡銆嬶紝瀵规寚瀹氱殑妯″潡/椤圭洰杩涜鎵归噺瀹℃煡鍜屾€ц兘浼樺寲銆?
+### 鏍稿績浠诲姟涓庣害鏉燂細
+1. **WPF 寮傛绾跨▼瑙勫垯锛堟渶浼樺厛锛?*锛?   - 涓ョ浣跨敤 bash `grep`锛岃浣跨敤楂樼簿搴︽悳绱㈠伐鍏凤紙濡?`grep_search`锛夋壂鎻忔寚瀹氱洰褰曚笅鎵€鏈夋枃浠朵腑鐨?`ConfigureAwait(false)`銆?   - 濡傛灉鏂囦欢灞炰簬 WPF UI 灞傦紙鍖呭惈 `UserControl`銆乣Window`銆乣Page`銆乣ViewModel`銆佷簨浠跺鐞嗗櫒銆佹搷浣?UI 鎺т欢/渚濊禆灞炴€?Snackbar锛夛紝浣?*蹇呴』**鎵归噺绉婚櫎鍏朵腑鐨?`.ConfigureAwait(false)`锛岃浠ｇ爜杩斿洖 UI 鍚屾涓婁笅鏂囷紝闃叉鎶涘嚭璺ㄧ嚎绋嬪紓甯稿鑷寸▼搴忛棯閫€锛?   - 濡傛灉鏂囦欢灞炰簬搴曞眰鏍稿績绫诲簱锛堟病鏈?UI 渚濊禆鐨勭函鏈嶅姟/宸ュ叿绫伙級锛岃纭繚鍏跺紓姝ユ柟娉曚娇鐢?`.ConfigureAwait(false)`銆?
+2. **WMI 涓庡悓姝ラ樆濉炴敼閫?*锛?   - 妫€鏌ヤ唬鐮佷腑鏄惁瀛樺湪鍚屾鐨?WMI 鏌ヨ锛堝 `ManagementObjectSearcher.Get()`锛夋垨鍚屾鐩戝惉锛坄ManagementEventWatcher`锛夈€?   - 灏嗗悓姝?WMI 鏌ヨ鏀逛负寮傛骞堕檮鍔犺秴鏃堕檺鍒讹紙寤鸿 3000ms锛夛紝闃叉鍦ㄨ繙绋嬫闈?(RDP) 鎴栬櫄鎷熸樉鍗￠┍鍔ㄤ笅鍗℃涓荤▼搴忋€?   - 瀵规敞鍐岃〃鍜岀郴缁熻缃洃鍚紝浼樺寲涓?Win32 `RegNotifyChangeKeyValue` 鎴栧紓姝ラ槻鎶栧鐞嗐€?
+3. **寮傚父鎹曡幏涓庡悗鍙?I/O 娌荤悊**锛?   - 妫€鏌ユ墍鏈夌殑 `async void` 浜嬩欢澶勭悊鍣紝纭繚鍐呴儴鏈夊畬鏁寸殑 `try-catch` 缁撴瀯淇濇姢锛岄槻姝㈡湭鎹曡幏寮傚父瀵艰嚧搴旂敤绋嬪簭宕╂簝闂€€銆?   - 妫€鏌ラ珮棰戣疆璇唬鐮侊紙濡備紶鎰熷櫒璇诲彇銆侀鎵?鍔熻€楃洃鎺у惊鐜級锛屽交搴曠Щ闄ゅ惊鐜唴鐨勫父瑙勬暟鎹墦鍗版棩蹇楋紙`Log.Instance.Trace/Debug`锛夛紝鏉滅粷纾佺洏 I/O 椋欏崌銆?
+4. **瀹夊叏缂栫▼涓庨獙璇?*锛?   - 涓嶈鐮村潖浠ｇ爜涓棤鍏崇殑鏃㈡湁娉ㄩ噴銆佷笟鍔￠€昏緫鍙婅瑷€鏈湴鍖栬祫婧愩€?   - 姣忔閲嶆瀯瀹屾垚鍚庯紝鍔″繀浣跨敤 `run_command` 杩愯 `dotnet build` 妫€鏌ョ紪璇戦敊璇紝骞剁‘淇濈紪璇戦€氳繃锛? 閿欒锛夈€?</TASK_PROMPT>
 ```
 
 ---
 
-## 七、对项目未来发展的建设性意见与架构规划
+## 涓冦€佸椤圭洰鏈潵鍙戝睍鐨勫缓璁炬€ф剰瑙佷笌鏋舵瀯瑙勫垝
 
-在深入排查与重构本项目的过程中，为确保项目的长远可维护性、高可用性及规范化，提出以下建设性意见与规划：
-
-### 1. 架构改造：更严格的 MVVM 隔离与 UI 线程调度解耦
-* **现状**：目前部分 UI 控件及 Page 页面中（如 `WindowsOptimizationPage`、各个 `Control` 内部）混合了非常多的业务逻辑、底层下载调用和直接的 `Dispatcher.Invoke` / `Dispatcher.BeginInvoke` 操作。这导致代码逻辑在 UI 线程与后台线程之间交织，极易引来线程安全隐患。
-* **建议**：
-  * 引入抽象层 **`IUiDispatcher` / `IUiScheduler`** 接口，在底层服务和 ViewModel 中只通过接口请求回到主线程，将 `Wpf.Dispatcher` 作为实现类在 IoC 容器中注入。
-  * 这样不仅可以把 ViewModel 彻底同 WPF 视图解耦，大幅提升单元测试的覆盖率和自动化测试可行性，还能从根本上避免因为手动写错 `Dispatcher` 或 `ConfigureAwait` 导致的死锁与跨线程异常。
-
-### 2. 自动化代码审查 (CI/CD) 与静态语法分析器 (Roslyn Analyzers)
-* **现状**：开发人员或 Agent 在写异步代码时，容易凭习惯顺手加上 `.ConfigureAwait(false)`，或者使用同步的 WMI API，这些问题往往在特定硬件或 RDP 远程桌面下才会爆雷。
-* **建议**：
-  * 引入 **Roslyn 静态语法分析器（如 Meziantou.Analyzer / Microsoft.VisualStudio.Threading.Analyzers）**，并在项目的 `.editorconfig` 中配置自定义规则。
-  * 在 CI 编译流水线（如 GitHub Actions）中强制启用规则：**当检测到 WPF 视图层调用了 `ConfigureAwait(false)` 或调用了同步阻塞 API 时，直接触发编译 Error**。从源头拦截高危代码的提交。
-
-### 3. 增强并发与硬件模拟专项测试
-* **现状**：目前项目拥有很好的单元测试基础（2340+ 单测），但大部分集中在纯逻辑、字符串序列化和工具类，对于并发竞态、多线程懒加载（如 `Lazy<T>` 缓存缓存淘汰）、硬件查询响应超时等场景覆盖较少。
-* **建议**：
-  * 编写针对硬件接口和底层服务的 **Mock 模拟层**，在测试中人为注入延迟（如模拟 WMI 阻塞 10 秒）与并发高频调用的测试用例，验证系统在高负载和极端网络/硬件环境下的容错熔断能力。
-  * 针对单例缓存和硬件状态管理器，增加多线程并发读写的压力测试，确保竞态安全。
-
-### 4. 硬件适配层的插件化与解耦 (Hardware Adapter Pattern)
-* **现状**：作为通用设备工具箱，底层承载了大量针对 Lenovo Legion、ThinkPad 等不同机型、EC 寄存器、功耗墙、GPU 控制的特化逻辑。
-* **建议**：
-  * 进一步将硬件控制抽象为标准化的 **硬件适配器驱动接口 (Hardware Adapter / Provider Pattern)**。
-  * 将联想特有的 WMI 接口、嵌入式控制器 (EC) 读写、光效控制明确封装在独立的 Provider 插件模块中。这样未来如果要扩展支持其他品牌（如华硕 ROG、机械革命、惠普等）的硬件控制，只需开发实现新的 Provider，而不必在核心主业务流程中不断增加 `if-else` 或设备兼容性判断，极大提升软硬件生态的扩展能力。
+鍦ㄦ繁鍏ユ帓鏌ヤ笌閲嶆瀯鏈」鐩殑杩囩▼涓紝涓虹‘淇濋」鐩殑闀胯繙鍙淮鎶ゆ€с€侀珮鍙敤鎬у強瑙勮寖鍖栵紝鎻愬嚭浠ヤ笅寤鸿鎬ф剰瑙佷笌瑙勫垝锛?
+### 1. 鏋舵瀯鏀归€狅細鏇翠弗鏍肩殑 MVVM 闅旂涓?UI 绾跨▼璋冨害瑙ｈ€?* **鐜扮姸**锛氱洰鍓嶉儴鍒?UI 鎺т欢鍙?Page 椤甸潰涓紙濡?`WindowsOptimizationPage`銆佸悇涓?`Control` 鍐呴儴锛夋贩鍚堜簡闈炲父澶氱殑涓氬姟閫昏緫銆佸簳灞備笅杞借皟鐢ㄥ拰鐩存帴鐨?`Dispatcher.Invoke` / `Dispatcher.BeginInvoke` 鎿嶄綔銆傝繖瀵艰嚧浠ｇ爜閫昏緫鍦?UI 绾跨▼涓庡悗鍙扮嚎绋嬩箣闂翠氦缁囷紝鏋佹槗寮曟潵绾跨▼瀹夊叏闅愭偅銆?* **寤鸿**锛?  * 寮曞叆鎶借薄灞?**`IUiDispatcher` / `IUiScheduler`** 鎺ュ彛锛屽湪搴曞眰鏈嶅姟鍜?ViewModel 涓彧閫氳繃鎺ュ彛璇锋眰鍥炲埌涓荤嚎绋嬶紝灏?`Wpf.Dispatcher` 浣滀负瀹炵幇绫诲湪 IoC 瀹瑰櫒涓敞鍏ャ€?  * 杩欐牱涓嶄粎鍙互鎶?ViewModel 褰诲簳鍚?WPF 瑙嗗浘瑙ｈ€︼紝澶у箙鎻愬崌鍗曞厓娴嬭瘯鐨勮鐩栫巼鍜岃嚜鍔ㄥ寲娴嬭瘯鍙鎬э紝杩樿兘浠庢牴鏈笂閬垮厤鍥犱负鎵嬪姩鍐欓敊 `Dispatcher` 鎴?`ConfigureAwait` 瀵艰嚧鐨勬閿佷笌璺ㄧ嚎绋嬪紓甯搞€?
+### 2. 鑷姩鍖栦唬鐮佸鏌?(CI/CD) 涓庨潤鎬佽娉曞垎鏋愬櫒 (Roslyn Analyzers)
+* **鐜扮姸**锛氬紑鍙戜汉鍛樻垨 Agent 鍦ㄥ啓寮傛浠ｇ爜鏃讹紝瀹规槗鍑範鎯『鎵嬪姞涓?`.ConfigureAwait(false)`锛屾垨鑰呬娇鐢ㄥ悓姝ョ殑 WMI API锛岃繖浜涢棶棰樺線寰€鍦ㄧ壒瀹氱‖浠舵垨 RDP 杩滅▼妗岄潰涓嬫墠浼氱垎闆枫€?* **寤鸿**锛?  * 寮曞叆 **Roslyn 闈欐€佽娉曞垎鏋愬櫒锛堝 Meziantou.Analyzer / Microsoft.VisualStudio.Threading.Analyzers锛?*锛屽苟鍦ㄩ」鐩殑 `.editorconfig` 涓厤缃嚜瀹氫箟瑙勫垯銆?  * 鍦?CI 缂栬瘧娴佹按绾匡紙濡?GitHub Actions锛変腑寮哄埗鍚敤瑙勫垯锛?*褰撴娴嬪埌 WPF 瑙嗗浘灞傝皟鐢ㄤ簡 `ConfigureAwait(false)` 鎴栬皟鐢ㄤ簡鍚屾闃诲 API 鏃讹紝鐩存帴瑙﹀彂缂栬瘧 Error**銆備粠婧愬ご鎷︽埅楂樺嵄浠ｇ爜鐨勬彁浜ゃ€?
+### 3. 澧炲己骞跺彂涓庣‖浠舵ā鎷熶笓椤规祴璇?* **鐜扮姸**锛氱洰鍓嶉」鐩嫢鏈夊緢濂界殑鍗曞厓娴嬭瘯鍩虹锛?340+ 鍗曟祴锛夛紝浣嗗ぇ閮ㄥ垎闆嗕腑鍦ㄧ函閫昏緫銆佸瓧绗︿覆搴忓垪鍖栧拰宸ュ叿绫伙紝瀵逛簬骞跺彂绔炴€併€佸绾跨▼鎳掑姞杞斤紙濡?`Lazy<T>` 缂撳瓨缂撳瓨娣樻卑锛夈€佺‖浠舵煡璇㈠搷搴旇秴鏃剁瓑鍦烘櫙瑕嗙洊杈冨皯銆?* **寤鸿**锛?  * 缂栧啓閽堝纭欢鎺ュ彛鍜屽簳灞傛湇鍔＄殑 **Mock 妯℃嫙灞?*锛屽湪娴嬭瘯涓汉涓烘敞鍏ュ欢杩燂紙濡傛ā鎷?WMI 闃诲 10 绉掞級涓庡苟鍙戦珮棰戣皟鐢ㄧ殑娴嬭瘯鐢ㄤ緥锛岄獙璇佺郴缁熷湪楂樿礋杞藉拰鏋佺缃戠粶/纭欢鐜涓嬬殑瀹归敊鐔旀柇鑳藉姏銆?  * 閽堝鍗曚緥缂撳瓨鍜岀‖浠剁姸鎬佺鐞嗗櫒锛屽鍔犲绾跨▼骞跺彂璇诲啓鐨勫帇鍔涙祴璇曪紝纭繚绔炴€佸畨鍏ㄣ€?
+### 4. 纭欢閫傞厤灞傜殑鎻掍欢鍖栦笌瑙ｈ€?(Hardware Adapter Pattern)
+* **鐜扮姸**锛氫綔涓洪€氱敤璁惧宸ュ叿绠憋紝搴曞眰鎵胯浇浜嗗ぇ閲忛拡瀵?Lenovo Legion銆乀hinkPad 绛変笉鍚屾満鍨嬨€丒C 瀵勫瓨鍣ㄣ€佸姛鑰楀銆丟PU 鎺у埗鐨勭壒鍖栭€昏緫銆?* **寤鸿**锛?  * 杩涗竴姝ュ皢纭欢鎺у埗鎶借薄涓烘爣鍑嗗寲鐨?**纭欢閫傞厤鍣ㄩ┍鍔ㄦ帴鍙?(Hardware Adapter / Provider Pattern)**銆?  * 灏嗚仈鎯崇壒鏈夌殑 WMI 鎺ュ彛銆佸祵鍏ュ紡鎺у埗鍣?(EC) 璇诲啓銆佸厜鏁堟帶鍒舵槑纭皝瑁呭湪鐙珛鐨?Provider 鎻掍欢妯″潡涓€傝繖鏍锋湭鏉ュ鏋滆鎵╁睍鏀寔鍏朵粬鍝佺墝锛堝鍗庣 ROG銆佹満姊伴潻鍛姐€佹儬鏅瓑锛夌殑纭欢鎺у埗锛屽彧闇€寮€鍙戝疄鐜版柊鐨?Provider锛岃€屼笉蹇呭湪鏍稿績涓讳笟鍔℃祦绋嬩腑涓嶆柇澧炲姞 `if-else` 鎴栬澶囧吋瀹规€у垽鏂紝鏋佸ぇ鎻愬崌杞‖浠剁敓鎬佺殑鎵╁睍鑳藉姏銆?

@@ -1,4 +1,17 @@
-# Knowledge Base — Multi-Board-Game-Collection
+﻿# Knowledge Base 鈥?Multi-Board-Game-Collection
+
+---
+### 馃И MANDATORY TESTING METHODOLOGY: THE PRE-CONFIGURED 3-TIER SUITE
+When testing, building, or verifying any modification, **YOU MUST STRICTLY USE THE PRE-CONFIGURED 3-TIER TESTING SUITE** defined in:
+馃憠 i/CANONICAL_TESTING_AND_VERIFICATION_SUITE.md
+
+This enforces:
+1. **Tier 1 (Automated AST/Test Gate)**: dotnet test / cargo test / go test -race / pytest / strict build -warnaserror.
+2. **Tier 2 (Live Debug Trace Trap)**: Attached WPF DataBinding TraceListener Level=Warning & Task.Run WMI 2500ms timeout traps.
+3. **Tier 3 (5-Locale x 3-DPI Multimodal OCR Matrix)**: Quantified verification against [UI-OCR-Clipping], [UI-OCR-Mojibake], [UI-OCR-Collision], and [UI-OCR-Contrast] across 100% / 125% / 150% DPI and en / zh-Hans / ja / de / ru.
+(For Novel, use the pre-configured Literary Continuity & Repetition Pruning Audit loop defined in CANONICAL_TESTING_AND_VERIFICATION_SUITE.md).
+---
+
 
 > Lessons learned during development. Referenced by .bugs/ queue and handover protocol.
 
@@ -7,7 +20,7 @@
 ## RULE-001: Multi-Game LLM Coach Architecture
 
 **Date**: 2026-07-07
-**Bug**: BUG-001 — LLM Coach only supported Gomoku
+**Bug**: BUG-001 鈥?LLM Coach only supported Gomoku
 **Impact**: 4 of 5 games had broken coach feature
 
 ### Root Cause
@@ -17,10 +30,10 @@ The LLM Coach service (src/services/llmCoach.js) hardcoded a Gomoku-specific sys
 Always pass gameType through the full LLM service call chain. Never assume a single game type in multi-game codebases.
 
 ### Key Files
-- src/services/llmCoach.js — buildChatCompletionRequest() accepts gameType; system prompts branch per game; board image splits into createGridBoardImageUrl() (Chess/Xiangqi) and createIntersectionBoardImageUrl() (Gomoku/Go/Junqi)
-- src/app/controllers/CoachController.js — getGameType() reads DOM body.dataset.activeGame or app.options.gameType; refreshCoachGuidance() skips local AI for non-Gomoku
-- src/games/registry.js — All 5 games declare llm-coach capability
-- src/services/llmCoach.test.js — Per-game system prompt assertions; canvas mock required
+- src/services/llmCoach.js 鈥?buildChatCompletionRequest() accepts gameType; system prompts branch per game; board image splits into createGridBoardImageUrl() (Chess/Xiangqi) and createIntersectionBoardImageUrl() (Gomoku/Go/Junqi)
+- src/app/controllers/CoachController.js 鈥?getGameType() reads DOM body.dataset.activeGame or app.options.gameType; refreshCoachGuidance() skips local AI for non-Gomoku
+- src/games/registry.js 鈥?All 5 games declare llm-coach capability
+- src/services/llmCoach.test.js 鈥?Per-game system prompt assertions; canvas mock required
 
 ### Testing Pattern
 When testing requestLlmCoachAdvice, always mock document.createElement(canvas) to return a mock context with fillRect, fillText, toDataURL, etc.
@@ -83,8 +96,8 @@ All i18n keys must exist in both zh and en sections of src/utils/i18n.js. Transl
 - Gomoku and Go have custom 3D renderers inheriting from shared render3d/ infrastructure
 - Chess, Xiangqi, Junqi share BoardGameRenderer3D base class in src/games/render3d/
 - 3 scenes available: Home (warm lighting), Park (outdoor), Competition (bright)
-- SoundManager lives in src/audio/SoundManager.js — procedural stone-drop audio via playMove()
-- Headless Chromium + Three.js screenshots may timeout — known limitation
+- SoundManager lives in src/audio/SoundManager.js 鈥?procedural stone-drop audio via playMove()
+- Headless Chromium + Three.js screenshots may timeout 鈥?known limitation
 
 ---
 
@@ -150,7 +163,7 @@ Use cameraController.focusOnCell(row, col, size, cellSize, true) to smoothly zoo
 - Initialize in init(): `this.particleSystem = new ParticleSystem(this.sceneManager.scene)`
 - Call `emitDropParticles()` in addPiece() after drop animation
 - Dispose before AnimationManager in dispose()
-- Victory effects not yet wired (no `gameOver` detection in shared base — each game subclass handles it)
+- Victory effects not yet wired (no `gameOver` detection in shared base 鈥?each game subclass handles it)
 
 ## RULE-011: Marketing Material Update Cadence
 
@@ -223,4 +236,5 @@ When adding difficulty levels to LLM Coach:
 2. Add difficulty parameter to buildChatCompletionRequest and requestLlmCoachAdvice
 3. Insert difficulty hint into system prompt
 4. Default to medium when difficulty is undefined
+
 

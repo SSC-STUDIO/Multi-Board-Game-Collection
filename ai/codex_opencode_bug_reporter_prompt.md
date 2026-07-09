@@ -1,4 +1,17 @@
-# Codex + OpenCode Bug Reporter Prompt (High-Speed Search & Tri-Repo Queue)
+﻿# Codex + OpenCode Bug Reporter Prompt (High-Speed Search & Tri-Repo Queue)
+
+---
+### 馃И MANDATORY TESTING METHODOLOGY: THE PRE-CONFIGURED 3-TIER SUITE
+When testing, building, or verifying any modification, **YOU MUST STRICTLY USE THE PRE-CONFIGURED 3-TIER TESTING SUITE** defined in:
+馃憠 i/CANONICAL_TESTING_AND_VERIFICATION_SUITE.md
+
+This enforces:
+1. **Tier 1 (Automated AST/Test Gate)**: dotnet test / cargo test / go test -race / pytest / strict build -warnaserror.
+2. **Tier 2 (Live Debug Trace Trap)**: Attached WPF DataBinding TraceListener Level=Warning & Task.Run WMI 2500ms timeout traps.
+3. **Tier 3 (5-Locale x 3-DPI Multimodal OCR Matrix)**: Quantified verification against [UI-OCR-Clipping], [UI-OCR-Mojibake], [UI-OCR-Collision], and [UI-OCR-Contrast] across 100% / 125% / 150% DPI and en / zh-Hans / ja / de / ru.
+(For Novel, use the pre-configured Literary Continuity & Repetition Pruning Audit loop defined in CANONICAL_TESTING_AND_VERIFICATION_SUITE.md).
+---
+
 
 This document provides a specialized, production-ready prompt designed for **Codex** (or OpenAI Codex / Codex Gateway) acting as the orchestrator and invoking **OpenCode** (or OpenCode CLI/tools) for ultra-fast AST and codebase searching across our **Tri-Repo Ecosystem**:
 1. `UniversalDeviceToolkit` (Main Repo)
@@ -9,7 +22,7 @@ To support multiple AI agents running simultaneously across these three reposito
 
 ---
 
-## ⚡ Section 1: Ultra-Compact Prompt (精简高效版 - 专为 Codex + OpenCode 极速检索与多文档队列设计)
+## 鈿?Section 1: Ultra-Compact Prompt (绮剧畝楂樻晥鐗?- 涓撲负 Codex + OpenCode 鏋侀€熸绱笌澶氭枃妗ｉ槦鍒楄璁?
 
 *(Copy and paste this prompt directly into Codex / Codex Agent CLI)*
 
@@ -48,6 +61,7 @@ Loop continuously: `Invoke OpenCode High-Speed Search -> Filter against In-Progr
 
 ---
 
-## 📖 Section 2: Full Detailed Architecture & Concurrency Protocol
+## 馃摉 Section 2: Full Detailed Architecture & Concurrency Protocol
 
 *(See previous sections for expanded diagnostic context and complete rules)*
+

@@ -1,4 +1,17 @@
-# OpenCode Multi-Agent Bug Reporter Prompts (Long-Term Autonomous Inspection)
+﻿# OpenCode Multi-Agent Bug Reporter Prompts (Long-Term Autonomous Inspection)
+
+---
+### 馃И MANDATORY TESTING METHODOLOGY: THE PRE-CONFIGURED 3-TIER SUITE
+When testing, building, or verifying any modification, **YOU MUST STRICTLY USE THE PRE-CONFIGURED 3-TIER TESTING SUITE** defined in:
+馃憠 i/CANONICAL_TESTING_AND_VERIFICATION_SUITE.md
+
+This enforces:
+1. **Tier 1 (Automated AST/Test Gate)**: dotnet test / cargo test / go test -race / pytest / strict build -warnaserror.
+2. **Tier 2 (Live Debug Trace Trap)**: Attached WPF DataBinding TraceListener Level=Warning & Task.Run WMI 2500ms timeout traps.
+3. **Tier 3 (5-Locale x 3-DPI Multimodal OCR Matrix)**: Quantified verification against [UI-OCR-Clipping], [UI-OCR-Mojibake], [UI-OCR-Collision], and [UI-OCR-Contrast] across 100% / 125% / 150% DPI and en / zh-Hans / ja / de / ru.
+(For Novel, use the pre-configured Literary Continuity & Repetition Pruning Audit loop defined in CANONICAL_TESTING_AND_VERIFICATION_SUITE.md).
+---
+
 
 This document provides specialized, production-ready prompts designed for **OpenCode** (or autonomous multi-agent frameworks in Cursor / Agent CLI / Claude Code) to act as a **Long-Term Automated Bug Reporter**. 
 
@@ -6,7 +19,7 @@ By deploying a collaborative **Multi-Agent Architecture** (Static Auditor, Log I
 
 ---
 
-## ⚡ Section 1: Ultra-Compact Prompt (精简高效版 - 专为 4000 字限制与 OpenCode 多智能体设计)
+## 鈿?Section 1: Ultra-Compact Prompt (绮剧畝楂樻晥鐗?- 涓撲负 4000 瀛楅檺鍒朵笌 OpenCode 澶氭櫤鑳戒綋璁捐)
 
 *(Copy and paste this prompt directly into OpenCode / Multi-Agent CLI to start the long-term bug reporter bot)*
 
@@ -43,7 +56,7 @@ Loop continuously: `Deploy Agents 1-3 -> Agent 4 Synthesizes BUG.md -> Sleep/Wai
 
 ---
 
-## 📖 Section 2: Full Detailed Architecture & Protocol Guide
+## 馃摉 Section 2: Full Detailed Architecture & Protocol Guide
 
 ### A. Why Multi-Agent Collaboration is Essential for Bug Reporting
 A single LLM scanning thousands of files quickly suffers from attention fatigue and misses subtle architectural defects. By splitting the inspection into **domain-specific sub-agents**, OpenCode achieves deep, exhaustive coverage:
@@ -92,3 +105,4 @@ flowchart TD
 #### 4. Agent 4: Chief Triage Synthesizer & Ledger Maintainer
 - **Deduplication & Historical Awareness**: Read existing `BUG.md` and `KNOWLEDGE_BASE.md`. Do not re-report bugs that are already marked as resolved (`[x]`) unless regression is explicitly proven by a failing test!
 - **Actionable Remediation Guidance**: For every bug reported, Agent 4 MUST provide the exact file path, line number, root cause explanation, and a copy-pasteable code snippet showing the suggested fix. This allows our Maintenance Agent (Prompt 1 / Prompt 2) to ingest and solve the issue in seconds!
+
