@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ---------------------------------------------------------------------------
-// DOM / browser mocks – llmCoach uses localStorage, fetch, document, window
+// DOM / browser mocks �?llmCoach uses localStorage, fetch, document, window
 // ---------------------------------------------------------------------------
 
 const localStorageMock = (() => {
@@ -402,6 +402,20 @@ describe('requestPostGameAnalysis', () => {
             json: () => Promise.resolve({ error: { message: 'rate limited' } })
         });
         await expect(requestPostGameAnalysis({ settings, snapshot, gameType: 'chess' })).rejects.toThrow('rate limited');
+    });
+
+    it('should include Othello post-game advice when gameType is othello', async () => {
+        await requestPostGameAnalysis({ settings, snapshot, gameType: 'othello' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        const text = body.messages[0].content + JSON.stringify(body.messages[1].content);
+        expect(text).toContain('corner control');
+    });
+
+    it('should include Shogi post-game advice when gameType is shogi', async () => {
+        await requestPostGameAnalysis({ settings, snapshot, gameType: 'shogi' });
+        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
+        const text = body.messages[0].content + JSON.stringify(body.messages[1].content);
+        expect(text).toContain('castle formations');
     });
 
 
