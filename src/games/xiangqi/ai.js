@@ -149,10 +149,31 @@ function pawnValue(piece, row) {
     return base + RED_PAWN_BONUS[9 - row];
 }
 
-function pieceValue(piece, row) {
+function mirrorRow(table, row) {
+    // 黑方读表时上下翻转（row 0↔9, 1↔8, …）
+    return table[9 - row];
+}
+
+/**
+ * 计算一枚棋子的总价值（子力 + 位置加成）。
+ * 红方直接读表；黑方上下镜像翻转。
+ */
+function pieceValue(piece, row, col) {
     const type = piece[1];
     if (type === 'P') return pawnValue(piece, row);
-    return BASE_VALUES[type] || 0;
+
+    const base = BASE_VALUES[type] || 0;
+    let bonus = 0;
+
+    if (type === 'R') {
+        bonus = piece[0] === 'r' ? ROOK_POS_BONUS[row][col] : mirrorRow(ROOK_POS_BONUS, row)[col];
+    } else if (type === 'N') {
+        bonus = piece[0] === 'r' ? HORSE_POS_BONUS[row][col] : mirrorRow(HORSE_POS_BONUS, row)[col];
+    } else if (type === 'C') {
+        bonus = piece[0] === 'r' ? CANNON_POS_BONUS[row][col] : mirrorRow(CANNON_POS_BONUS, row)[col];
+    }
+
+    return base + bonus;
 }
 
 /**

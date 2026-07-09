@@ -32,6 +32,14 @@ describe('games/xiangqi/ai', () => {
         expect(evaluate(state.board)).toBe(0);
     });
 
+    it('evaluate 包含位置加成：车在中心比角落价值更高', () => {
+        const centerBoard = Array.from({ length: 10 }, () => Array(9).fill(null));
+        centerBoard[4][4] = 'rR';
+        const cornerBoard = Array.from({ length: 10 }, () => Array(9).fill(null));
+        cornerBoard[0][0] = 'rR';
+        expect(evaluate(centerBoard)).toBeGreaterThan(evaluate(cornerBoard));
+    });
+
     it('AI 从合法走法中选择', () => {
         const state = createXiangqiState({ level: 'easy' });
         const move = getXiangqiAIMove(state);
