@@ -46,12 +46,13 @@ describe('games/junqi/classic/ai', () => {
     });
 
     it('能吃对方军旗时 AI 优先夺旗', () => {
-        // 红师长(r, S) 在 (1,1)，黑军旗(b, F) 在 (2,1) 相邻可吃
+        // 红司令(r, S) 在 (5,0)，黑军旗(b, F) 在 (4,0) 相邻可吃
+        // (4,0) 不是营(camp)，所以可以攻击
         let board = placeEmpty();
-        board = withPiece(board, 1, 1, 'r', 'S');
-        board = withPiece(board, 2, 1, 'b', 'F');
+        board = withPiece(board, 5, 0, 'r', 'S');
+        board = withPiece(board, 4, 0, 'b', 'F');
         // 给黑方留一颗子保证有对方棋存在（避免规则层提前判胜负）
-        board = withPiece(board, 12, 3, 'b', 'G');
+        board = withPiece(board, 12, 4, 'b', 'G');
         let state = createClassicState({ level: 'hard', playerColor: 'r' });
         state = setLevel(state, 'hard');
         state.board = board;
@@ -59,17 +60,16 @@ describe('games/junqi/classic/ai', () => {
         const mv = getClassicAIMove(state);
         expect(mv).not.toBeNull();
         expect(mv.kind).toBe('capture');
-        expect(mv.to).toEqual([2, 1]);
+        expect(mv.to).toEqual([4, 0]);
     });
 
     it('有高价值目标时优先吃大子而非走空格', () => {
-        // 红军长(r, G 级别8) 在 (1,1)；上(0,1)空、下(2,1)是黑师长(b, S 级别9)可吃
-        // S 级别9 > G 级别8，红军长不能吃黑师长（会被反吃）。改黑将为可吃目标：
-        // 黑司令(b, S=9) 不过——将级10不存在；用黑军长(b, G=8) vs 红司令(r, S=9) 可吃
+        // 红司令(r, S 级别9) 在 (5,0)
+        // 上(4,0)是黑军长(b, G 级别8，可吃)；右(5,1)空
+        // S(9) > G(8) → 红司令可吃黑军长；同时有空格可走但应优先吃大子
         let board = placeEmpty();
-        board = withPiece(board, 1, 1, 'r', 'S');
-        board = withPiece(board, 2, 1, 'b', 'G');
-        board = withPiece(board, 0, 1, 'b', 'P');
+        board = withPiece(board, 5, 0, 'r', 'S');
+        board = withPiece(board, 4, 0, 'b', 'G');
         board = withPiece(board, 12, 4, 'b', 'T');
         const state = setLevel({ ...createClassicState({ level: 'hard' }) }, 'hard');
         state.board = board;
@@ -77,7 +77,7 @@ describe('games/junqi/classic/ai', () => {
         const mv = getClassicAIMove(state);
         expect(mv).not.toBeNull();
         expect(mv.kind).toBe('capture');
-        expect(mv.to).toEqual([2, 1]);
+        expect(mv.to).toEqual([4, 0]);
     });
 
     it('AI 返回的走法始终是合法走法', () => {
