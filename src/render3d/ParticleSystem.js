@@ -4,11 +4,11 @@
  */
 
 import * as THREE from 'three';
+import { boardToWorld } from '../config/renderConfig.js';
 
 export class ParticleSystem {
     constructor(scene) {
         this.scene = scene;
-        this.particles = [];
         this.geometry = new THREE.BufferGeometry();
         this.maxParticles = 1000;
         this.activeCount = 0;
@@ -264,36 +264,32 @@ export class ParticleSystem {
      */
 
     /**
-     * Emit celebration particles at a board position.
+     * Emit celebration particles at a board position using the buffer particle system.
      * @param {number} row
      * @param {number} col
      * @param {number} boardSize
      * @param {number} cellSize
      * @param {number} boardThickness
-     * @param {number} color - particle color
+     * @param {number} color - particle color hex
      */
     emitVictoryParticles(row, col, boardSize, cellSize, boardThickness, color = 0xd4af37) {
         const world = boardToWorld(row, col, boardSize, cellSize);
-        const count = 3;
-        for (let i = 0; i < count; i++) {
-            const size = 0.04 + Math.random() * 0.06;
-            const velocity = {
-                x: (Math.random() - 0.5) * 1.2,
-                y: 2.5 + Math.random() * 2.0,
-                z: (Math.random() - 0.5) * 1.2,
-            };
-            this.particles.push({
-                position: { x: world.x, y: boardThickness + 0.2, z: world.z },
-                velocity,
-                size,
-                color,
-                life: 1.0,
-                decay: 0.3 + Math.random() * 0.3,
-                gravity: -4.0,
-                tag: 'victory',
+        const particleColor = new THREE.Color(color);
+        for (let i = 0; i < 30; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 1.5 + Math.random() * 3;
+            this.addParticle({
+                x: world.x + (Math.random() - 0.5) * 0.5,
+                y: boardThickness / 2,
+                z: world.z + (Math.random() - 0.5) * 0.5,
+                vx: Math.cos(angle) * speed,
+                vy: 2.5 + Math.random() * 2.0,
+                vz: Math.sin(angle) * speed,
+                color: particleColor,
+                size: 0.05 + Math.random() * 0.08,
+                lifetime: 1.0 + Math.random() * 0.8,
             });
         }
-        this.needsUpdate = true;
     }
 
     dispose() {

@@ -12,6 +12,7 @@ export { MaterialFactory } from './MaterialFactory.js';
 export { AnimationManager } from './AnimationManager.js';
 export { InteractionHandler } from './InteractionHandler.js';
 export { EnvironmentBuilder } from './EnvironmentBuilder.js';
+export { ParticleSystem } from './ParticleSystem.js';
 
 // 配置和工具函数
 export { RENDER_CONFIG, getOptimalConfig, boardToWorld, worldToBoard, getBoardOffset } from '../config/renderConfig.js';
