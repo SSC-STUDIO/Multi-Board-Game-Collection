@@ -451,7 +451,13 @@ export class ShogiApp extends BoardGameApp {
 
     onResign() {
         const winner = this.state.turn === 'sente' ? 'gote' : 'sente';
-        this.state.result = { type: 'resign', winner };
+        this.state.result = {
+            type: 'resign',
+            winner,
+            badge: 'shogiResignBadge',
+            title: 'shogiResignTitle',
+            detail: 'shogiResignDetail'
+        };
     }
 
     dispose() {}

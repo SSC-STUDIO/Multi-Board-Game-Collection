@@ -386,4 +386,52 @@ describe('ShogiApp', () => {
             expect(getPieceLabel).toHaveBeenCalled();
         });
     });
+
+    describe('resign and formatResult', () => {
+        it('onResign should set result with badge/title/detail keys', () => {
+            app.startGame();
+            app.state.turn = 'sente';
+            app.onResign();
+            expect(app.state.result.type).toBe('resign');
+            expect(app.state.result.winner).toBe('gote');
+            expect(app.state.result.badge).toBe('shogiResignBadge');
+            expect(app.state.result.title).toBe('shogiResignTitle');
+            expect(app.state.result.detail).toBe('shogiResignDetail');
+        });
+
+        it('formatResult should localize resign result with winner label', () => {
+            app.startGame();
+            app.state.result = {
+                type: 'resign',
+                winner: 'gote',
+                badge: 'shogiResignBadge',
+                title: 'shogiResignTitle',
+                detail: 'shogiResignDetail'
+            };
+            const formatted = app.formatResult();
+            // i18n mock returns key as-is; {player} replaced with winner label
+            expect(formatted.badge).toBe('shogiResignBadge');
+            expect(formatted.title).toBe('shogiResignTitle');
+            expect(formatted.detail).toBe('shogiResignDetail');
+        });
+
+        it('resign() should call onResign and show result overlay', () => {
+            app.startGame();
+            app.state.turn = 'sente';
+            app.resign();
+            expect(app.state.gameOver).toBe(true);
+            expect(app.state.result.type).toBe('resign');
+            expect(app.state.result.winner).toBe('gote');
+            expect(app.dom.result.overlay.classList.remove).toHaveBeenCalledWith('hidden');
+        });
+
+        it('formatResult should return empty strings when no result', () => {
+            app.startGame();
+            app.state.result = null;
+            const formatted = app.formatResult();
+            expect(formatted.badge).toBe('');
+            expect(formatted.title).toBe('');
+            expect(formatted.detail).toBe('');
+        });
+    });
 });
