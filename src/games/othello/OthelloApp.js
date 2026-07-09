@@ -9,6 +9,7 @@ import { createOthelloState, createOthelloOptions } from "./state.js";
 import { createInitialBoard, getLegalMoves, makeMove, isGameOver, getWinner, countDiscs, BOARD_SIZE } from "./rules.js";
 import { getOthelloAIMove, getOthelloAIDelay } from "./ai.js";
 import { i18n } from "../../utils/i18n.js";
+import { formatMove } from "../../utils/formatters.js";
 
 const PIECE_GLYPH = { black: "\u25CF", white: "\u25CB" };
 const opponent = (c) => c === "black" ? "white" : "black";
@@ -254,7 +255,13 @@ export class OthelloApp extends BoardGameApp {
     showMessageKey(key, params, type) {
         const el = this.dom?.message;
         if (!el) return;
-        el.textContent = key;
+        let text = i18n.t(key);
+        if (params && params.length) {
+            for (const p of params) {
+                text = text.replace(/\{[^}]+\}/, p);
+            }
+        }
+        el.textContent = text || key;
         el.className = "message " + (type || "info");
         clearTimeout(this._messageTimer);
         this._messageTimer = setTimeout(() => { el.textContent = ""; }, 3000);
@@ -389,19 +396,27 @@ export class OthelloApp extends BoardGameApp {
     }
 
     handleHint() {
-        if (this.state.aiThinking || this.state.gameOver) return;
-        if (!this.isHumanTurn()) return;
+        if (this.state.aiThinking || this.state.gameOver) {
+            this.sound.play('error');
+            return;
+        }
+        if (!this.isHumanTurn()) {
+            this.sound.play('error');
+            return;
+        }
 
         // Use the Othello AI (hard level) to suggest the best move
         const move = getOthelloAIMove(this.state.board, this.state.currentPlayer, "hard");
         if (!move) {
-            this.showMessage("noHintAvailable", "warn");
+            this.sound.play('error');
+            this.showMessageKey("noHintAvailable", [], "warn");
             return;
         }
 
         this.state.hintMove = { row: move.row, col: move.col };
+        this.sound.play('select');
         this.render();
-        this.showMessage(`Hint: (${move.row}, ${move.col})`, "info");
+        this.showMessageKey("hintSuggestionMessage", [formatMove(move.row, move.col)], "info");
     }
 
     // === Cleanup ===
