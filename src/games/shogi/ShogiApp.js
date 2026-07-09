@@ -53,7 +53,8 @@ export class ShogiApp extends BoardGameApp {
                 resignBtn: root.getElementById("shogi-resign-btn"),
                 coachPanel: root.getElementById("shogi-coach-panel"),
                 coachBtn: root.getElementById("shogi-coach-btn"),
-                coachContent: root.getElementById("shogi-coach-content")
+                coachContent: root.getElementById("shogi-coach-content"),
+                message: root.getElementById("shogi-message")
             },
             result: {
                 overlay: root.getElementById("shogi-result-overlay"),
@@ -100,6 +101,7 @@ export class ShogiApp extends BoardGameApp {
             this.handleCellClick(row, col);
         });
         game.undoBtn?.addEventListener('click', () => this.handleUndo());
+        game.hintBtn?.addEventListener('click', () => this.handleHint());
         game.resignBtn?.addEventListener('click', () => this.resign());
         result?.newBtn?.addEventListener('click', () => this.restart());
         result?.backBtn?.addEventListener('click', () => window.__returnToLauncher?.());
@@ -162,6 +164,10 @@ export class ShogiApp extends BoardGameApp {
                 if (isTarget) {
                     cell.classList.add(this.state.board[row][col] ? "capture-target" : "move-target");
                 }
+                // Highlight AI-suggested move from the hint feature
+                if (this.state.hintMove && this.state.hintMove.row === row && this.state.hintMove.col === col) {
+                    cell.classList.add("cell-hint");
+                }
 
                 const piece = this.state.board[row][col];
                 if (piece) {
@@ -220,6 +226,7 @@ export class ShogiApp extends BoardGameApp {
     handleCellClick(row, col) {
         if (!this.state || this.state.gameOver || this.state.aiThinking) return;
         if (!this.isHumanTurn()) return;
+        this.state.hintMove = null;
 
         const piece = this.state.board[row][col];
 
@@ -347,6 +354,7 @@ export class ShogiApp extends BoardGameApp {
         this.state.turn = this.state.turn === 'sente' ? 'gote' : 'sente';
         this.selected = null;
         this.highlightMoves = [];
+        this.state.hintMove = null;
         this.state.lastMove = { row: mv.to[0], col: mv.to[1] };
 
         // Check for checkmate / stalemate before scheduling AI
@@ -413,6 +421,24 @@ export class ShogiApp extends BoardGameApp {
     isHumanTurn() {
         if (this.options.mode !== 'pve') return true;
         return this.state.turn === this.options.playerColor;
+    }
+
+    handleHint() {
+        if (this.state.aiThinking || this.state.gameOver) return;
+        if (!this.isHumanTurn()) return;
+        // Use the Shogi AI (hard level) to suggest the best move
+        const mv = getShogiAIMove(this.state.board, this.state.turn, this.state.hands, 'hard');
+        if (!mv) {
+            this.showMessage(i18n.t('noHintAvailable') || 'No hint available', 'warn');
+            return;
+        }
+        // Mark the destination cell for visual highlight
+        this.state.hintMove = { row: mv.to[0], col: mv.to[1] };
+        this.render();
+        const label = mv.kind === 'drop'
+            ? `Hint: drop ${mv.type} → (${mv.to[0]},${mv.to[1]})`
+            : `Hint: (${mv.from[0]},${mv.from[1]}) → (${mv.to[0]},${mv.to[1]})`;
+        this.showMessage(label, 'info');
     }
 
     getAIDelay() {

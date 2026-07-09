@@ -158,6 +158,7 @@ vi.mock('./rules.js', () => ({
 vi.mock('./ai.js', () => ({
     getShogiAIMove: vi.fn(() => null),
     getShogiAIDelay: vi.fn(() => 500),
+    generateAllMoves: vi.fn(() => [{ kind: 'board', from: [0, 0], to: [1, 1], promote: false }]),
 }));
 
 const mockDoc = vi.hoisted(() => ({
@@ -313,6 +314,59 @@ describe('ShogiApp', () => {
             app.hideRoot();
             expect(app.dom.root.classList.add).toHaveBeenCalledWith('hidden');
             expect(app.dom.setup.panel.classList.add).toHaveBeenCalledWith('hidden');
+        });
+    });
+
+    describe('hint', () => {
+        it('should bind hintBtn click event on startGame', () => {
+            app.startGame();
+            expect(app.dom.game.hintBtn.addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
+        });
+
+        it('should show no hint message when AI returns null', () => {
+            app.startGame();
+            app.handleHint();
+            expect(app.dom.game.message.textContent).toContain('noHintAvailable');
+        });
+
+        it('should show hint suggestion when AI returns a move', async () => {
+            // Override the mock to return a board move
+            const { getShogiAIMove } = await import('./ai.js');
+            getShogiAIMove.mockReturnValueOnce({
+                kind: 'board', from: [7, 4], to: [6, 4], promote: false
+            });
+            app.startGame();
+            app.handleHint();
+            expect(app.state.hintMove).toEqual({ row: 6, col: 4 });
+            expect(app.dom.game.board.style.setProperty).toHaveBeenCalled();
+        });
+
+        it('should clear hintMove when user clicks a cell', () => {
+            app.startGame();
+            app.state.hintMove = { row: 6, col: 4 };
+            app.handleCellClick(7, 4);
+            expect(app.state.hintMove).toBeNull();
+        });
+
+        it('should clear hintMove when move is committed', () => {
+            app.startGame();
+            app.state.hintMove = { row: 6, col: 4 };
+            app.commitMove({ kind: 'board', from: [7, 4], to: [6, 4], promote: false });
+            expect(app.state.hintMove).toBeNull();
+        });
+
+        it('should not show hint during AI thinking', () => {
+            app.startGame();
+            app.state.aiThinking = true;
+            app.handleHint();
+            expect(app.state.hintMove).toBeNull();
+        });
+
+        it('should not show hint when game is over', () => {
+            app.startGame();
+            app.state.gameOver = true;
+            app.handleHint();
+            expect(app.state.hintMove).toBeNull();
         });
     });
 
