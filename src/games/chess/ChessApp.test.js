@@ -49,6 +49,7 @@ const { makeMockElements } = vi.hoisted(() => ({
                 lastMove: el(`${prefix}-last-move`),
                 capturedWhite: el(`${prefix}-captured-white`),
                 capturedBlack: el(`${prefix}-captured-black`),
+                hintBtn: el(`${prefix}-hint-btn`),
                 undo: el(`${prefix}-undo-btn`),
                 resign: el(`${prefix}-resign-btn`),
                 restart: el(`${prefix}-restart-btn`),

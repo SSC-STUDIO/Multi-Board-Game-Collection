@@ -485,6 +485,10 @@ export class BoardGameRenderer3D {
         const last = options.lastMove;
         if (last?.from) this.addMarker(last.from[0], last.from[1], 0xf4ce5b, 0.25, 0.02, 0.2);
         if (last?.to) this.addMarker(last.to[0], last.to[1], 0xf4ce5b, 0.31, 0.024, 0.26);
+        // Hint marker: amber ring on the suggested destination, drawn last so it sits on top
+        const hint = options.hintMove;
+        if (hint?.from) this.addMarker(hint.from[0], hint.from[1], 0xff9800, 0.30, 0.028, 0.55);
+        if (hint?.to) this.addMarker(hint.to[0], hint.to[1], 0xff9800, 0.35, 0.03, 0.55);
     }
 
     addMarker(row, col, color, radius, height, fillOpacity = 0.24) {

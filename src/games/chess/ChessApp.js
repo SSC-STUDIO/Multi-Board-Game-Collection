@@ -73,6 +73,7 @@ export class ChessApp extends BoardGameApp {
                 lastMove: root.getElementById('chess-last-move'),
                 capturedWhite: root.getElementById('chess-captured-white'),
                 capturedBlack: root.getElementById('chess-captured-black'),
+                hintBtn: root.getElementById('chess-hint-btn'),
                 undo: root.getElementById('chess-undo-btn'),
                 resign: root.getElementById('chess-resign-btn'),
                 restart: root.getElementById('chess-restart-btn'),
@@ -129,6 +130,7 @@ export class ChessApp extends BoardGameApp {
             this.handleSquareClick(row, col);
         });
         game.undo?.addEventListener('click', () => this.handleUndo());
+        game.hintBtn?.addEventListener('click', () => this.handleHint());
         game.resign?.addEventListener('click', () => this.resign());
         game.restart?.addEventListener('click', () => this.restart());
         this.bindBackToLauncher(game.back);
@@ -239,6 +241,9 @@ export class ChessApp extends BoardGameApp {
         }
 
         const piece = this.state.board[row][col];
+
+        // Clear hint highlight when user interacts
+        this.state.hintMove = null;
 
         if (this.selected) {
             const [sr, sc] = this.selected;
@@ -353,6 +358,34 @@ export class ChessApp extends BoardGameApp {
         this.renderStatus();
     }
 
+    /** 提示下一步建议走法（使用 AI 引擎） */
+    handleHint() {
+        if (this.state.gameOver) {
+            this.sound.play('error');
+            return;
+        }
+        if (this.state.aiThinking) {
+            this.sound.play('error');
+            return;
+        }
+        if (!this.isHumanTurn()) {
+            this.sound.play('error');
+            return;
+        }
+
+        const move = getChessAIMove(this.state);
+        if (!move) {
+            this.showMessage(i18n.t('noHintAvailable') || 'No hint available', 'warn');
+            return;
+        }
+
+        this.state.hintMove = { from: move.from, to: move.to };
+        this.sound.play('select');
+        this.renderBoard();
+        this.renderStatus();
+        this.showMessage(`Hint: ${squareName(move.to[0], move.to[1])} (${this.describeMove(move)})`, 'info');
+    }
+
     checkGameEnd() {
         if (isCheckmate(this.state.board, this.state)) {
             const winner = this.state.turn === 'w' ? 'b' : 'w';
@@ -459,7 +492,8 @@ export class ChessApp extends BoardGameApp {
             flipped: flip,
             selected: this.selected,
             moves: this.highlightMoves,
-            lastMove: this.state.moveHistory[this.state.moveHistory.length - 1]
+            lastMove: this.state.moveHistory[this.state.moveHistory.length - 1],
+            hintMove: this.state.hintMove
         });
     }
 
