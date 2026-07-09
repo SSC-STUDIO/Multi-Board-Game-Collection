@@ -33,8 +33,11 @@ function minimax(board, depth, alpha, beta, maximizing, aiColor) {
                 const score = black - white;
                 return { score: aiColor === "black" ? score : -score, move: null };
             }
-            // Pass turn
-            const result = minimax(board, depth - 1, alpha, beta, false, aiColor);
+            // Pass turn: swap the optimizing role — the opponent now moves.
+            // Previously this passed a hard-coded `false`, which corrupted the
+            // search when the AI's own color had to pass (it kept evaluating
+            // from the wrong perspective and never alternated correctly).
+            const result = minimax(board, depth - 1, alpha, beta, !maximizing, aiColor);
             return { score: result.score, move: null };
         }
         return { score: evaluateBoard(board) * (aiColor === "black" ? 1 : -1), move: null };
