@@ -7,8 +7,10 @@
 import { BoardGameApp } from "../../app/BoardGameApp.js";
 import { createOthelloState, createOthelloOptions } from "./state.js";
 import { createInitialBoard, getLegalMoves, makeMove, isGameOver, getWinner, countDiscs, BOARD_SIZE } from "./rules.js";
+import { getOthelloAIMove, getOthelloAIDelay } from "./ai.js";
 
 const PIECE_GLYPH = { black: "\u25CF", white: "\u25CB" };
+const opponent = (c) => c === "black" ? "white" : "black";
 
 export class OthelloApp extends BoardGameApp {
     constructor(root = document) {
@@ -123,24 +125,36 @@ export class OthelloApp extends BoardGameApp {
     }
 
     commitMove(row, col, color, opts = {}) {
+        // Support single-object form from AI pipeline: commitMove({ row, col })
+        if (typeof row === "object" && row !== null) {
+            const mv = row;
+            row = mv.row;
+            col = mv.col;
+            color = this.state.currentPlayer;
+            opts = mv.opts || {};
+        }
         const result = makeMove(this.state.board, row, col, color);
         if (!result.success) return false;
 
         this.state.lastMove = { row, col, color };
-        this.state.moveHistory.push({ row, col, color, flips: result.flipped.length });
+        // Store flipped coordinates for undo support
+        const flippedCoords = (result.flipped || []).map(f => ({ row: f.row, col: f.col }));
+        this.state.moveHistory.push({ row, col, color, flips: result.flipped.length, flippedCoords });
 
         // Check game end (board full)
-        const opponent = color === "black" ? "white" : "black";
         if (isGameOver(this.state.board)) {
             this.state.gameOver = true;
             const winner = getWinner(this.state.board);
             this.state.resultType = winner === "draw" ? "draw" : "win";
             this.state.resultWinnerColor = winner === "draw" ? null : winner;
+            this.render();
+            this.renderMoveList();
             return true;
         }
 
         // Check if opponent has legal moves
-        const opponentMoves = getLegalMoves(this.state.board, opponent);
+        const opp = opponent(color);
+        const opponentMoves = getLegalMoves(this.state.board, opp);
         if (opponentMoves.length === 0) {
             // Opponent must pass — same player continues
             this.state.passCount++;
@@ -151,31 +165,166 @@ export class OthelloApp extends BoardGameApp {
                 this.state.resultType = winner === "draw" ? "draw" : "win";
                 this.state.resultWinnerColor = winner === "draw" ? null : winner;
             }
+            this.render();
+            this.renderMoveList();
             return true;
         }
 
         // Switch player and reset pass counter
-        this.state.currentPlayer = opponent;
+        this.state.currentPlayer = opp;
         this.state.passCount = 0;
+        this.render();
+        this.renderMoveList();
+        this.maybeScheduleAI();
         return true;
     }
 
-    scheduleAIMove() {
-        // Placeholder for AI integration
+    // === AI lifecycle hooks (BoardGameApp overrides) ===
+
+    isHumanTurn() {
+        if (this.options.mode !== "pve") return true;
+        return this.state.currentPlayer === this.options.playerColor;
     }
 
-    renderMoveList() {}
-    updateStatus() {}
-    showMessageKey(key, params, type) {}
-    setAIThinking(v) { this.state.aiThinking = v; }
-    clearPendingAI() {}
+    getAIMove() {
+        const aiColor = opponent(this.options.playerColor);
+        return getOthelloAIMove(this.state.board, aiColor, this.options.level);
+    }
+
+    getAIDelay() {
+        return getOthelloAIDelay(this.options.level);
+    }
+
+    // === Board interaction ===
+
+    handleCellClick(row, col) {
+        if (!this.state || this.state.gameOver || this.state.aiThinking) return;
+        if (!this.isHumanTurn()) return;
+
+        const err = this.validateMove(row, col, this.state.currentPlayer);
+        if (err) {
+            this.showMessageKey("invalidMove", [], "warn");
+            return;
+        }
+
+        this.commitMove(row, col, this.state.currentPlayer);
+    }
+
+    renderStatus() {
+        const el = this.dom?.game?.status;
+        if (!el || !this.state) return;
+        const label = this.state.currentPlayer === "black" ? "\u26ab Black" : "\u26aa White";
+        const aiLabel = this.state.aiThinking ? " \u2014 AI thinking\u2026" : "";
+        el.textContent = label + aiLabel;
+    }
+
+    renderMoveList() {
+        const el = this.dom?.game?.moveList;
+        if (!el) return;
+        el.innerHTML = "";
+        for (const [i, mv] of this.state.moveHistory.entries()) {
+            const span = document.createElement("span");
+            span.className = "move-entry";
+            const glyph = mv.color === "black" ? "\u26ab" : "\u26aa";
+            span.textContent = `${i + 1}. ${glyph} (${mv.row},${mv.col})`;
+            el.appendChild(span);
+        }
+    }
+
+    showMessageKey(key, params, type) {
+        const el = this.dom?.message;
+        if (!el) return;
+        el.textContent = key;
+        el.className = "message " + (type || "info");
+        clearTimeout(this._messageTimer);
+        this._messageTimer = setTimeout(() => { el.textContent = ""; }, 3000);
+    }
+
+    showMessage(msg, type) {
+        this.showMessageKey(msg, [], type);
+    }
+
+    clearPendingAI() {
+        this.clearAITimer();
+    }
+
+    setAIThinking(v) { if (this.state) this.state.aiThinking = v; }
+
     clearCoachState() {}
+
     cancelLlmCoachRequest() {}
+
     clearPreview() {}
+
     clearPlacementSelection() {}
+
     refreshImmersiveUi() {}
+
     refreshCoachGuidance() {}
+
+    // === Event binding ===
+
+    bindSetupEvents() {
+        const { setup } = this.dom;
+        setup?.startBtn?.addEventListener("click", () => this.startGame());
+        setup?.backBtn?.addEventListener("click", () => window.__returnToLauncher?.());
+    }
+
+    bindGameEvents() {
+        const { game, result } = this.dom;
+        game?.board?.addEventListener("click", (event) => {
+            const cell = event.target?.closest?.(".cell");
+            if (!cell) return;
+            const row = Number(cell.dataset.row);
+            const col = Number(cell.dataset.col);
+            if (Number.isNaN(row) || Number.isNaN(col)) return;
+            this.handleCellClick(row, col);
+        });
+        game?.undoBtn?.addEventListener("click", () => this.handleUndo());
+        game?.resignBtn?.addEventListener("click", () => this.handleResign());
+        result?.newBtn?.addEventListener("click", () => this.enterSetup());
+        result?.backBtn?.addEventListener("click", () => window.__returnToLauncher?.());
+    }
+
+    // === Undo (replays from initial board + remaining history) ===
+
+    handleUndo() {
+        if (this.state.aiThinking || this.state.gameOver) return;
+        const stepCount = this.options.mode === "pve" ? 2 : 1;
+        if (this.state.moveHistory.length < stepCount) return;
+
+        for (let i = 0; i < stepCount; i++) {
+            this.state.moveHistory.pop();
+        }
+        // Replay from initial board to reconstruct correct state
+        this.state.board = createInitialBoard();
+        for (const mv of this.state.moveHistory) {
+            makeMove(this.state.board, mv.row, mv.col, mv.color);
+        }
+        const last = this.state.moveHistory[this.state.moveHistory.length - 1];
+        this.state.currentPlayer = last ? opponent(last.color) : "black";
+        this.state.passCount = 0;
+        this.state.lastMove = last || null;
+        this.state.gameOver = false;
+        this.render();
+        this.renderMoveList();
+    }
+
+    handleResign() {
+        if (this.state.aiThinking || this.state.gameOver) return;
+        this.state.gameOver = true;
+        this.state.resultType = "win";
+        this.state.resultWinnerColor = opponent(this.state.currentPlayer);
+    }
+
+    // === Cleanup ===
+
     use3D = false;
+
+    dispose() {
+        this.clearPendingAI();
+        super.dispose?.();
+    }
 }
 
 export { BOARD_SIZE as boardSize };

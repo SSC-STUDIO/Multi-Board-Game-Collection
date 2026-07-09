@@ -352,6 +352,90 @@ describe('OthelloApp', () => {
         });
     });
 
+    describe('AI integration', () => {
+        it('isHumanTurn should return true in pvp mode', () => {
+            app.state = { currentPlayer: 'black' };
+            expect(app.isHumanTurn()).toBe(true);
+        });
+
+        it('isHumanTurn should return true when AI is not player color in pve', () => {
+            app.options.mode = 'pve';
+            app.options.playerColor = 'black';
+            app.state = { currentPlayer: 'black' };
+            expect(app.isHumanTurn()).toBe(true);
+        });
+
+        it('isHumanTurn should return false when it is AI turn in pve', () => {
+            app.options.mode = 'pve';
+            app.options.playerColor = 'black';
+            app.state = { currentPlayer: 'white' };
+            expect(app.isHumanTurn()).toBe(false);
+        });
+
+        it('getAIDelay should return delay based on level', () => {
+            app.options.level = 'easy';
+            expect(app.getAIDelay()).toBe(300);
+            app.options.level = 'hard';
+            expect(app.getAIDelay()).toBe(800);
+        });
+
+        it('handleCellClick should reject when AI is thinking', () => {
+            app.startGame();
+            app.state.aiThinking = true;
+            app.handleCellClick(2, 3);
+            expect(app.state.moveHistory.length).toBe(0);
+        });
+
+        it('handleCellClick should reject occupied cell', () => {
+            app.startGame();
+            app.handleCellClick(3, 3);
+            expect(app.state.moveHistory.length).toBe(0);
+        });
+
+        it('handleCellClick should execute valid move', () => {
+            app.startGame();
+            app.handleCellClick(2, 3);
+            expect(app.state.moveHistory.length).toBe(1);
+        });
+    });
+
+    describe('undo and resign', () => {
+        it('handleUndo should remove last move in pvp', async () => {
+            const { makeMove } = await import('./rules.js');
+            app.startGame();
+            app.commitMove(2, 3, 'black');
+            expect(app.state.moveHistory.length).toBe(1);
+            makeMove.mockClear();
+            app.handleUndo();
+            expect(app.state.moveHistory.length).toBe(0);
+        });
+
+        it('handleResign should set game over with opponent as winner', () => {
+            app.startGame();
+            app.state.currentPlayer = 'black';
+            app.handleResign();
+            expect(app.state.gameOver).toBe(true);
+            expect(app.state.resultWinnerColor).toBe('white');
+        });
+    });
+
+    describe('renderStatus', () => {
+        it('should show current player and AI thinking state', () => {
+            app.startGame();
+            app.state.currentPlayer = 'black';
+            app.state.aiThinking = false;
+            app.renderStatus();
+            expect(app.dom.game.status.textContent).toContain('Black');
+        });
+
+        it('should show AI thinking label', () => {
+            app.startGame();
+            app.state.aiThinking = true;
+            app.renderStatus();
+            expect(app.dom.game.status.textContent).toContain('AI thinking');
+        });
+    });
+
     describe('dispose', () => {
         it('should clean up without errors', () => {
             expect(() => app.dispose()).not.toThrow();
