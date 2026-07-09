@@ -324,6 +324,7 @@ export class OthelloApp extends BoardGameApp {
         const stepCount = this.options.mode === "pve" ? 2 : 1;
         if (this.state.moveHistory.length < stepCount) return;
 
+        this.state.hintMove = null;
         for (let i = 0; i < stepCount; i++) {
             this.state.moveHistory.pop();
         }

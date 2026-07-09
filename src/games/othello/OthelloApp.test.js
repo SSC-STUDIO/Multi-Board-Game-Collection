@@ -643,6 +643,17 @@ describe('OthelloApp', () => {
             app.handleHint();
             expect(app.dom.message.textContent).toContain('noHintAvailable');
         });
+
+        it('should clear hintMove on undo', async () => {
+            const { getOthelloAIMove } = await import('./ai.js');
+            getOthelloAIMove.mockReturnValueOnce({ row: 2, col: 3 });
+            app.startGame();
+            app.handleHint();
+            expect(app.state.hintMove).not.toBeNull();
+            app.state.moveHistory.push({ row: 2, col: 3, color: 'black' });
+            app.handleUndo();
+            expect(app.state.hintMove).toBeNull();
+        });
     });
 
     describe('renderStatus', () => {

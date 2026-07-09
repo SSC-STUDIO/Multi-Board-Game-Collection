@@ -369,6 +369,14 @@ describe('ShogiApp', () => {
             app.handleHint();
             expect(app.state.hintMove).toBeNull();
         });
+
+        it('should clear hintMove on undo', () => {
+            app.startGame();
+            app.state.hintMove = { row: 6, col: 4 };
+            app.state.moveHistory.push({ kind: 'board', from: [7, 4], to: [6, 4], promote: false });
+            app.handleUndo();
+            expect(app.state.hintMove).toBeNull();
+        });
     });
 
     describe('boardSize export', () => {
