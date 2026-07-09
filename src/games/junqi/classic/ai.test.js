@@ -134,7 +134,7 @@ describe('games/junqi/classic/ai', () => {
         const picks = new Set();
         for (let i = 0; i < 12; i += 1) {
             const mv = getClassicAIMove(state);
-            picks.add(${mv.kind}::);
+            picks.add(`${mv.kind}::`);
         }
         // hard topN=1 → 仅在浮点并列时可能多于一种；这里吃黑车评分突出，应稳定选吃
         expect(picks.size).toBeLessThanOrEqual(2);
