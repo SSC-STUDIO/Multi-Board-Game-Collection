@@ -128,9 +128,8 @@ export class OthelloApp extends BoardGameApp {
 
         this.state.lastMove = { row, col, color };
         this.state.moveHistory.push({ row, col, color, flips: result.flipped.length });
-        this.state.passCount = 0;
 
-        // Check game end
+        // Check game end (board full)
         const opponent = color === "black" ? "white" : "black";
         if (isGameOver(this.state.board)) {
             this.state.gameOver = true;
@@ -140,23 +139,24 @@ export class OthelloApp extends BoardGameApp {
             return true;
         }
 
-        // Switch player
-        this.state.currentPlayer = opponent;
-
         // Check if opponent has legal moves
         const opponentMoves = getLegalMoves(this.state.board, opponent);
         if (opponentMoves.length === 0) {
-            // Opponent must pass
-            this.state.currentPlayer = color;
+            // Opponent must pass — same player continues
             this.state.passCount++;
             if (this.state.passCount >= 2) {
+                // Both players passed consecutively → game over
                 this.state.gameOver = true;
                 const winner = getWinner(this.state.board);
                 this.state.resultType = winner === "draw" ? "draw" : "win";
                 this.state.resultWinnerColor = winner === "draw" ? null : winner;
             }
+            return true;
         }
 
+        // Switch player and reset pass counter
+        this.state.currentPlayer = opponent;
+        this.state.passCount = 0;
         return true;
     }
 
