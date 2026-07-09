@@ -579,6 +579,56 @@ describe('OthelloApp', () => {
         });
     });
 
+    describe('checkGameEnd (pass handling via AI null path)', () => {
+        it('should pass turn when current player has no legal moves', async () => {
+            const { getLegalMoves } = await import('./rules.js');
+            app.startGame();
+            // Current player is black; mock that black has no legal moves.
+            getLegalMoves.mockReturnValue([]);
+            app.checkGameEnd();
+            // Black must pass — turn switches to white.
+            expect(app.state.currentPlayer).toBe('white');
+            expect(app.state.passCount).toBe(0); // reset after switch
+        });
+
+        it('should end game on double pass when AI has no moves', async () => {
+            const { getLegalMoves, getWinner } = await import('./rules.js');
+            app.startGame();
+            app.state.passCount = 1; // previous pass already recorded
+            getLegalMoves.mockReturnValue([]);
+            getWinner.mockReturnValue('black');
+            app.checkGameEnd();
+            expect(app.state.gameOver).toBe(true);
+            expect(app.state.resultWinnerColor).toBe('black');
+        });
+
+        it('should not act when player still has legal moves', async () => {
+            const { getLegalMoves } = await import('./rules.js');
+            app.startGame();
+            // Restore default mock that returns 4 legal moves.
+            getLegalMoves.mockReturnValue([
+                { row: 2, col: 3 }, { row: 3, col: 2 },
+                { row: 4, col: 5 }, { row: 5, col: 4 },
+            ]);
+            app.checkGameEnd();
+            expect(app.state.currentPlayer).toBe('black');
+            expect(app.state.gameOver).toBe(false);
+        });
+
+        it('should re-schedule AI when it passes and human now has moves', async () => {
+            const { getLegalMoves } = await import('./rules.js');
+            app.options.mode = 'pve';
+            app.options.playerColor = 'black';
+            app.startGame();
+            app.state.currentPlayer = 'white'; // AI turn
+            // AI has no legal moves
+            getLegalMoves.mockReturnValue([]);
+            app.checkGameEnd();
+            // Turn should now be black (human), and maybeScheduleAI would be called.
+            expect(app.state.currentPlayer).toBe('black');
+        });
+    });
+
     describe('handleHint', () => {
         it('should set hintMove from AI suggestion', async () => {
             const { getOthelloAIMove } = await import('./ai.js');

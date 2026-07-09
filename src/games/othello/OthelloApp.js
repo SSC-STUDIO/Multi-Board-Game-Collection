@@ -292,6 +292,45 @@ export class OthelloApp extends BoardGameApp {
 
     refreshCoachGuidance() {}
 
+    // === Pass handling (called by base class when AI has no moves) ===
+
+    /**
+     * Handle the case where the current player has no legal moves.
+     * In Othello, a player with no legal moves must pass (turn goes to
+     * the opponent). Two consecutive passes end the game.
+     *
+     * This override is critical for PvE mode: when the AI returns null
+     * (no legal moves), BoardGameApp.scheduleAIMove calls checkGameEnd.
+     * Without this override, the game would freeze — the base class
+     * checkGameEnd is a no-op, so the turn never switches back to the
+     * human player.
+     */
+    checkGameEnd() {
+        if (!this.state || this.state.gameOver) return;
+        const legalMoves = getLegalMoves(this.state.board, this.state.currentPlayer);
+        if (legalMoves.length > 0) return; // Player can move; nothing to do.
+
+        // Current player has no moves — they must pass.
+        this.state.passCount++;
+
+        if (this.state.passCount >= 2) {
+            // Both players passed consecutively → game over.
+            this.state.gameOver = true;
+            const winner = getWinner(this.state.board);
+            this.state.resultType = winner === 'draw' ? 'draw' : 'win';
+            this.state.resultWinnerColor = winner === 'draw' ? null : winner;
+            this._finalizeResult(winner);
+            return;
+        }
+
+        // Switch player and reset pass counter so the next player can move.
+        const opp = opponent(this.state.currentPlayer);
+        this.state.currentPlayer = opp;
+        this.state.passCount = 0;
+        this.render();
+        this.maybeScheduleAI();
+    }
+
     // === Event binding ===
 
     bindSetupEvents() {
