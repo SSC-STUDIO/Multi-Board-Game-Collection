@@ -343,8 +343,11 @@ function search(board, side, hands, depth, alpha, beta) {
             // Checkmated
             return { score: side === 'sente' ? -99_999 : 99_999, move: null };
         }
-        // No legal moves but not in check: illegal in Shogi normally, treat as draw
-        return { score: 0, move: null };
+        // No legal moves but not in check: in Shogi this is stalemate, which
+        // per standard rules is still a loss for the side to move (same as
+        // checkmate). In ShogiApp.checkGameEnd this same position ends the
+        // game with the opponent winning, so keep the AI evaluation consistent.
+        return { score: side === 'sente' ? -99_999 : 99_999, move: null };
     }
 
     if (depth === 0) {
