@@ -75,6 +75,7 @@ export class XiangqiApp extends BoardGameApp {
                 moveCount: root.getElementById('xiangqi-move-count'),
                 lastMove: root.getElementById('xiangqi-last-move'),
                 undo: root.getElementById('xiangqi-undo-btn'),
+                hint: root.getElementById('xiangqi-hint-btn'),
                 resign: root.getElementById('xiangqi-resign-btn'),
                 restart: root.getElementById('xiangqi-restart-btn'),
                 back: root.getElementById('xiangqi-back-btn')
@@ -125,6 +126,7 @@ export class XiangqiApp extends BoardGameApp {
             this.handleCellClick(row, col);
         });
         game.undo?.addEventListener('click', () => this.handleUndo());
+        game.hint?.addEventListener('click', () => this.handleHint());
         game.resign?.addEventListener('click', () => this.resign());
         game.restart?.addEventListener('click', () => this.restart());
         this.bindBackToLauncher(game.back);
@@ -214,6 +216,10 @@ export class XiangqiApp extends BoardGameApp {
         }
 
         const piece = this.state.board[row][col];
+
+        // Clear hint highlight when user interacts
+        this.state.hintMove = null;
+
         if (this.selected) {
             const [sr, sc] = this.selected;
             if (sr === row && sc === col) {
@@ -258,6 +264,7 @@ export class XiangqiApp extends BoardGameApp {
         }];
         this.selected = null;
         this.highlightMoves = [];
+        this.state.hintMove = null;
         this.sound.play('move', { color: move.piece[0] === 'r' ? 'red' : 'black', source: 'human' });
         this.renderBoard();
         this.renderStatus();
@@ -283,9 +290,38 @@ export class XiangqiApp extends BoardGameApp {
         });
         this.selected = null;
         this.highlightMoves = [];
+        this.state.hintMove = null;
         this.sound.play('undo');
         this.renderBoard();
         this.renderStatus();
+    }
+
+    /** 提示下一步建议走法（使用 AI 引擎） */
+    handleHint() {
+        if (this.state.gameOver) {
+            this.sound.play('error');
+            return;
+        }
+        if (this.state.aiThinking) {
+            this.sound.play('error');
+            return;
+        }
+        if (!this.isHumanTurn()) {
+            this.sound.play('error');
+            return;
+        }
+
+        const move = getXiangqiAIMove(this.state);
+        if (!move) {
+            this.showMessage(i18n.t('noHintAvailable') || 'No hint available', 'warn');
+            return;
+        }
+
+        this.state.hintMove = { from: move.from, to: move.to };
+        this.sound.play('select');
+        this.renderBoard();
+        this.renderStatus();
+        this.showMessage(i18n.t('hintSuggestionMessage', { move: describeMove(move) }), 'info');
     }
 
     checkGameEnd() {
@@ -382,7 +418,8 @@ export class XiangqiApp extends BoardGameApp {
             selected: this.selected,
             moves: this.highlightMoves,
             lastMove: this.state.moveHistory[this.state.moveHistory.length - 1],
-            labelFont: 'bold 122px KaiTi, STKaiti, serif'
+            labelFont: 'bold 122px KaiTi, STKaiti, serif',
+            hintMove: this.state.hintMove
         });
     }
 

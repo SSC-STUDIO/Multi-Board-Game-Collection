@@ -53,5 +53,6 @@ export function createXiangqiState(options = {}) {
         coachAnalyzedBoard: null,
         coachFeedback: '',
         coachPostGame: null,
-        coachPostGameData: null,    };
+        coachPostGameData: null,
+        hintMove: null,    };
 }
