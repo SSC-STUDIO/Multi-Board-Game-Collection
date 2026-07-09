@@ -57,6 +57,36 @@ export function getFlips(board, row, col, color) {
 }
 
 /**
+ * Count discs that would be flipped if `color` plays at (row, col).
+ * Lightweight version of getFlips that avoids array allocation —
+ * used for move ordering heuristics where only the count matters.
+ * @returns {number} number of discs that would flip, 0 if move is illegal
+ */
+export function getFlipCount(board, row, col, color) {
+    if (board[row][col] !== null) return 0;
+    const opponent = color === "black" ? "white" : "black";
+    let total = 0;
+
+    for (const [dr, dc] of DIRECTIONS) {
+        let count = 0;
+        let r = row + dr;
+        let c = col + dc;
+
+        while (isInside(r, c) && board[r][c] === opponent) {
+            count++;
+            r += dr;
+            c += dc;
+        }
+
+        if (count > 0 && isInside(r, c) && board[r][c] === color) {
+            total += count;
+        }
+    }
+
+    return total;
+}
+
+/**
  * Check if a move is legal.
  */
 export function isLegalMove(board, row, col, color) {

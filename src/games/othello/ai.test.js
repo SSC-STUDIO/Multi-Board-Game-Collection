@@ -1,6 +1,6 @@
 ﻿import { describe, it, expect } from 'vitest';
-import { getOthelloAIMove, getOthelloAIDelay } from './ai.js';
-import { createInitialBoard, makeMove, getLegalMoves } from './rules.js';
+import { getOthelloAIMove, getOthelloAIDelay, resetTranspositionTable } from './ai.js';
+import { createInitialBoard, makeMove, getLegalMoves, getFlips, getFlipCount } from './rules.js';
 
 // ---------------------------------------------------------------------------
 // getOthelloAIDelay
@@ -163,6 +163,84 @@ describe("getOthelloAIMove move quality", () => {
         if (move !== null) {
             const legalMoves = getLegalMoves(board, "white");
             expect(legalMoves.some(m => m.row === move.row && m.col === move.col)).toBe(true);
+        }
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Transposition table
+// ---------------------------------------------------------------------------
+describe("Othello AI transposition table", () => {
+    it("resetTranspositionTable should be callable without errors", () => {
+        expect(() => resetTranspositionTable()).not.toThrow();
+    });
+
+    it("should produce identical results before and after TT reset", () => {
+        const board = createInitialBoard();
+        makeMove(board, 2, 3, "black");
+        makeMove(board, 2, 4, "white");
+
+        resetTranspositionTable();
+        const move1 = getOthelloAIMove(board, "black", "hard");
+
+        resetTranspositionTable();
+        const move2 = getOthelloAIMove(board, "black", "hard");
+
+        // Deterministic: same board + same TT state should produce the same move
+        if (move1 && move2) {
+            expect(move1.row).toBe(move2.row);
+            expect(move1.col).toBe(move2.col);
+        }
+    });
+
+    it("should not corrupt results when TT has stale entries from a different position", () => {
+        // Fill TT with entries from a different position
+        const boardA = createInitialBoard();
+        makeMove(boardA, 2, 3, "black");
+        makeMove(boardA, 5, 4, "white");
+        getOthelloAIMove(boardA, "black", "hard");
+
+        // Now evaluate a completely different position without clearing TT
+        const boardB = createInitialBoard();
+        makeMove(boardB, 3, 2, "black");
+        const move = getOthelloAIMove(boardB, "white", "medium");
+
+        if (move !== null) {
+            const legalMoves = getLegalMoves(boardB, "white");
+            expect(legalMoves.some(m => m.row === move.row && m.col === move.col)).toBe(true);
+        }
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Move ordering: the AI should prefer high-flip / high-positional moves
+// ---------------------------------------------------------------------------
+describe("Othello AI move ordering quality", () => {
+    it("hard AI should prefer a move that flips more discs over one that flips fewer", () => {
+        // Construct a position where one move flips significantly more discs
+        const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+        // Set up a line of white discs that black can bracket for a big flip
+        board[3][3] = "white";
+        board[3][4] = "white";
+        board[3][5] = "white";
+        board[4][3] = "black"; // anchor
+        board[2][3] = "black"; // anchor
+
+        const legalMoves = getLegalMoves(board, "black");
+        if (legalMoves.length === 0) return;
+
+        // Find the move with the highest flip count
+        const bestByCount = legalMoves.reduce((best, m) => {
+            const cnt = getFlipCount(board, m.row, m.col, "black");
+            return cnt > best.cnt ? { move: m, cnt } : best;
+        }, { move: null, cnt: -1 });
+
+        // The AI should pick the highest-flip move (or one equally good)
+        const aiMove = getOthelloAIMove(board, "black", "hard");
+        if (aiMove && bestByCount.move) {
+            const aiFlipCount = getFlipCount(board, aiMove.row, aiMove.col, "black");
+            // AI should match or come within 1 of the best flip count
+            expect(aiFlipCount).toBeGreaterThanOrEqual(bestByCount.cnt - 1);
         }
     });
 });

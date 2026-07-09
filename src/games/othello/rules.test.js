@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createInitialBoard, getFlips, isLegalMove, getLegalMoves, makeMove, countDiscs, isGameOver, getWinner, evaluateBoard, BOARD_SIZE } from "./rules.js";
+import { createInitialBoard, getFlips, getFlipCount, isLegalMove, getLegalMoves, makeMove, countDiscs, isGameOver, getWinner, evaluateBoard, BOARD_SIZE } from "./rules.js";
 
 describe("Othello rules", () => {
     describe("createInitialBoard", () => {
@@ -49,6 +49,40 @@ describe("Othello rules", () => {
             const board = createInitialBoard();
             const flips = getFlips(board, 0, 0, "black");
             expect(flips).toEqual([]);
+        });
+    });
+
+    describe("getFlipCount", () => {
+        it("should match getFlips length for initial board moves", () => {
+            const board = createInitialBoard();
+            const moves = getLegalMoves(board, "black");
+            for (const m of moves) {
+                expect(getFlipCount(board, m.row, m.col, "black")).toBe(
+                    getFlips(board, m.row, m.col, "black").length
+                );
+            }
+        });
+
+        it("should return 0 for occupied cell", () => {
+            const board = createInitialBoard();
+            expect(getFlipCount(board, 3, 3, "black")).toBe(0);
+        });
+
+        it("should return 0 for cell with no capture", () => {
+            const board = createInitialBoard();
+            expect(getFlipCount(board, 0, 0, "black")).toBe(0);
+        });
+
+        it("should count correctly after a few moves", () => {
+            const board = createInitialBoard();
+            makeMove(board, 2, 3, "black");
+            // Now white has new legal moves; verify counts match
+            const moves = getLegalMoves(board, "white");
+            for (const m of moves) {
+                expect(getFlipCount(board, m.row, m.col, "white")).toBe(
+                    getFlips(board, m.row, m.col, "white").length
+                );
+            }
         });
     });
 
