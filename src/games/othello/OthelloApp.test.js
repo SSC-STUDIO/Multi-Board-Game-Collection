@@ -342,6 +342,41 @@ describe('OthelloApp', () => {
             expect(app.state.passCount).toBe(2);
             expect(app.state.gameOver).toBe(true);
         });
+
+        it('should re-schedule AI after pass in PvE when AI must continue', async () => {
+            const { getLegalMoves } = await import('./rules.js');
+            app.options.mode = 'pve';
+            app.options.playerColor = 'black';
+            app.startGame();
+            // Human (black) makes a move; mock AI (white) has no legal moves
+            getLegalMoves.mockReturnValueOnce([]);
+            app.state.currentPlayer = 'black';
+            app.commitMove(2, 3, 'black');
+            // currentPlayer should stay 'black' (human) — correct pass handling
+            expect(app.state.passCount).toBe(1);
+            expect(app.state.currentPlayer).toBe('black');
+            // Now simulate: human (black) makes another move; AI (white) now has moves
+            getLegalMoves.mockReturnValueOnce([{ row: 2, col: 2 }]);
+            getLegalMoves.mockReturnValueOnce([]);
+            app.state.currentPlayer = 'black';
+            // After human move, AI has legal moves so it should switch to AI
+            app.commitMove(5, 4, 'black');
+            expect(app.state.currentPlayer).toBe('white');
+        });
+
+        it('should re-schedule AI after pass in PvE when opponent passed during AI turn', async () => {
+            const { getLegalMoves } = await import('./rules.js');
+            app.options.mode = 'pve';
+            app.options.playerColor = 'black';
+            app.startGame();
+            // Simulate AI move (white) where human (black) has no legal moves
+            getLegalMoves.mockReturnValueOnce([]);
+            app.state.currentPlayer = 'white';
+            app.commitMove(2, 3, 'white');
+            // AI should still be currentPlayer — pass triggers re-schedule
+            expect(app.state.currentPlayer).toBe('white');
+            expect(app.state.passCount).toBe(1);
+        });
     });
 
     describe('setAIThinking', () => {

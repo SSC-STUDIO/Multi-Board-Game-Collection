@@ -167,6 +167,9 @@ export class OthelloApp extends BoardGameApp {
             }
             this.render();
             this.renderMoveList();
+            // Re-evaluate AI scheduling: in PvE, if the pass makes it the
+            // AI's turn again, the AI must be re-scheduled to move.
+            this.maybeScheduleAI();
             return true;
         }
 
