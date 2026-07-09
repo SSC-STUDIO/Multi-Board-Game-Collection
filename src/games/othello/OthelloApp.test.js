@@ -96,6 +96,7 @@ vi.mock('./ai.js', () => ({
         }
     }),
     getOthelloAIMove: vi.fn(() => ({ row: 2, col: 3 })),
+    resetTranspositionTable: vi.fn(),
 }));
 
 const BOARD_SIZE = 8;

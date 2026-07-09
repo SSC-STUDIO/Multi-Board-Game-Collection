@@ -166,6 +166,12 @@ function minimax(board, depth, alpha, beta, maximizing, aiColor) {
     let bestMove = ordered[0];
     let bestScore = maximizing ? -Infinity : Infinity;
 
+    // Save original bounds for correct TT flag computation.
+    // alpha/beta are mutated during the loop, so the final values
+    // no longer reflect the parent window — the flag would incorrectly
+    // default to ttUpper (lower bound) on every non-cutoff node.
+    const origAlpha = alpha;
+
     for (const move of ordered) {
         const copy = board.map(row => [...row]);
         makeMove(copy, move.row, move.col, currentColor);
@@ -189,8 +195,11 @@ function minimax(board, depth, alpha, beta, maximizing, aiColor) {
         if (beta <= alpha) break;
     }
 
-    // Store result in transposition table
-    const flag = bestScore <= alpha ? ttUpper : bestScore >= beta ? ttLower : ttExact;
+    // Store result in transposition table using original bounds.
+    // ttLower = beta cutoff (score >= original beta → lower bound).
+    // ttUpper = alpha cutoff (score <= original alpha → upper bound).
+    // ttExact = full search completed (score is between origAlpha and beta).
+    const flag = bestScore <= origAlpha ? ttUpper : bestScore >= beta ? ttLower : ttExact;
     ttStore(hash, depth, bestScore, flag);
 
     return { score: bestScore, move: bestMove };

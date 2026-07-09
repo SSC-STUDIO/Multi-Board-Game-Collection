@@ -7,7 +7,7 @@
 import { BoardGameApp } from "../../app/BoardGameApp.js";
 import { createOthelloState, createOthelloOptions } from "./state.js";
 import { createInitialBoard, getLegalMoves, makeMove, isGameOver, getWinner, countDiscs, BOARD_SIZE } from "./rules.js";
-import { getOthelloAIMove, getOthelloAIDelay } from "./ai.js";
+import { getOthelloAIMove, getOthelloAIDelay, resetTranspositionTable } from "./ai.js";
 import { i18n } from "../../utils/i18n.js";
 import { formatMove } from "../../utils/formatters.js";
 
@@ -89,6 +89,9 @@ export class OthelloApp extends BoardGameApp {
         this.state.currentPlayer = "black";
         this.state.moveHistory = [];
         this.state.passCount = 0;
+        // Clear the AI transposition table so stale board-state scores
+        // from the previous match don't leak into this one.
+        resetTranspositionTable();
         if (this.dom && this.dom.setup && this.dom.setup.panel) {
             this.dom.setup.panel.classList.add("hidden");
         }
