@@ -87,6 +87,17 @@ vi.mock('../../audio/SoundManager.js', () => ({
     },
 }));
 
+vi.mock('./ai.js', () => ({
+    getOthelloAIDelay: vi.fn((level) => {
+        switch (level) {
+            case 'easy': return 300;
+            case 'hard': return 800;
+            default: return 500;
+        }
+    }),
+    getOthelloAIMove: vi.fn(() => ({ row: 2, col: 3 })),
+}));
+
 const BOARD_SIZE = 8;
 
 const createEmptyBoard = () =>
@@ -451,6 +462,72 @@ describe('OthelloApp', () => {
             app.handleResign();
             expect(app.state.gameOver).toBe(true);
             expect(app.state.resultWinnerColor).toBe('white');
+        });
+    });
+
+    describe('handleHint', () => {
+        it('should set hintMove from AI suggestion', async () => {
+            const { getOthelloAIMove } = await import('./ai.js');
+            getOthelloAIMove.mockReturnValueOnce({ row: 2, col: 3 });
+            app.startGame();
+            app.handleHint();
+            expect(app.state.hintMove).toEqual({ row: 2, col: 3 });
+        });
+
+        it('should call render after setting hint', async () => {
+            const { getOthelloAIMove } = await import('./ai.js');
+            getOthelloAIMove.mockReturnValueOnce({ row: 3, col: 2 });
+            app.startGame();
+            app.handleHint();
+            expect(app.dom.game.board.replaceChildren).toHaveBeenCalled();
+        });
+
+        it('should not hint when AI is thinking', async () => {
+            const { getOthelloAIMove } = await import('./ai.js');
+            app.startGame();
+            app.state.aiThinking = true;
+            const callsBefore = getOthelloAIMove.mock.calls.length;
+            app.handleHint();
+            expect(getOthelloAIMove.mock.calls.length).toBe(callsBefore);
+            expect(app.state.hintMove).toBeNull();
+        });
+
+        it('should not hint when game is over', async () => {
+            const { getOthelloAIMove } = await import('./ai.js');
+            app.startGame();
+            app.state.gameOver = true;
+            const callsBefore = getOthelloAIMove.mock.calls.length;
+            app.handleHint();
+            expect(getOthelloAIMove.mock.calls.length).toBe(callsBefore);
+        });
+
+        it('should not hint when not human turn', async () => {
+            const { getOthelloAIMove } = await import('./ai.js');
+            app.options.mode = 'pve';
+            app.options.playerColor = 'black';
+            app.startGame();
+            app.state.currentPlayer = 'white';
+            const callsBefore = getOthelloAIMove.mock.calls.length;
+            app.handleHint();
+            expect(getOthelloAIMove.mock.calls.length).toBe(callsBefore);
+        });
+
+        it('should clear hintMove when a move is committed', async () => {
+            const { getOthelloAIMove } = await import('./ai.js');
+            getOthelloAIMove.mockReturnValueOnce({ row: 2, col: 3 });
+            app.startGame();
+            app.handleHint();
+            expect(app.state.hintMove).not.toBeNull();
+            app.commitMove(2, 3, 'black');
+            expect(app.state.hintMove).toBeNull();
+        });
+
+        it('should show message when no hint available', async () => {
+            const { getOthelloAIMove } = await import('./ai.js');
+            getOthelloAIMove.mockReturnValueOnce(null);
+            app.startGame();
+            app.handleHint();
+            expect(app.dom.message.textContent).toContain('noHintAvailable');
         });
     });
 

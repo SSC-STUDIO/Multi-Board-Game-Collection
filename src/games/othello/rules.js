@@ -133,7 +133,15 @@ export function getWinner(board) {
 
 /**
  * Evaluate board position for AI (positive = good for black, negative = good for white).
- * Uses positional weights and disc count.
+ * Uses positional weights, disc count, and mobility.
+ *
+ * Strategy rationale:
+ * - Positional weights reward corners (stable) and punish C-squares
+ *   (easy for opponent to attack).
+ * - Disc count provides a material baseline, weighted lightly so
+ *   positional play dominates early.
+ * - Mobility (number of legal moves) reflects flexibility: more moves
+ *   means the AI can choose optimally while constraining the opponent.
  */
 const POSITION_WEIGHTS = [
     [120, -20,  20,   5,   5,  20, -20, 120],
@@ -159,6 +167,12 @@ export function evaluateBoard(board) {
     }
     const { black, white } = countDiscs(board);
     score += (black - white) * 2;
+
+    // Mobility: players with more legal moves can dictate the game.
+    // The heuristic favours positions where the AI has many options
+    // while the opponent has few.
+    score += (getLegalMoves(board, "black").length - getLegalMoves(board, "white").length) * 10;
+
     return score;
 }
 

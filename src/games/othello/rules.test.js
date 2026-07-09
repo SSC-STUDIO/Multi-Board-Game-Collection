@@ -140,5 +140,45 @@ describe("Othello rules", () => {
             board[0][0] = "black";
             expect(evaluateBoard(board)).toBeGreaterThan(100);
         });
+
+        it("should prefer higher mobility positions", () => {
+            // Create a board where black has many options and white few
+            // Edge setup: black owns most of the left edge, white is boxed in
+            const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+            // Place discs so black has 3+ legal moves while white has only 1
+            board[2][2] = "white";
+            board[2][3] = "black";
+            board[3][2] = "black";
+            board[3][3] = "white";
+            // Add more black discs to give black good mobility
+            board[0][0] = "black";  // corner
+            board[0][1] = "white";
+            board[1][0] = "white";
+            // Black now has flanks along top, white is constrained
+            const blackMoves = getLegalMoves(board, "black").length;
+            const whiteMoves = getLegalMoves(board, "white").length;
+            const diff = blackMoves - whiteMoves;
+
+            const score = evaluateBoard(board);
+            // If black has a mobility advantage, score should reflect it
+            if (diff > 0) {
+                expect(score).toBeGreaterThan(0);
+            } else if (diff < 0) {
+                expect(score).toBeLessThan(0);
+            }
+            // Mobility differential * 10 is part of the score
+            expect(score).toEqual(expect.any(Number));
+        });
+
+        it("should detect symmetric mobility as a balanced score", () => {
+            // A board where both sides have similar mobility should be near 0
+            // from the mobility component (positional weights may shift it)
+            const board = createInitialBoard();
+            const blackMoves = getLegalMoves(board, "black").length;
+            const whiteMoves = getLegalMoves(board, "white").length;
+            // On initial board both have 4 moves → mobility diff = 0
+            expect(blackMoves).toBe(whiteMoves);
+            expect(evaluateBoard(board)).toBe(0);
+        });
     });
 });

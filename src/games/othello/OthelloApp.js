@@ -113,6 +113,11 @@ export class OthelloApp extends BoardGameApp {
                     cell.classList.add("cell-hint");
                 }
 
+                // Highlight AI-suggested move from the hint feature
+                if (this.state.hintMove && this.state.hintMove.row === row && this.state.hintMove.col === col) {
+                    cell.classList.add("cell-suggested");
+                }
+
                 board.appendChild(cell);
             }
         }
@@ -133,6 +138,8 @@ export class OthelloApp extends BoardGameApp {
             color = this.state.currentPlayer;
             opts = mv.opts || {};
         }
+        // Clear any hint highlight when a move is committed
+        this.state.hintMove = null;
         const result = makeMove(this.state.board, row, col, color);
         if (!result.success) return false;
 
@@ -284,6 +291,7 @@ export class OthelloApp extends BoardGameApp {
             this.handleCellClick(row, col);
         });
         game?.undoBtn?.addEventListener("click", () => this.handleUndo());
+        game?.hintBtn?.addEventListener("click", () => this.handleHint());
         game?.resignBtn?.addEventListener("click", () => this.handleResign());
         result?.newBtn?.addEventListener("click", () => this.enterSetup());
         result?.backBtn?.addEventListener("click", () => window.__returnToLauncher?.());
@@ -318,6 +326,22 @@ export class OthelloApp extends BoardGameApp {
         this.state.gameOver = true;
         this.state.resultType = "win";
         this.state.resultWinnerColor = opponent(this.state.currentPlayer);
+    }
+
+    handleHint() {
+        if (this.state.aiThinking || this.state.gameOver) return;
+        if (!this.isHumanTurn()) return;
+
+        // Use the Othello AI (hard level) to suggest the best move
+        const move = getOthelloAIMove(this.state.board, this.state.currentPlayer, "hard");
+        if (!move) {
+            this.showMessage("noHintAvailable", "warn");
+            return;
+        }
+
+        this.state.hintMove = { row: move.row, col: move.col };
+        this.render();
+        this.showMessage(`Hint: (${move.row}, ${move.col})`, "info");
     }
 
     // === Cleanup ===
