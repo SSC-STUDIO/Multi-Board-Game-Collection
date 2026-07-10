@@ -40,6 +40,7 @@ const { makeMockElements } = vi.hoisted(() => ({
                 backBtn: el('othello-back-btn'),
             },
             game: {
+                panel: el('othello-game'),
                 board: el('othello-board'),
                 board3d: el('othello-board-3d'),
                 status: el('othello-status'),
@@ -239,7 +240,7 @@ describe('OthelloApp', () => {
         it('should switch panels and create state', () => {
             app.startGame();
             expect(app.dom.setup.panel.classList.add).toHaveBeenCalledWith('hidden');
-            expect(app.dom.game.board.classList.remove).toHaveBeenCalledWith('hidden');
+            expect(app.dom.game.panel.classList.remove).toHaveBeenCalledWith('hidden');
             expect(app.state.currentPlayer).toBe('black');
             expect(app.state.gameOver).toBe(false);
             expect(app.state.moveHistory).toEqual([]);

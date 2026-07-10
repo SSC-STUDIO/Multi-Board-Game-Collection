@@ -41,6 +41,7 @@ export class OthelloApp extends BoardGameApp {
                 backBtn: root.getElementById("othello-back-btn")
             },
             game: {
+                panel: root.getElementById("othello-game"),
                 board: root.getElementById("othello-board"),
                 board3d: root.getElementById("othello-board-3d"),
                 status: root.getElementById("othello-status"),
@@ -68,8 +69,8 @@ export class OthelloApp extends BoardGameApp {
         };
     }
 
-    createFreshState() {
-        this.state = createOthelloState(this.options);
+    createInitialState() {
+        return createOthelloState(this.options);
     }
 
     enterSetup() {
@@ -84,21 +85,13 @@ export class OthelloApp extends BoardGameApp {
         }
     }
 
-    startGame() {
-        this.state.gameOver = false;
-        this.state.currentPlayer = "black";
-        this.state.moveHistory = [];
-        this.state.passCount = 0;
+    /** Othello-specific startup: clear the AI transposition table. */
+    startGameImpl() {
         // Clear the AI transposition table so stale board-state scores
         // from the previous match don't leak into this one.
         resetTranspositionTable();
-        if (this.dom && this.dom.setup && this.dom.setup.panel) {
-            this.dom.setup.panel.classList.add("hidden");
-        }
-        if (this.dom && this.dom.game && this.dom.game.board) {
-            this.dom.game.board.classList.remove("hidden");
-        }
         this.render();
+        this.renderMoveList();
     }
 
     render() {
