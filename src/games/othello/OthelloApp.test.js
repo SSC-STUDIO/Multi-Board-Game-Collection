@@ -472,6 +472,14 @@ describe('OthelloApp', () => {
             expect(app.state.moveHistory.length).toBe(0);
         });
 
+        it('handleUndo should call clearPendingAI to cancel pending AI timer', async () => {
+            app.startGame();
+            app.commitMove(2, 3, 'black');
+            const spy = vi.spyOn(app, 'clearPendingAI');
+            app.handleUndo();
+            expect(spy).toHaveBeenCalled();
+        });
+
         it('handleResign should set game over with opponent as winner', () => {
             app.startGame();
             app.state.currentPlayer = 'black';
