@@ -744,6 +744,13 @@ describe('OthelloApp', () => {
             app.renderStatus();
             expect(app.dom.game.status.textContent).toContain('AI thinking');
         });
+
+        it('should be called by render() so status bar updates after every move', () => {
+            app.startGame();
+            app.state.currentPlayer = 'white';
+            app.render(); // render() should now call renderStatus() internally
+            expect(app.dom.game.status.textContent).toContain('White');
+        });
     });
 
     describe('dispose', () => {

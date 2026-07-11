@@ -126,6 +126,7 @@ export class OthelloApp extends BoardGameApp {
                 board.appendChild(cell);
             }
         }
+        this.renderStatus();
     }
 
     validateMove(row, col, color) {
