@@ -183,6 +183,7 @@ export class ShogiApp extends BoardGameApp {
                 board.appendChild(cell);
             }
         }
+        this.renderStatus();
     }
 
     /** Board status display (turn indicator + AI thinking) */
@@ -322,7 +323,6 @@ export class ShogiApp extends BoardGameApp {
         this.selected = null;
         this.highlightMoves = [];
         this.render();
-        this.renderStatus();
         this.renderMoveList();
         this.maybeScheduleAI();
     }
@@ -362,12 +362,10 @@ export class ShogiApp extends BoardGameApp {
         this.checkGameEnd();
         if (this.state.gameOver) {
             this.render();
-            this.renderStatus();
             return;
         }
 
         this.render();
-        this.renderStatus();
         this.renderMoveList();
         this.maybeScheduleAI();
     }
@@ -400,7 +398,6 @@ export class ShogiApp extends BoardGameApp {
         }
         this.sound.play('win');
         this.render();
-        this.renderStatus();
         this.showResult();
     }
 
