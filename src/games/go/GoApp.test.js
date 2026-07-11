@@ -262,6 +262,17 @@ describe('GoApp', () => {
             app.handlePass();
             expect(app.state.consecutivePasses).toBe(0);
         });
+
+        it('should call renderBoard after commitPass to sync 3D highlights', () => {
+            app.dom.game.board.style.setProperty = vi.fn();
+            app.startGame();
+            app.state.currentPlayer = 'black';
+            const spy = vi.spyOn(app, 'renderBoard');
+            app.commitPass();
+            expect(spy).toHaveBeenCalled();
+            expect(app.state.lastMove.pass).toBe(true);
+            expect(app.state.lastMove.row).toBeNull();
+        });
     });
 
     describe('toggleView and applyViewMode', () => {

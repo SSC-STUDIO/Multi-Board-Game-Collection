@@ -309,6 +309,7 @@ export class GoApp extends BoardGameApp {
         this.state.moveHistory.push(move);
         this.state.lastMove = move;
         this.sound.play('uiTap');
+        this.renderBoard();
 
         if (this.state.consecutivePasses >= 2) {
             this.finishByScoring();
