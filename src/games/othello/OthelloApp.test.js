@@ -458,6 +458,20 @@ describe('OthelloApp', () => {
             expect(app.state.moveHistory.length).toBe(0);
         });
 
+        it('handleUndo in pve should work when only 1 move exists (AI passed)', async () => {
+            app.options.mode = 'pve';
+            app.options.playerColor = 'black';
+            app.startGame();
+            // Simulate: human made 1 move, AI passed (no 2nd move in history)
+            app.commitMove(2, 3, 'black');
+            expect(app.state.moveHistory.length).toBe(1);
+            // AI passed — passCount >= 2, but no move added to moveHistory
+            app.state.passCount = 0;
+            app.handleUndo();
+            // With the fix, stepCount falls back to 1 in PvE when < 2 moves
+            expect(app.state.moveHistory.length).toBe(0);
+        });
+
         it('handleResign should set game over with opponent as winner', () => {
             app.startGame();
             app.state.currentPlayer = 'black';

@@ -288,4 +288,24 @@ describe('XiangqiApp', () => {
             expect(app.dom.game.panel.classList.add).toHaveBeenCalledWith('hidden');
         });
     });
+
+    describe('handleUndo aiThinking guard', () => {
+        it('should not undo when aiThinking is true', () => {
+            app.startGame();
+            app.state.moveHistory = [{ from: 'e2', to: 'e4', color: 'red' }];
+            const lenBefore = app.state.moveHistory.length;
+            app.state.aiThinking = true;
+            app.handleUndo();
+            expect(app.state.moveHistory.length).toBe(lenBefore);
+        });
+
+        it('should not undo when gameOver is true', () => {
+            app.startGame();
+            app.state.moveHistory = [{ from: 'e2', to: 'e4', color: 'red' }];
+            const lenBefore = app.state.moveHistory.length;
+            app.state.gameOver = true;
+            app.handleUndo();
+            expect(app.state.moveHistory.length).toBe(lenBefore);
+        });
+    });
 });

@@ -282,7 +282,7 @@ export class ShogiApp extends BoardGameApp {
     /** Undo: in PvE mode revert 2 steps (AI + human), in PvP revert 1 step */
     handleUndo() {
         if (this.state.aiThinking || this.state.gameOver) return;
-        const stepCount = this.options.mode === 'pve' ? 2 : 1;
+        const stepCount = this.options.mode === 'pve' && this.state.moveHistory.length >= 2 ? 2 : 1;
         if (this.state.moveHistory.length < stepCount) return;
         this.clearPendingAI();
         this.state.hintMove = null;

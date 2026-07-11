@@ -353,7 +353,7 @@ export class OthelloApp extends BoardGameApp {
 
     handleUndo() {
         if (this.state.aiThinking || this.state.gameOver) return;
-        const stepCount = this.options.mode === "pve" ? 2 : 1;
+        const stepCount = this.options.mode === "pve" && this.state.moveHistory.length >= 2 ? 2 : 1;
         if (this.state.moveHistory.length < stepCount) return;
 
         this.state.hintMove = null;
@@ -372,6 +372,7 @@ export class OthelloApp extends BoardGameApp {
         this.state.gameOver = false;
         this.render();
         this.renderMoveList();
+        this.renderStatus();
     }
 
     handleResign() {

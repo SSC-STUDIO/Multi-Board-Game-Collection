@@ -322,6 +322,8 @@ export class GoApp extends BoardGameApp {
     }
 
     handleUndo() {
+        if (this.state.aiThinking || this.state.gameOver) return;
+        this.clearAITimer();
         if (this.state.moveHistory.length === 0) {
             this.sound.play('error');
             return;

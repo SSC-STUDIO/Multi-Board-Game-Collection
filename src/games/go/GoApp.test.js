@@ -377,4 +377,24 @@ describe('GoApp', () => {
             expect(app.dom.setup.handicapRow.classList.toggle).toHaveBeenCalledWith('hidden', false);
         });
     });
+
+    describe('handleUndo aiThinking guard', () => {
+        it('should not undo when aiThinking is true', () => {
+            app.startGame();
+            app.state.moveHistory = [{ row: 3, col: 3, color: 'black' }];
+            const lenBefore = app.state.moveHistory.length;
+            app.state.aiThinking = true;
+            app.handleUndo();
+            expect(app.state.moveHistory.length).toBe(lenBefore);
+        });
+
+        it('should not undo when gameOver is true', () => {
+            app.startGame();
+            app.state.moveHistory = [{ row: 3, col: 3, color: 'black' }];
+            const lenBefore = app.state.moveHistory.length;
+            app.state.gameOver = true;
+            app.handleUndo();
+            expect(app.state.moveHistory.length).toBe(lenBefore);
+        });
+    });
 });
