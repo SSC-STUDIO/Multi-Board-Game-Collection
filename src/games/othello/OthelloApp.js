@@ -318,6 +318,8 @@ export class OthelloApp extends BoardGameApp {
             this.state.resultType = winner === 'draw' ? 'draw' : 'win';
             this.state.resultWinnerColor = winner === 'draw' ? null : winner;
             this._finalizeResult(winner);
+            this.render();
+            this.renderMoveList();
             return;
         }
 

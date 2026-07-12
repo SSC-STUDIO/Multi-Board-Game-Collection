@@ -625,6 +625,19 @@ describe('OthelloApp', () => {
             expect(app.state.resultWinnerColor).toBe('black');
         });
 
+        it('should call render() after double-pass game end so status shows gameEnd', async () => {
+            const { getLegalMoves, getWinner } = await import('./rules.js');
+            app.startGame();
+            app.state.passCount = 1;
+            getLegalMoves.mockReturnValue([]);
+            getWinner.mockReturnValue('black');
+            app.checkGameEnd();
+            // render() should have been called, which calls renderStatus()
+            // renderStatus() with gameOver=true should set status to 'gameEnd'
+            expect(app.state.gameOver).toBe(true);
+            expect(app.dom.game.status.textContent).toBe('gameEnd');
+        });
+
         it('should not act when player still has legal moves', async () => {
             const { getLegalMoves } = await import('./rules.js');
             app.startGame();
