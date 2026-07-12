@@ -1,6 +1,6 @@
 /** Gomoku 规则引擎：胜负判定、禁手检测 @module game/rules */
 
-import { DIRECTIONS, FOUR_PATTERNS, THREE_PATTERNS } from '../../config/gameConfig.js';
+import { DIRECTIONS, FOUR_PATTERNS, OPEN_THREE_PATTERNS } from '../../config/gameConfig.js';
 import { isInside } from '../../utils/board.js';
 import { i18n } from '../../utils/i18n.js';
 
@@ -190,7 +190,7 @@ export function hasOverline(board, size, row, col, color) {
  * @returns {number} 匹配方向的数量
  */
 export function countOpenPatterns(board, size, row, col, color, target) {
-    const patterns = target === 4 ? FOUR_PATTERNS : THREE_PATTERNS;
+    const patterns = target === 4 ? FOUR_PATTERNS : OPEN_THREE_PATTERNS;
     let count = 0;
 
     DIRECTIONS.forEach(([dRow, dCol]) => {

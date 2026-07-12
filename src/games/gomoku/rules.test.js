@@ -3,6 +3,8 @@ import {
     checkWin, getWinningLine, wouldWin, hasOverline,
     getForbiddenReason, countOpenPatterns, getLineInfo, getLineString,
 } from './rules.js';
+import { OPEN_THREE_PATTERNS } from '../../config/gameConfig.js';
+import { i18n } from '../../utils/i18n.js';
 import { isBoardFull } from '../../utils/board.js';
 
 const S = 15;
@@ -106,6 +108,68 @@ describe('getForbiddenReason', () => {
     it('returns empty for non-forbidden position', () => {
         const board = makeBoard(); board[0][0] = 'black'; board[0][1] = 'white';
         expect(getForbiddenReason(board, S, 'renju', 7, 7, 'black')).toBe('');
+    });
+    it('forbids double open three (two 活三 in different directions)', () => {
+        // Placing at (7,7) creates open three horizontally and vertically
+        const board = makeBoard();
+        setStones(board, [[7,5,'black'],[7,6,'black'],[5,7,'black'],[6,7,'black']]);
+        // Ensure both ends of each three are open
+        // Horizontal: ..XXX.. → cells (7,4) and (7,8) must be empty
+        // Vertical: ..XXX.. → cells (4,7) and (8,7) must be empty
+        expect(getForbiddenReason(board, S, 'renju', 7, 7, 'black')).toBe(i18n.t('forbiddenDoubleThree'));
+    });
+    it('does NOT forbid double sleeping three (two 眠三 in different directions)', () => {
+        // Placing at (7,7) creates sleeping three horizontally and vertically
+        // White stones block one end of each three
+        const board = makeBoard();
+        setStones(board, [
+            [7,4,'white'],[7,5,'black'],[7,6,'black'],   // horizontal: OXXX.. (sleeping three)
+            [4,7,'white'],[5,7,'black'],[6,7,'black'],    // vertical: OXXX.. (sleeping three)
+        ]);
+        expect(getForbiddenReason(board, S, 'renju', 7, 7, 'black')).toBe('');
+    });
+    it('does NOT forbid single open three', () => {
+        // Only one open three — not double
+        const board = makeBoard();
+        setStones(board, [[7,5,'black'],[7,6,'black']]);
+        expect(getForbiddenReason(board, S, 'renju', 7, 7, 'black')).toBe('');
+    });
+});
+
+describe('OPEN_THREE_PATTERNS', () => {
+    it('contains exactly 3 open-three patterns', () => {
+        expect(OPEN_THREE_PATTERNS).toHaveLength(3);
+        expect(OPEN_THREE_PATTERNS).toContain('..XXX..');
+        expect(OPEN_THREE_PATTERNS).toContain('..XX.X..');
+        expect(OPEN_THREE_PATTERNS).toContain('..X.XX..');
+    });
+    it('does NOT contain sleeping-three patterns', () => {
+        // Sleeping threes have one blocked end — should not be in OPEN_THREE_PATTERNS
+        expect(OPEN_THREE_PATTERNS).not.toContain('.XXX..');
+        expect(OPEN_THREE_PATTERNS).not.toContain('XXX..');
+        expect(OPEN_THREE_PATTERNS).not.toContain('.XX.X.');
+    });
+});
+
+describe('countOpenPatterns (target=3 uses OPEN_THREE_PATTERNS)', () => {
+    it('counts open three in one direction', () => {
+        const board = makeBoard();
+        setStones(board, [[7,5,'black'],[7,6,'black']]);
+        board[7][7] = 'black'; // place the stone
+        expect(countOpenPatterns(board, S, 7, 7, 'black', 3)).toBeGreaterThanOrEqual(1);
+    });
+    it('counts open three in two directions (double three)', () => {
+        const board = makeBoard();
+        setStones(board, [[7,5,'black'],[7,6,'black'],[5,7,'black'],[6,7,'black']]);
+        board[7][7] = 'black'; // place the stone
+        expect(countOpenPatterns(board, S, 7, 7, 'black', 3)).toBeGreaterThanOrEqual(2);
+    });
+    it('does NOT count sleeping three (blocked end)', () => {
+        const board = makeBoard();
+        // Sleeping three: white blocks left end
+        setStones(board, [[7,4,'white'],[7,5,'black'],[7,6,'black']]);
+        board[7][7] = 'black'; // place the stone → .XXX.. but left blocked → OXXX..
+        expect(countOpenPatterns(board, S, 7, 7, 'black', 3)).toBe(0);
     });
 });
 

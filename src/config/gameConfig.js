@@ -86,6 +86,17 @@ export const THREE_PATTERNS = [
 ];
 
 /**
+ * 活三（open three）匹配模式（仅用于三三禁手检测）
+ * 标准 Renju 规则：三三禁手仅适用于两个活三，不含眠三
+ * @type {string[]}
+ */
+export const OPEN_THREE_PATTERNS = [
+    '..XXX..',      // 活三
+    '..XX.X..',     // 跳活三
+    '..X.XX..'      // 跳活三
+];
+
+/**
  * 棋盘列标签（跳过字母 'I'，符合围棋/五子棋惯例）
  * @type {string}
  */
