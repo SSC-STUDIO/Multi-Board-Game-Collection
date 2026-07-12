@@ -240,8 +240,8 @@ export class JunqiApp extends BoardGameApp {
         this.highlightMoves = [];
         this.sound.play(move.kind === 'capture' ? 'move' : 'uiTap', { color: move.piece?.color, source: 'human' });
         this.renderBoard();
-        this.renderStatus();
         this.finishIfWinner(checkClassicWinner(this.state.board, this.state));
+        this.renderStatus();
         if (!this.state.gameOver) this.maybeScheduleAI();
     }
 
@@ -271,8 +271,9 @@ export class JunqiApp extends BoardGameApp {
             color: 'black', source: 'human'
         });
         this.renderBoard();
+        const hasWinner = this.finishIfWinner(checkFlipWinner(this.state.board, this.state));
         this.renderStatus();
-        if (this.finishIfWinner(checkFlipWinner(this.state.board, this.state))) return;
+        if (hasWinner) return;
         if (firstFlipAssigned) {
             this.showMessage(
                 i18n.t('junqiFirstFlipAssigned', {

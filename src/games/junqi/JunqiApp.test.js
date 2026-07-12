@@ -334,4 +334,29 @@ describe('JunqiApp', () => {
             expect(app.dom.game.panel.classList.add).toHaveBeenCalledWith('hidden');
         });
     });
+
+    describe('commitMove status on game end (classic)', () => {
+        it('should call renderStatus after finishIfWinner sets gameOver', () => {
+            app.startGame();
+            app.finishIfWinner = () => { app.state.gameOver = true; return true; };
+            const spy = vi.spyOn(app, 'renderStatus');
+            app.commitClassicMove({ from: [0, 0], to: [1, 0], piece: { color: 'r', rank: 'P' }, kind: 'move' });
+            expect(app.state.gameOver).toBe(true);
+            expect(spy).toHaveBeenCalled();
+            expect(app.dom.game.currentPlayer.textContent).toContain('gameEnd');
+        });
+    });
+
+    describe('commitMove status on game end (flip)', () => {
+        it('should call renderStatus after finishIfWinner sets gameOver', () => {
+            app.variant = 'flip';
+            app.startGame();
+            app.finishIfWinner = () => { app.state.gameOver = true; return true; };
+            const spy = vi.spyOn(app, 'renderStatus');
+            app.commitFlipMove({ from: [0, 0], to: [0, 0], piece: { color: 'r', rank: 'X' }, kind: 'flip' });
+            expect(app.state.gameOver).toBe(true);
+            expect(spy).toHaveBeenCalled();
+            expect(app.dom.game.currentPlayer.textContent).toContain('gameEnd');
+        });
+    });
 });
