@@ -35,7 +35,7 @@ $diffOutput = @()
 $diffOutput = cmd /c "cd /d $root && git diff --name-only" 2>$null
 $ErrorActionPreference = "Stop"
 $diffList = @($diffOutput | Where-Object { $_ -ne "" -and $_ -notmatch "warning:" })
-$allowed = @("src/games/othello/OthelloApp.js", "src/games/othello/OthelloApp.test.js", "src/games/chess/ChessApp.js", "src/games/chess/ChessApp.test.js", "src/games/go/GoApp.js", "src/games/go/GoApp.test.js", "src/games/xiangqi/XiangqiApp.js", "src/games/xiangqi/XiangqiApp.test.js", "src/games/shogi/ShogiApp.js")
+$allowed = @("src/games/othello/OthelloApp.js", "src/games/othello/OthelloApp.test.js", "src/games/chess/ChessApp.js", "src/games/chess/ChessApp.test.js", "src/games/go/GoApp.js", "src/games/go/GoApp.test.js", "src/games/xiangqi/XiangqiApp.js", "src/games/xiangqi/XiangqiApp.test.js", "src/games/shogi/ShogiApp.js", "src/games/shogi/ShogiApp.test.js", "scripts/verify-hermes.ps1", "ai/task-plans/62-shogi-final-move-missing-from-move-list.md")
 foreach ($file in $diffList) {
     if ($file -notin $allowed) {
         Write-Host "FAIL: unexpected changed file: $file" -ForegroundColor Red

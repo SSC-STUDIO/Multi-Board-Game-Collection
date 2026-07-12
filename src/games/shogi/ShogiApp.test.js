@@ -441,5 +441,15 @@ describe('ShogiApp', () => {
             expect(formatted.title).toBe('');
             expect(formatted.detail).toBe('');
         });
+
+        it('should call renderMoveList even when commitMove ends the game', () => {
+            app.startGame();
+            const spy = vi.spyOn(app, 'renderMoveList');
+            // Force checkGameEnd to detect game over
+            app.checkGameEnd = () => { app.state.gameOver = true; };
+            app.commitMove({ kind: 'board', from: [7, 4], to: [6, 4], promote: false });
+            expect(spy).toHaveBeenCalled();
+            expect(app.state.moveHistory.length).toBe(1);
+        });
     });
 });

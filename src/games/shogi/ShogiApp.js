@@ -360,13 +360,10 @@ export class ShogiApp extends BoardGameApp {
 
         // Check for checkmate / stalemate before scheduling AI
         this.checkGameEnd();
-        if (this.state.gameOver) {
-            this.render();
-            return;
-        }
-
         this.render();
         this.renderMoveList();
+        if (this.state.gameOver) return;
+
         this.maybeScheduleAI();
     }
 
