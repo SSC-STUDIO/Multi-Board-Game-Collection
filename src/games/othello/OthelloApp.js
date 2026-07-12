@@ -231,6 +231,10 @@ export class OthelloApp extends BoardGameApp {
     renderStatus() {
         const el = this.dom?.game?.status;
         if (!el || !this.state) return;
+        if (this.state.gameOver) {
+            el.textContent = i18n.t('gameEnd') || 'Game End';
+            return;
+        }
         const label = this.state.currentPlayer === "black" ? "\u26ab Black" : "\u26aa White";
         const aiLabel = this.state.aiThinking ? " \u2014 AI thinking\u2026" : "";
         el.textContent = label + aiLabel;

@@ -751,6 +751,33 @@ describe('OthelloApp', () => {
             app.render(); // render() should now call renderStatus() internally
             expect(app.dom.game.status.textContent).toContain('White');
         });
+
+        it('should show gameEnd when gameOver is true', () => {
+            app.startGame();
+            app.state.gameOver = true;
+            app.renderStatus();
+            expect(app.dom.game.status.textContent).toBe('gameEnd');
+        });
+
+        it('should not show player label when gameOver is true', () => {
+            app.startGame();
+            app.state.gameOver = true;
+            app.state.currentPlayer = 'black';
+            app.state.aiThinking = false;
+            app.renderStatus();
+            expect(app.dom.game.status.textContent).not.toContain('Black');
+        });
+
+        it('should show gameEnd after commitMove triggers game end', async () => {
+            const { isGameOver, getWinner } = await import('./rules.js');
+            isGameOver.mockReturnValueOnce(true);
+            getWinner.mockReturnValueOnce('black');
+            app.startGame();
+            app.commitMove(2, 3, 'black');
+            // commitMove calls render() which calls renderStatus()
+            expect(app.state.gameOver).toBe(true);
+            expect(app.dom.game.status.textContent).toBe('gameEnd');
+        });
     });
 
     describe('dispose', () => {
