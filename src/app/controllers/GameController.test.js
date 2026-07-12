@@ -570,6 +570,32 @@ describe('GameController.undo', () => {
         ctrl.undo();
         expect(enterSpy).toHaveBeenCalled();
     });
+
+    it('blocks undo when aiThinking is true', () => {
+        const app = createMockApp();
+        app.state.aiThinking = true;
+        app.state.moveHistory = [
+            { row: 7, col: 7, color: 'black', index: 1 }
+        ];
+        const ctrl = new GameController(app);
+        ctrl.undo();
+        expect(app.sound.play).toHaveBeenCalledWith('error');
+        expect(showMessage).toHaveBeenCalledWith(app.dom, 'noUndoDuringAiTurn', 'info');
+        expect(app.state.moveHistory).toHaveLength(1);
+    });
+
+    it('blocks undo when gameOver is true', () => {
+        const app = createMockApp();
+        app.state.gameOver = true;
+        app.state.moveHistory = [
+            { row: 7, col: 7, color: 'black', index: 1 }
+        ];
+        const ctrl = new GameController(app);
+        ctrl.undo();
+        expect(app.sound.play).toHaveBeenCalledWith('error');
+        expect(showMessage).toHaveBeenCalledWith(app.dom, 'gameAlreadyEnded', 'info');
+        expect(app.state.moveHistory).toHaveLength(1);
+    });
 });
 
 describe('GameController.showHint', () => {
@@ -713,6 +739,16 @@ describe('GameController.resign', () => {
         expect(app.state.resultWinnerColor).toBe('white');
         expect(showResultOverlay).toHaveBeenCalledWith(app.dom, app.state.resultSummary);
         expect(app.sound.play).toHaveBeenCalledWith('resign');
+    });
+
+    it('blocks resign when aiThinking is true', () => {
+        const app = createMockApp();
+        app.state.aiThinking = true;
+        const ctrl = new GameController(app);
+        ctrl.resign();
+        expect(app.sound.play).toHaveBeenCalledWith('error');
+        expect(showMessage).toHaveBeenCalledWith(app.dom, 'noResignDuringAiTurn', 'info');
+        expect(app.state.gameOver).toBe(false);
     });
 });
 

@@ -366,6 +366,16 @@ export class GameController {
      * @returns {void}
      */
     undo() {
+        if (this.app.state.aiThinking) {
+            this.app.sound.play('error');
+            this.showMessageKey('noUndoDuringAiTurn');
+            return;
+        }
+        if (this.app.state.gameOver) {
+            this.app.sound.play('error');
+            this.showMessageKey('gameAlreadyEnded');
+            return;
+        }
         if (this.app.state.moveHistory.length === 0) {
             this.app.sound.play('error');
             this.showMessageKey('nothingToUndo');
@@ -537,6 +547,11 @@ export class GameController {
      * @returns {void}
      */
     resign() {
+        if (this.app.state.aiThinking) {
+            this.app.sound.play('error');
+            this.showMessageKey('noResignDuringAiTurn');
+            return;
+        }
         if (this.app.state.gameOver) {
             this.app.sound.play('error');
             this.showMessageKey('gameAlreadyEnded');
