@@ -267,8 +267,8 @@ export class XiangqiApp extends BoardGameApp {
         this.state.hintMove = null;
         this.sound.play('move', { color: move.piece[0] === 'r' ? 'red' : 'black', source: 'human' });
         this.renderBoard();
-        this.renderStatus();
         this.checkGameEnd();
+        this.renderStatus();
         if (this.state.gameOver) return;
         this.maybeScheduleAI();
     }

@@ -308,4 +308,16 @@ describe('XiangqiApp', () => {
             expect(app.state.moveHistory.length).toBe(lenBefore);
         });
     });
+
+    describe('commitMove status on game end', () => {
+        it('should call renderStatus after checkGameEnd sets gameOver', () => {
+            app.startGame();
+            app.checkGameEnd = () => { app.state.gameOver = true; };
+            const spy = vi.spyOn(app, 'renderStatus');
+            app.commitMove({ from: [6, 4], to: [4, 4], piece: 'rP', capture: null });
+            expect(app.state.gameOver).toBe(true);
+            expect(spy).toHaveBeenCalled();
+            expect(app.dom.game.currentPlayer.textContent).toContain('gameEnd');
+        });
+    });
 });
