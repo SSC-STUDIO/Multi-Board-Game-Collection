@@ -249,10 +249,78 @@ export function makeDrop(board, type, side, toRow, toCol) {
     }
 
     // Cannot drop pawn to give immediate checkmate (打ち歩詰め uchifuzume)
-    // (simplified: skip this check for now)
+    if (type === "P") {
+        board[toRow][toCol] = { type, side };
+        const opponent = side === "sente" ? "gote" : "sente";
+        const givesCheck = isInCheck(board, opponent);
+        if (givesCheck) {
+            // Check if opponent has any legal escape (board moves + drops).
+            // If not, this pawn drop is checkmate → illegal uchifuzume.
+            const hasEscape = hasAnyLegalMove(board, opponent);
+            if (!hasEscape) {
+                // Undo placement — illegal uchifuzume
+                board[toRow][toCol] = null;
+                return false;
+            }
+        }
+        board[toRow][toCol] = null;
+    }
 
     board[toRow][toCol] = { type, side };
     return true;
+}
+
+/**
+ * Check if a side has any legal move (board moves + drops) that does not
+ * leave own king in check. Used by uchifuzume detection in makeDrop.
+ * Does NOT recurse into uchifuzume checking (only pawn drops trigger it).
+ * @param {Array<Array<object|null>>} board
+ * @param {'sente'|'gote'} side
+ * @returns {boolean}
+ */
+export function hasAnyLegalMove(board, side) {
+    // Board moves
+    for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+            const piece = board[r][c];
+            if (!piece || piece.side !== side) continue;
+            const moves = getLegalMoves(board, r, c);
+            for (const mv of moves) {
+                // Simulate move, check for self-check, then restore
+                const captured = board[mv.row][mv.col];
+                const originalType = piece.type;
+                board[mv.row][mv.col] = piece;
+                board[r][c] = null;
+                if (mv.promote && canPromote(piece.type)) {
+                    piece.type = PIECES[piece.type].promoted;
+                }
+                const inCheck = isInCheck(board, side);
+                piece.type = originalType;
+                board[r][c] = piece;
+                board[mv.row][mv.col] = captured;
+                if (!inCheck) return true;
+            }
+        }
+    }
+
+    // Drop moves (non-pawn only — pawn drops are not relevant for
+    // escaping check in the uchifuzume context, since the side escaping
+    // is the one being checked, not the one dropping a pawn for mate)
+    for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+            if (board[r][c]) continue;
+            // Try dropping a Gold (the most versatile drop piece for escaping)
+            // If any drop can escape check, the position is not mate
+            board[r][c] = { type: "G", side };
+            if (!isInCheck(board, side)) {
+                board[r][c] = null;
+                return true;
+            }
+            board[r][c] = null;
+        }
+    }
+
+    return false;
 }
 
 /**

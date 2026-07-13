@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createInitialBoard, getLegalMoves, getLegalMovesFiltered, makeMove, makeDrop, isInCheck, getPieceLabel, BOARD_SIZE, PIECES } from "./rules.js";
+import { createInitialBoard, getLegalMoves, getLegalMovesFiltered, makeMove, makeDrop, isInCheck, hasAnyLegalMove, getPieceLabel, BOARD_SIZE, PIECES } from "./rules.js";
 
 describe("Shogi rules", () => {
     describe("createInitialBoard", () => {
@@ -142,8 +142,97 @@ describe("Shogi rules", () => {
         });
     });
 
+    describe("makeDrop — uchifuzume (打ち歩詰め)", () => {
+        it("should prevent pawn drop that delivers immediate checkmate", () => {
+            // Construct a position where dropping a pawn checkmates the opponent.
+            // Gote king trapped at (0,0), surrounded by own pieces except the
+            // pawn-check square at (1,0). Sente drops pawn at (1,0) → check + mate.
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            // Gote king at (0,0)
+            board[0][0] = { type: "K", side: "gote" };
+            // Surround gote king so it cannot move
+            board[0][1] = { type: "G", side: "gote" }; // block right
+            // (1,0) is the only escape square — sente pawn drop there checks
+            // Sente pieces to prevent escape after drop
+            board[0][2] = { type: "G", side: "sente" };   // covers (0,1) if king tries right
+            // Sente king somewhere safe
+            board[8][4] = { type: "K", side: "sente" };
+
+            // Sente drops pawn at (1,0) — this gives check to gote king at (0,0)
+            // Gote king cannot move: (0,1) blocked by own G, (1,0) occupied by pawn,
+            // (1,1) is attacked by the pawn at (1,0) since pawn attacks diagonally.
+            // Actually in Shogi, pawn at (1,0) attacks (0,0) forward — check.
+            // King could try (0,1) but it's own piece. Can gote block? No piece
+            // can reach (1,0) to capture the pawn because it's defended.
+            // Let's make the pawn at (1,0) defended so king can't capture:
+            board[2][0] = { type: "G", side: "sente" }; // defends (1,0)
+
+            const success = makeDrop(board, "P", "sente", 1, 0);
+            expect(success).toBe(false);
+            expect(board[1][0]).toBeNull();
+        });
+
+        it("should allow pawn drop that gives check but NOT mate", () => {
+            // Gote king at (0,0) with an escape square
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[0][0] = { type: "K", side: "gote" };
+            // Sente king safe
+            board[8][4] = { type: "K", side: "sente" };
+            // No surrounding pieces — king can escape to (0,1) or (1,1)
+
+            // Sente drops pawn at (1,0) → check, but king can escape to (0,1)
+            const success = makeDrop(board, "P", "sente", 1, 0);
+            expect(success).toBe(true);
+            expect(board[1][0]).toEqual({ type: "P", side: "sente" });
+        });
+
+        it("should allow non-pawn drop that delivers checkmate", () => {
+            // Same mate position but dropping a Gold instead of a pawn → legal
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[0][0] = { type: "K", side: "gote" };
+            board[0][1] = { type: "G", side: "gote" }; // block right
+            board[0][2] = { type: "G", side: "sente" }; // covers (0,1)
+            board[2][0] = { type: "G", side: "sente" }; // defends (1,0)
+            board[8][4] = { type: "K", side: "sente" };
+
+            // Drop Gold (not pawn) at (1,0) → check + mate, but uchifuzume
+            // only applies to pawn drops, so this should succeed
+            const success = makeDrop(board, "G", "sente", 1, 0);
+            expect(success).toBe(true);
+        });
+
+        it("should not affect non-checking pawn drops", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[8][4] = { type: "K", side: "sente" };
+            board[0][4] = { type: "K", side: "gote" };
+
+            // Drop pawn at (4,4) — no check involved
+            const success = makeDrop(board, "P", "sente", 4, 4);
+            expect(success).toBe(true);
+        });
+    });
+
+    describe("hasAnyLegalMove", () => {
+        it("should return true when side has legal board moves", () => {
+            const board = createInitialBoard();
+            expect(hasAnyLegalMove(board, "sente")).toBe(true);
+        });
+
+        it("should return false when side has no legal moves (mate)", () => {
+            // Minimal: sente king at corner with no moves, gote gold attacking
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[0][0] = { type: "K", side: "sente" };
+            // Surround all escape squares with gote pieces or own pieces
+            board[0][1] = { type: "G", side: "gote" };
+            board[1][0] = { type: "G", side: "gote" };
+            board[1][1] = { type: "G", side: "gote" };
+            // King cannot move (all diagonals/orthogonals covered by gote)
+            expect(hasAnyLegalMove(board, "sente")).toBe(false);
+        });
+    });
+
     describe("isInCheck", () => {
-        it("should detect check from gold general", () => {
+         it("should detect check from gold general", () => {
             // Minimal board: king at (4,4), gold at (3,4) attacking it
             const board = Array.from({ length: 9 }, () => Array(9).fill(null));
             board[4][4] = { type: "K", side: "sente" };
