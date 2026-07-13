@@ -185,12 +185,20 @@ const mockDoc = vi.hoisted(() => ({
 }));
 
 const { OthelloApp } = await import('./OthelloApp.js');
+const rulesMock = await import('./rules.js');
 
 describe('OthelloApp', () => {
     let app;
 
     beforeEach(() => {
         vi.useFakeTimers();
+        // Reset getLegalMoves to default mock implementation (4 legal moves)
+        // to prevent mockReturnValue([]) from a previous test from leaking.
+        rulesMock.getLegalMoves.mockReset();
+        rulesMock.getLegalMoves.mockImplementation(() => [
+            { row: 2, col: 3 }, { row: 3, col: 2 },
+            { row: 4, col: 5 }, { row: 5, col: 4 },
+        ]);
         app = new OthelloApp(mockDoc);
     });
 
@@ -341,18 +349,32 @@ describe('OthelloApp', () => {
             expect(app.state.passCount).toBe(1);
         });
 
-        it('should detect double pass ending the game', async () => {
+        it('should detect double pass ending the game in single commitMove when both players have no moves', async () => {
             const { getLegalMoves, getWinner } = await import('./rules.js');
             app.startGame();
+            // Both opponent AND same player have no legal moves → double pass
             getLegalMoves.mockReturnValue([]);
             getWinner.mockReturnValueOnce('black');
             app.commitMove(2, 3, 'black');
-            expect(app.state.passCount).toBe(1);
-            app.state.currentPlayer = 'black';
-            // Make opponent pass by returning empty legal + same current player
-            getLegalMoves.mockReturnValue([]);
-            app.commitMove(5, 4, 'black');
             expect(app.state.passCount).toBe(2);
+            expect(app.state.gameOver).toBe(true);
+        });
+
+        it('should detect double pass across two turns when players pass sequentially', async () => {
+            const { getLegalMoves, getWinner } = await import('./rules.js');
+            app.startGame();
+            // First move: opponent has no moves, but same player does → passCount=1
+            getLegalMoves.mockReturnValueOnce([])  // opponent (white) no moves
+                         .mockReturnValueOnce([{ row: 5, col: 4 }]); // same player (black) has moves
+            app.commitMove(2, 3, 'black');
+            expect(app.state.passCount).toBe(1);
+            expect(app.state.currentPlayer).toBe('black');
+            // Second move: now both have no moves → passCount increments twice (opponent + same-player)
+            getLegalMoves.mockReturnValue([]);
+            getWinner.mockReturnValueOnce('black');
+            app.state.currentPlayer = 'black';
+            app.commitMove(5, 4, 'black');
+            expect(app.state.passCount).toBe(3); // 1 (first move) + 2 (second move double-increment)
             expect(app.state.gameOver).toBe(true);
         });
 
@@ -467,6 +489,8 @@ describe('OthelloApp', () => {
             expect(app.state.moveHistory.length).toBe(1);
             // AI passed — passCount >= 2, but no move added to moveHistory
             app.state.passCount = 0;
+            // commitMove normally → maybeScheduleAI → aiThinking=true; clear it for undo
+            app.state.aiThinking = false;
             app.handleUndo();
             // With the fix, stepCount falls back to 1 in PvE when < 2 moves
             expect(app.state.moveHistory.length).toBe(0);
@@ -540,12 +564,10 @@ describe('OthelloApp', () => {
         it('should set state.result and show overlay on double-pass game end', async () => {
             const { getLegalMoves, getWinner } = await import('./rules.js');
             app.startGame();
+            // Both players have no moves → double pass in single commitMove
             getLegalMoves.mockReturnValue([]);
             getWinner.mockReturnValueOnce('black');
             app.commitMove(2, 3, 'black');
-            expect(app.state.passCount).toBe(1);
-            app.state.currentPlayer = 'black';
-            app.commitMove(5, 4, 'black');
             expect(app.state.passCount).toBe(2);
             expect(app.state.gameOver).toBe(true);
             expect(app.state.result).toBeDefined();
@@ -611,7 +633,7 @@ describe('OthelloApp', () => {
             app.checkGameEnd();
             // Black must pass — turn switches to white.
             expect(app.state.currentPlayer).toBe('white');
-            expect(app.state.passCount).toBe(0); // reset after switch
+            expect(app.state.passCount).toBe(1); // pass persists (no reset in checkGameEnd)
         });
 
         it('should end game on double pass when AI has no moves', async () => {

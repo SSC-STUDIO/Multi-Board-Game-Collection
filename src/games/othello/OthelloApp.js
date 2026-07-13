@@ -172,6 +172,13 @@ export class OthelloApp extends BoardGameApp {
         if (opponentMoves.length === 0) {
             // Opponent must pass — same player continues
             this.state.passCount++;
+            // Also check if the same player (who just moved) has no legal
+            // moves on the resulting board. If both players have no moves,
+            // it's a double pass → game over.
+            const samePlayerMoves = getLegalMoves(this.state.board, color);
+            if (samePlayerMoves.length === 0) {
+                this.state.passCount++;
+            }
             if (this.state.passCount >= 2) {
                 // Both players passed consecutively → game over
                 this.state.gameOver = true;
@@ -323,10 +330,12 @@ export class OthelloApp extends BoardGameApp {
             return;
         }
 
-        // Switch player and reset pass counter so the next player can move.
+        // Switch player. Do NOT reset passCount — the pass counter must
+        // persist so that a second consecutive pass (by the other player)
+        // accumulates to 2 and triggers game over. passCount resets to 0
+        // only when a normal move is committed (commitMove line 193).
         const opp = opponent(this.state.currentPlayer);
         this.state.currentPlayer = opp;
-        this.state.passCount = 0;
         this.render();
         this.maybeScheduleAI();
     }
