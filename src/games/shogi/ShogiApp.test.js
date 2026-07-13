@@ -139,6 +139,7 @@ vi.mock('./state.js', () => ({
 vi.mock('./rules.js', () => ({
     createInitialBoard: vi.fn(() => initialBoard()),
     getLegalMoves: vi.fn(() => []),
+    getLegalMovesFiltered: vi.fn(() => []),
     makeMove: vi.fn((board, fromRow, fromCol, toRow, toCol) => board),
     makeDrop: vi.fn((board, type, side, toRow, toCol) => board),
     isInCheck: vi.fn(() => false),

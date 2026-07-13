@@ -6,7 +6,7 @@
 
 import { BoardGameApp } from "../../app/BoardGameApp.js";
 import { createShogiState, createShogiOptions } from "./state.js";
-import { createInitialBoard, getLegalMoves, makeMove, makeDrop, isInCheck, getPieceLabel, BOARD_SIZE, PIECES } from "./rules.js";
+import { createInitialBoard, getLegalMovesFiltered, makeMove, makeDrop, isInCheck, getPieceLabel, BOARD_SIZE, PIECES } from "./rules.js";
 import { getShogiAIMove, getShogiAIDelay, generateAllMoves } from "./ai.js";
 import { i18n } from "../../utils/i18n.js";
 
@@ -272,7 +272,7 @@ export class ShogiApp extends BoardGameApp {
     /** Select a piece and compute/highlight its legal moves */
     selectPiece(row, col) {
         this.selected = { row, col };
-        const legalMoves = getLegalMoves(this.state.board, row, col);
+        const legalMoves = getLegalMovesFiltered(this.state.board, row, col);
         this.highlightMoves = legalMoves;
         if (legalMoves.length === 0) {
             this.showMessage('No legal moves from this piece', 'warn');

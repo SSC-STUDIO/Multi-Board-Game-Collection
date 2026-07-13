@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createInitialBoard, getLegalMoves, makeMove, makeDrop, isInCheck, getPieceLabel, BOARD_SIZE, PIECES } from "./rules.js";
+import { createInitialBoard, getLegalMoves, getLegalMovesFiltered, makeMove, makeDrop, isInCheck, getPieceLabel, BOARD_SIZE, PIECES } from "./rules.js";
 
 describe("Shogi rules", () => {
     describe("createInitialBoard", () => {
@@ -155,6 +155,61 @@ describe("Shogi rules", () => {
             const board = Array.from({ length: 9 }, () => Array(9).fill(null));
             board[4][4] = { type: "K", side: "sente" };
             expect(isInCheck(board, "sente")).toBe(false);
+        });
+    });
+
+    describe("getLegalMovesFiltered", () => {
+        it("should filter moves that leave own king in check", () => {
+            // Sente king at (4,4), gote rook at (4,8) attacking row 4
+            // Sente gold at (4,5) — moving it away exposes king to rook check
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[4][4] = { type: "K", side: "sente" };
+            board[4][5] = { type: "G", side: "sente" };
+            board[4][8] = { type: "R", side: "gote" };
+
+            // Raw getLegalMoves should allow the gold to move away
+            const raw = getLegalMoves(board, 4, 5);
+            expect(raw.length).toBeGreaterThanOrEqual(1);
+
+            // getLegalMovesFiltered must NOT include any move that exposes the king
+            const filtered = getLegalMovesFiltered(board, 4, 5);
+            for (const mv of filtered) {
+                // Simulate and verify no self-check
+                const cap = board[mv.row][mv.col];
+                const origType = board[4][5].type;
+                board[mv.row][mv.col] = board[4][5];
+                board[4][5] = null;
+                expect(isInCheck(board, "sente")).toBe(false);
+                board[4][5] = board[mv.row][mv.col];
+                board[mv.row][mv.col] = cap;
+            }
+        });
+
+        it("should not modify the board after filtering", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[4][4] = { type: "K", side: "sente" };
+            board[4][5] = { type: "G", side: "sente" };
+            board[4][8] = { type: "R", side: "gote" };
+
+            const snapshot = board.map(r => r.map(c => c ? { ...c } : null));
+            getLegalMovesFiltered(board, 4, 5);
+
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    expect(board[r][c]).toEqual(snapshot[r][c]);
+                }
+            }
+        });
+
+        it("should allow moves that don't expose the king", () => {
+            // King at (0,0), gold at (1,1), no threats — gold can move freely
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[0][0] = { type: "K", side: "sente" };
+            board[1][1] = { type: "G", side: "sente" };
+
+            const raw = getLegalMoves(board, 1, 1);
+            const filtered = getLegalMovesFiltered(board, 1, 1);
+            expect(filtered.length).toBe(raw.length);
         });
     });
 

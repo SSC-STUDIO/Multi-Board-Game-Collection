@@ -289,6 +289,43 @@ export function isInCheck(board, side) {
 }
 
 /**
+ * Get all legal moves for a piece at (row, col), filtered to exclude
+ * moves that leave the piece's own king in check (self-check filter).
+ * @param {Array<Array<object|null>>} board - Board state
+ * @param {number} row - Source row
+ * @param {number} col - Source column
+ * @returns {Array<{row: number, col: number, promote?: boolean}>}
+ */
+export function getLegalMovesFiltered(board, row, col) {
+    const piece = board[row][col];
+    if (!piece) return [];
+
+    const rawMoves = getLegalMoves(board, row, col);
+    const side = piece.side;
+
+    return rawMoves.filter((mv) => {
+        // Simulate the move on the board, check for self-check, then restore
+        const captured = board[mv.row][mv.col];
+        const originalType = piece.type;
+
+        board[mv.row][mv.col] = piece;
+        board[row][col] = null;
+        if (mv.promote && canPromote(piece.type)) {
+            piece.type = PIECES[piece.type].promoted;
+        }
+
+        const inCheck = isInCheck(board, side);
+
+        // Restore
+        piece.type = originalType;
+        board[row][col] = piece;
+        board[mv.row][mv.col] = captured;
+
+        return !inCheck;
+    });
+}
+
+/**
  * Get the piece label (kanji) for display.
  */
 export function getPieceLabel(type) {
