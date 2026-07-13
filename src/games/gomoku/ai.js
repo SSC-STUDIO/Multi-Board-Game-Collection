@@ -469,7 +469,7 @@ function getPatternBonus(line) {
     return 0;
 }
 
-function detectCompositeThreats(board, size, row, col, color) {
+export function detectCompositeThreats(board, size, row, col, color) {
     const copy = board.map(r => [...r]);
     copy[row][col] = color;
 
@@ -495,7 +495,7 @@ function detectCompositeThreats(board, size, row, col, color) {
         // Double open three (unstoppable)
         isDoubleThree: openThrees >= 2 || openThreePatterns >= 2,
         // Four-three (unstoppable)
-        isFourThree: (openFours + halfOpenFours) >= 1 && openThrees >= 1,
+        isFourThree: (openFours + halfOpenFours) >= 1 && Math.max(openThrees, openThreePatterns) >= 1,
         // Double four (forbidden in renju but still dangerous)
         isDoubleFour: openFours >= 2 || openFourPatterns >= 2
     };

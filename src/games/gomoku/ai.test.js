@@ -5,7 +5,7 @@ vi.mock('../../utils/i18n.js', () => ({
     t: (key) => key
 }));
 
-import { getAIDelay, getBestMove, getMoveGuidance, getMoveReview } from './ai.js';
+import { getAIDelay, getBestMove, getMoveGuidance, getMoveReview, detectCompositeThreats } from './ai.js';
 
 function createBoard(size) {
     return Array.from({ length: size }, () => Array(size).fill(null));
@@ -471,5 +471,34 @@ describe('getMoveGuidance', () => {
         const guidance = getMoveGuidance(state, 'black');
         expect(guidance.row).toBe(7);
         expect(guidance.col).toBe(7);
+    });
+});
+
+describe('detectCompositeThreats', () => {
+    it('should detect isFourThree when open three is only found by pattern method', () => {
+        // Candidate position: (7,4)
+        // Horizontal: black at 3,5,6 + white at 7 → half-open four (count=4, openEnds=1)
+        // Vertical: black at 6,8 + empty gap at 7 → open three only via pattern (count=2 by line method)
+        const board = createBoard(15);
+        // Horizontal half-open four (white blocks right end)
+        board[7][3] = 'black';
+        board[7][5] = 'black';
+        board[7][6] = 'black';
+        board[7][7] = 'white';
+        // Vertical: pattern-only open three (gap at row 7 between stones at 6 and 8)
+        board[6][4] = 'black';
+        board[8][4] = 'black';
+        const threats = detectCompositeThreats(board, 15, 7, 4, 'black');
+        expect(threats.halfOpenFours).toBe(1);
+        expect(threats.openThrees).toBeGreaterThanOrEqual(1);
+        expect(threats.isFourThree).toBe(true);
+    });
+
+    it('should not false-positive isFourThree without a four', () => {
+        const board = createBoard(15);
+        board[6][4] = 'black';
+        board[8][4] = 'black';
+        const threats = detectCompositeThreats(board, 15, 7, 4, 'black');
+        expect(threats.isFourThree).toBe(false);
     });
 });
