@@ -14,7 +14,9 @@ import {
     findKing,
     pieceColor,
     isSquareAttacked,
-    oppositeColor
+    oppositeColor,
+    getPositionKey,
+    isThreefoldRepetition
 } from './rules.js';
 import { createChessState } from './state.js';
 
@@ -1223,5 +1225,46 @@ describe('games/chess/rules — 复杂场景', () => {
         const quiet = moves.find((m) => !m.capture);
         const { state: next } = applyMove(board, state, quiet);
         expect(next.halfmoveClock).toBe(16);
+    });
+});
+
+describe('games/chess/rules — 三次重复判和', () => {
+    it('同一位置出现三次返回 true', () => {
+        const board = createInitialBoard();
+        const state = baseState();
+        const key = getPositionKey(board, state);
+        const history = [key, 'other1', key, 'other2', key];
+        expect(isThreefoldRepetition(history)).toBe(true);
+    });
+
+    it('同一位置出现两次不判和', () => {
+        const board = createInitialBoard();
+        const state = baseState();
+        const key = getPositionKey(board, state);
+        const history = [key, 'other', key];
+        expect(isThreefoldRepetition(history)).toBe(false);
+    });
+
+    it('不同位置不判和', () => {
+        const board = createInitialBoard();
+        const state = baseState();
+        const history = [
+            getPositionKey(board, state),
+            getPositionKey(board, { ...state, turn: 'b' }),
+            getPositionKey(board, state)
+        ];
+        expect(isThreefoldRepetition(history)).toBe(false);
+    });
+
+    it('空历史返回 false', () => {
+        expect(isThreefoldRepetition([])).toBe(false);
+        expect(isThreefoldRepetition(null)).toBe(false);
+    });
+
+    it('相同棋盘不同轮到方产生不同键', () => {
+        const board = createInitialBoard();
+        const keyW = getPositionKey(board, { turn: 'w', castlingRights: { wK: true, wQ: true, bK: true, bQ: true }, enPassantTarget: null });
+        const keyB = getPositionKey(board, { turn: 'b', castlingRights: { wK: true, wQ: true, bK: true, bQ: true }, enPassantTarget: null });
+        expect(keyW).not.toBe(keyB);
     });
 });

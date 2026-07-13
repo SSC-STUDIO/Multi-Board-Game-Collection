@@ -53,6 +53,7 @@ export function createChessState(options = {}) {
         halfmoveClock: 0,
         fullmoveNumber: 1,
         moveHistory: [],
+        positionHistory: [],
         result: null,
         gameOver: false,
         aiThinking: false,

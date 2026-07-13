@@ -471,3 +471,43 @@ export function isInsufficientMaterial(board) {
 export function isFiftyMoveDraw(state) {
     return (state.halfmoveClock || 0) >= 100;
 }
+
+/**
+ * 生成位置键（用于三次重复判和）。
+ * 包含：棋盘状态 + 轮到方 + 易位权 + 吃过路兵目标。
+ * FIDE 规则 9.2.1 要求这些信息完全确定一个局面。
+ *
+ * @param {Array<Array<string|null>>} board
+ * @param {{ turn: string, castlingRights: object, enPassantTarget: [number,number]|null }} state
+ * @returns {string}
+ */
+export function getPositionKey(board, state) {
+    const boardStr = board.map((row) => row.map((p) => p || '.').join('')).join('/');
+    const cr = state.castlingRights;
+    const castling = [
+        cr.wK ? 'K' : '', cr.wQ ? 'Q' : '',
+        cr.bK ? 'k' : '', cr.bQ ? 'q' : ''
+    ].join('') || '-';
+    const ep = state.enPassantTarget
+        ? `${state.enPassantTarget[0]}${state.enPassantTarget[1]}`
+        : '-';
+    return `${boardStr} ${state.turn} ${castling} ${ep}`;
+}
+
+/**
+ * 三次重复判和（FIDE 9.2.1）。
+ * 检查 positionHistory 数组中最后一个位置键是否已出现 ≥ 3 次。
+ *
+ * @param {string[]} positionHistory - 位置键数组，每次走子后追加
+ * @returns {boolean}
+ */
+export function isThreefoldRepetition(positionHistory) {
+    if (!positionHistory || positionHistory.length < 3) return false;
+    const last = positionHistory[positionHistory.length - 1];
+    let count = 0;
+    for (let i = 0; i < positionHistory.length; i += 1) {
+        if (positionHistory[i] === last) count += 1;
+        if (count >= 3) return true;
+    }
+    return false;
+}

@@ -107,6 +107,7 @@ vi.mock('./state.js', () => ({
         halfmoveClock: 0,
         fullmoveNumber: 1,
         moveHistory: [],
+        positionHistory: [],
         gameOver: false,
         aiThinking: false,
         result: null,
@@ -127,6 +128,8 @@ vi.mock('./rules.js', () => ({
     isInsufficientMaterial: vi.fn(() => false),
     isFiftyMoveDraw: vi.fn(() => false),
     isInCheck: vi.fn(() => false),
+    getPositionKey: vi.fn(() => 'mock-position-key'),
+    isThreefoldRepetition: vi.fn(() => false),
 }));
 
 vi.mock('./ai.js', () => ({

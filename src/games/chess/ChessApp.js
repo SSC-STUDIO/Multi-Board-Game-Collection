@@ -18,7 +18,9 @@ import {
     isStalemate,
     isInsufficientMaterial,
     isFiftyMoveDraw,
-    isInCheck
+    isInCheck,
+    getPositionKey,
+    isThreefoldRepetition
 } from './rules.js';
 import { getChessAIMove, getChessAIDelay } from './ai.js';
 import { ChessRenderer3D } from './render3d/ChessRenderer3D.js';
@@ -316,6 +318,10 @@ export class ChessApp extends BoardGameApp {
             ...move,
             san: this.describeMove(move)
         }];
+        this.state.positionHistory = [
+            ...(this.state.positionHistory || []),
+            getPositionKey(this.state.board, this.state)
+        ];
         this.selected = null;
         this.highlightMoves = [];
         this.state.hintMove = null;
@@ -353,6 +359,7 @@ export class ChessApp extends BoardGameApp {
             this.state.board = board;
             Object.assign(this.state, state);
             this.state.moveHistory.push(mv);
+            this.state.positionHistory.push(getPositionKey(this.state.board, this.state));
         });
         this.selected = null;
         this.highlightMoves = [];
@@ -419,6 +426,13 @@ export class ChessApp extends BoardGameApp {
         if (isFiftyMoveDraw(this.state)) {
             this.state.gameOver = true;
             this.state.result = { type: 'draw', winner: null, reason: 'fiftyMove' };
+            this.sound.play('draw');
+            this.showResult();
+            return;
+        }
+        if (isThreefoldRepetition(this.state.positionHistory)) {
+            this.state.gameOver = true;
+            this.state.result = { type: 'draw', winner: null, reason: 'threefold' };
             this.sound.play('draw');
             this.showResult();
         }
