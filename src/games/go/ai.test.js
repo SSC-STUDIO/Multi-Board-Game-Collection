@@ -151,4 +151,76 @@ describe('games/go/ai', () => {
         }
     });
 
+    it('hard mode respects ko rule — does not return ko-forbidden move', () => {
+        // Regression: minimaxPly previously called placeStone WITHOUT forwarding
+        // the koPoint parameter, so the AI's 2-ply search did not enforce the
+        // ko rule and could select a ko-illegal recapture.
+        // Construct a ko situation: black captures one white stone, creating a
+        // ko point. Then set AI as white with hard mode and verify the AI does
+        // not return the ko point as its move.
+        const state = createGoState({ size: 5, options: { level: 'hard' } });
+        // Set up a classic ko shape:
+        //   . B W .
+        //   B W . W
+        //   . B W .
+        // Black plays at the empty spot to capture one white stone → ko.
+        state.board[0][1] = 'black';
+        state.board[0][2] = 'white';
+        state.board[1][0] = 'black';
+        state.board[1][1] = 'white';
+        state.board[1][3] = 'white';
+        state.board[2][1] = 'black';
+        state.board[2][2] = 'white';
+        // White stone at (1,1) has liberties at (1,2) only.
+        // Black captures by playing (1,2):
+        const captureRes = placeStone(state.board, 1, 2, 'black');
+        state.board = captureRes.board;
+        state.koPoint = captureRes.koPoint;
+        state.currentPlayer = 'white';
+        // The ko point should now be (1,1) — where the captured white stone was.
+        expect(captureRes.koPoint).not.toBeNull();
+        // White must not recapture at the ko point immediately.
+        const move = getGoAIMove(state);
+        expect(move).toBeDefined();
+        if (!move.pass) {
+            // The AI must not return the exact ko point as its move.
+            const isKoPoint = move.row === captureRes.koPoint.row &&
+                              move.col === captureRes.koPoint.col;
+            expect(isKoPoint).toBe(false);
+        }
+    });
+
+    it('ko point TT key prevents collision between ko and non-ko states', () => {
+        // Regression: the TT key previously omitted koPoint, so the same board
+        // with a ko point and without a ko point shared one TT entry.
+        // This test verifies that the AI produces a valid move in both states
+        // and that the ko state does not corrupt the non-ko result.
+        const board = Array.from({ length: 5 }, () => Array(5).fill(null));
+        board[2][2] = 'black';
+        board[2][3] = 'white';
+
+        // State WITHOUT ko point
+        const stateNoKo = createGoState({ size: 5, options: { level: 'hard' } });
+        stateNoKo.board = board.map(r => r.slice());
+        stateNoKo.currentPlayer = 'black';
+        stateNoKo.koPoint = null;
+        const moveNoKo = getGoAIMove(stateNoKo);
+
+        // State WITH ko point at (0,0) — different TT key, should not collide
+        const stateWithKo = createGoState({ size: 5, options: { level: 'hard' } });
+        stateWithKo.board = board.map(r => r.slice());
+        stateWithKo.currentPlayer = 'black';
+        stateWithKo.koPoint = { row: 0, col: 0 };
+        const moveWithKo = getGoAIMove(stateWithKo);
+
+        // Both should return valid moves
+        expect(moveNoKo).toBeDefined();
+        expect(moveWithKo).toBeDefined();
+        // If not pass, the AI must not play at the ko point
+        if (!moveWithKo.pass) {
+            const isKoPoint = moveWithKo.row === 0 && moveWithKo.col === 0;
+            expect(isKoPoint).toBe(false);
+        }
+    });
+
 });

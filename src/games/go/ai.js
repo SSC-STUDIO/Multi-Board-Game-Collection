@@ -199,11 +199,12 @@ export function resetGoTT() { goTT.clear(); }
  */
 function minimaxPly(board, row, col, color, koPoint, depth = 1) {
     const hash = boardHash(board);
-    const ttKey = hash + ":" + color + ":" + depth + ":" + row + ":" + col;
+    const koKey = koPoint ? koPoint.row + "," + koPoint.col : "-";
+    const ttKey = hash + ":" + color + ":" + depth + ":" + row + ":" + col + ":" + koKey;
     const ttEntry = goTT.get(ttKey);
     if (ttEntry !== undefined) return ttEntry;
 
-    const placement = placeStone(board, row, col, color);
+    const placement = placeStone(board, row, col, color, { koPoint });
     if (!placement.legal) return -Infinity;
     const opponent = getOpponent(color);
     const legal = getLegalMoves(placement.board, opponent, { koPoint: placement.koPoint || null });
