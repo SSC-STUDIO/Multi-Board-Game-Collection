@@ -112,13 +112,44 @@ export function getBestMove(state, color) {
         if (lastOpp && lastOpp.color !== color) {
             const dr = lastOpp.row - center;
             const dc = lastOpp.col - center;
-            // If opponent played diagonal, play orthogonally adjacent to center
-            if (Math.abs(dr) === 1 && Math.abs(dc) === 1 && !board[center][center]) {
-                return { row: center, col: center, score: 950 };
+            // If opponent played diagonal-adjacent, respond orthogonally adjacent
+            // to center (on the same row or col as the opponent's offset).
+            if (Math.abs(dr) === 1 && Math.abs(dc) === 1) {
+                // Try (center, center+dc) first, then (center+dr, center)
+                if (isInside(size, center, center + dc) && !board[center][center + dc]) {
+                    return { row: center, col: center + dc, score: 950 };
+                }
+                if (isInside(size, center + dr, center) && !board[center + dr][center]) {
+                    return { row: center + dr, col: center, score: 950 };
+                }
             }
-            // If opponent played orthogonal, play diagonal to maintain balance
-            if ((Math.abs(dr) + Math.abs(dc)) === 1 && !board[center + dr][center + dc]) {
-                return { row: center + dr, col: center + dc, score: 920 };
+            // If opponent played orthogonally adjacent, respond diagonally adjacent
+            // to center (on the same side as the opponent).
+            if (Math.abs(dr) + Math.abs(dc) === 1) {
+                // Choose a diagonal square in the opponent's direction
+                if (dr !== 0) {
+                    // Opponent is above/below center; pick a diagonal on that side
+                    const targets = [
+                        [center + dr, center + 1],
+                        [center + dr, center - 1]
+                    ];
+                    for (const [tr, tc] of targets) {
+                        if (isInside(size, tr, tc) && !board[tr][tc]) {
+                            return { row: tr, col: tc, score: 920 };
+                        }
+                    }
+                } else {
+                    // Opponent is left/right of center; pick a diagonal on that side
+                    const targets = [
+                        [center + 1, center + dc],
+                        [center - 1, center + dc]
+                    ];
+                    for (const [tr, tc] of targets) {
+                        if (isInside(size, tr, tc) && !board[tr][tc]) {
+                            return { row: tr, col: tc, score: 920 };
+                        }
+                    }
+                }
             }
         }
     }

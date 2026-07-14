@@ -83,6 +83,57 @@ describe('getBestMove', () => {
         expect(Math.abs(move.col - 7)).toBeLessThanOrEqual(2);
     });
 
+    // --- Opening book third-move: dead-branch regression (rev 83) ---
+    it('hard: opening book third move responds to diagonal opponent on an empty square', () => {
+        const board = createBoard(15);
+        // AI (black) took center on move 0; opponent (white) played diagonal
+        board[7][7] = 'black';
+        board[6][6] = 'white';
+        const state = createState({
+            board,
+            moveHistory: [
+                { row: 7, col: 7, color: 'black' },
+                { row: 6, col: 6, color: 'white' }
+            ]
+        });
+        const move = getBestMove(state, 'black');
+        expect(move).not.toBeNull();
+        // Must be an empty square — not center (7,7) and not opponent's (6,6)
+        const isEmpty = move.row !== 7 || move.col !== 7;
+        const isOpponent = move.row === 6 && move.col === 6;
+        expect(isEmpty).toBe(true);
+        expect(isOpponent).toBe(false);
+        expect(board[move.row][move.col]).toBeNull();
+        // Must be adjacent to center (within 1 step)
+        expect(Math.abs(move.row - 7)).toBeLessThanOrEqual(1);
+        expect(Math.abs(move.col - 7)).toBeLessThanOrEqual(1);
+    });
+
+    it('hard: opening book third move responds to orthogonal opponent on an empty square', () => {
+        const board = createBoard(15);
+        // AI (black) took center on move 0; opponent (white) played orthogonal
+        board[7][7] = 'black';
+        board[6][7] = 'white';
+        const state = createState({
+            board,
+            moveHistory: [
+                { row: 7, col: 7, color: 'black' },
+                { row: 6, col: 7, color: 'white' }
+            ]
+        });
+        const move = getBestMove(state, 'black');
+        expect(move).not.toBeNull();
+        // Must be an empty square — not center (7,7) and not opponent's (6,7)
+        const isEmpty = move.row !== 7 || move.col !== 7;
+        const isOpponent = move.row === 6 && move.col === 7;
+        expect(isEmpty).toBe(true);
+        expect(isOpponent).toBe(false);
+        expect(board[move.row][move.col]).toBeNull();
+        // Must be adjacent to center (within 1 step)
+        expect(Math.abs(move.row - 7)).toBeLessThanOrEqual(1);
+        expect(Math.abs(move.col - 7)).toBeLessThanOrEqual(1);
+    });
+
     it('should block opponent four-in-a-row', () => {
         const board = createBoard(15);
         board[7][5] = 'white';
