@@ -218,14 +218,13 @@ export function makeMove(board, fromRow, fromCol, toRow, toCol, promote = false)
 }
 
 /**
- * Execute a drop (place captured piece from hand onto board).
- * @returns {boolean} success
+ * Check if a drop is valid (cell empty, no nifu, no uchidokoro).
+ * Does NOT check uchifuzume (that requires full board search and is handled by caller).
  */
-export function makeDrop(board, type, side, toRow, toCol) {
+function isValidDrop(board, type, side, toRow, toCol) {
     if (toRow < 0 || toRow >= BOARD_SIZE || toCol < 0 || toCol >= BOARD_SIZE) return false;
     if (board[toRow][toCol]) return false;
-
-    // Cannot drop pawn on column where unpromoted pawn of same side already exists (二歩 nifu)
+    // Nifu (二歩): cannot drop pawn on column where unpromoted pawn of same side exists
     if (type === "P") {
         for (let r = 0; r < BOARD_SIZE; r++) {
             if (board[r][toCol] && board[r][toCol].side === side && board[r][toCol].type === "P") {
@@ -233,19 +232,23 @@ export function makeDrop(board, type, side, toRow, toCol) {
             }
         }
     }
-
-    // 行き所のない駒 (Uchidokoro naru koma): cannot drop a piece where it would
-    // have no legal moves. Pawn/Lance cannot be dropped on the last rank;
-    // Knight cannot be dropped on the last two ranks (it needs 2 rows to jump).
+    // Uchidokoro (行き所のない駒): cannot drop where piece has no legal moves
     if (side === "sente") {
-        // Sente moves toward row 0
         if ((type === "P" || type === "L") && toRow === 0) return false;
         if (type === "N" && toRow <= 1) return false;
     } else {
-        // Gote moves toward row 8
         if ((type === "P" || type === "L") && toRow === BOARD_SIZE - 1) return false;
         if (type === "N" && toRow >= BOARD_SIZE - 2) return false;
     }
+    return true;
+}
+
+/**
+ * Execute a drop (place captured piece from hand onto board).
+ * @returns {boolean} success
+ */
+export function makeDrop(board, type, side, toRow, toCol) {
+    if (!isValidDrop(board, type, side, toRow, toCol)) return false;
 
     // Cannot drop pawn to give immediate checkmate (打ち歩詰め uchifuzume)
     if (type === "P") {
@@ -304,16 +307,15 @@ export function hasAnyLegalMove(board, side) {
 
     // Drop moves — test all droppable piece types, not just Gold.
     // A Rook, Bishop, or Knight drop might block/escape check where Gold cannot.
-    // We do NOT test pawn drops here because uchifuzume only restricts the
-    // side delivering mate, not the side escaping it; but skipping pawn drops
-    // could miss a legal pawn-drop escape. So we test P too.
-    // However, makeDrop would recurse if called here — instead we simulate
-    // the drop directly and check for self-check.
+    // Apply drop restrictions (nifu, uchidokoro) to avoid treating illegal
+    // drops as legal escapes. Uchifuzume is NOT checked here — we only need
+    // to know if ANY escape exists, not whether the drop gives checkmate.
     const dropTypes = ["R", "B", "G", "S", "N", "L", "P"];
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
             if (board[r][c]) continue;
             for (const dt of dropTypes) {
+                if (!isValidDrop(board, dt, side, r, c)) continue;
                 board[r][c] = { type: dt, side };
                 if (!isInCheck(board, side)) {
                     board[r][c] = null;

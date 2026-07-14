@@ -310,6 +310,42 @@ describe("Shogi rules", () => {
         });
     });
 
+    describe("hasAnyLegalMove", () => {
+        it("should find drop escape that blocks a rook attack", () => {
+            // Gote king at (8,4) in check by sente rook at (0,4).
+            // King escape squares blocked by own pawns.
+            // Gold drop on (7,4) blocks rook → legal escape exists.
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[8][4] = { type: "K", side: "gote" };
+            board[0][4] = { type: "R", side: "sente" };
+            board[7][3] = { type: "P", side: "gote" };
+            board[7][5] = { type: "P", side: "gote" };
+            board[8][3] = { type: "P", side: "gote" };
+            board[8][5] = { type: "P", side: "gote" };
+
+            expect(hasAnyLegalMove(board, "gote")).toBe(true);
+        });
+
+        it("should reject nifu pawn drop (same file restriction)", () => {
+            // Nifu rule: cannot drop pawn on a file with existing same-side pawn.
+            // This test verifies isValidDrop via makeDrop behavior.
+            const { makeDrop } = require("./rules.js");
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[8][4] = { type: "P", side: "gote" }; // existing gote pawn on col 4
+            expect(makeDrop(board, "P", "gote", 3, 4)).toBe(false); // nifu
+            expect(makeDrop(board, "P", "gote", 3, 3)).toBe(true);  // different file
+        });
+
+        it("should reject uchidokoro Lance drop on last rank", () => {
+            // Uchidokoro: Lance/Pawn cannot be dropped on last rank.
+            const { makeDrop } = require("./rules.js");
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            expect(makeDrop(board, "L", "gote", 8, 4)).toBe(false); // gote last rank
+            expect(makeDrop(board, "P", "gote", 8, 4)).toBe(false); // gote last rank
+            expect(makeDrop(board, "L", "gote", 7, 4)).toBe(true);  // not last rank
+        });
+    });
+
     describe("getPieceLabel", () => {
         it("should return kanji for known piece", () => {
             expect(getPieceLabel("K")).toBe("王");
