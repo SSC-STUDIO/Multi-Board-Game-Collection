@@ -222,6 +222,17 @@ export function getForbiddenReason(board, size, rule, row, col, color) {
     const copy = board.map((r) => [...r]);
     copy[row][col] = color;
 
+    // Renju rule: if a move creates exactly five-in-a-row (win), it is NOT
+    // forbidden even if another direction simultaneously forms an overline.
+    // The overline prohibition applies only when no exact five exists.
+    const hasExactFive = DIRECTIONS.some(([dRow, dCol]) => {
+        const line = getLineInfo(copy, size, row, col, dRow, dCol, color);
+        return line.count === 5;
+    });
+    if (hasExactFive) {
+        return '';
+    }
+
     const overline = hasOverline(copy, size, row, col, color);
     const openFours = countOpenPatterns(copy, size, row, col, color, 4);
     const openThrees = countOpenPatterns(copy, size, row, col, color, 3);

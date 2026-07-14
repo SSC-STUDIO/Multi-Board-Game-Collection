@@ -134,6 +134,36 @@ describe('getForbiddenReason', () => {
         setStones(board, [[7,5,'black'],[7,6,'black']]);
         expect(getForbiddenReason(board, S, 'renju', 7, 7, 'black')).toBe('');
     });
+    it('does NOT forbid overline when exactly five-in-a-row also exists', () => {
+        // Placing at (7,7) creates exactly 5 horizontally (7,3..7,7)
+        // and 6+ vertically (3,7..8,7 = 6 stones). The exact-five wins
+        // and overrides the overline prohibition.
+        const board = makeBoard();
+        setStones(board, [
+            // Horizontal: 4 black stones at (7,3)..(7,6), place at (7,7) → 5
+            [7,3,'black'],[7,4,'black'],[7,5,'black'],[7,6,'black'],
+            // Vertical: 5 black stones at (3,7)..(7,7 would be the move),
+            // so (3,7),(4,7),(5,7),(6,7) = 4 + move at (7,7) = 5
+            // To make overline (6+), we need 5 existing + move = 6:
+            // (2,7),(3,7),(4,7),(5,7),(6,7) = 5 + move at (7,7) = 6
+            [2,7,'black'],[3,7,'black'],[4,7,'black'],[5,7,'black'],[6,7,'black'],
+        ]);
+        // The move at (7,7) creates horizontal 5 and vertical 6 (overline).
+        // Per Renju rules, the five wins — not forbidden.
+        expect(getForbiddenReason(board, S, 'renju', 7, 7, 'black')).toBe('');
+    });
+    it('still forbids overline when no exactly-five exists', () => {
+        // Placing at (7,7) creates 6 vertically but only 4 horizontally.
+        // No exact five → overline is forbidden.
+        const board = makeBoard();
+        setStones(board, [
+            // Vertical: (2,7)..(6,7) = 5 + move at (7,7) = 6 (overline)
+            [2,7,'black'],[3,7,'black'],[4,7,'black'],[5,7,'black'],[6,7,'black'],
+            // Horizontal: only (7,6) = 1 + move at (7,7) = 2, not 5
+            [7,6,'black'],
+        ]);
+        expect(getForbiddenReason(board, S, 'renju', 7, 7, 'black')).toBe(i18n.t('forbiddenOverline'));
+    });
 });
 
 describe('OPEN_THREE_PATTERNS', () => {
