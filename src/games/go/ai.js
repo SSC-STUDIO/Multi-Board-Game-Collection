@@ -199,7 +199,7 @@ export function resetGoTT() { goTT.clear(); }
  */
 function minimaxPly(board, row, col, color, koPoint, depth = 1) {
     const hash = boardHash(board);
-    const ttKey = hash + ":" + color + ":" + depth;
+    const ttKey = hash + ":" + color + ":" + depth + ":" + row + ":" + col;
     const ttEntry = goTT.get(ttKey);
     if (ttEntry !== undefined) return ttEntry;
 
