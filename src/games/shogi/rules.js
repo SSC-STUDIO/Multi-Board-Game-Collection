@@ -77,6 +77,8 @@ export function createInitialBoard() {
 
 /**
  * Get raw movement deltas for a piece type (before direction filtering).
+ * Deltas are in sente orientation (forward = decreasing row).
+ * For gote, the row component is flipped by the caller via `forward`.
  */
 function getRawDeltas(type) {
     switch (type) {
@@ -92,6 +94,8 @@ function getRawDeltas(type) {
 
 /**
  * Get sliding directions for rook/bishop/lance.
+ * Directions are in sente orientation (forward = decreasing row).
+ * For gote, the row component is flipped by the caller via `forward`.
  */
 function getSlidingDirections(type) {
     switch (type) {
@@ -112,23 +116,16 @@ export function getLegalMoves(board, row, col) {
 
     const moves = [];
     const side = piece.side;
-    const forward = side === "sente" ? -1 : 1;
+    const flip = side === "gote" ? -1 : 1; // deltas are sente-oriented; flip row for gote
     const isPromoted = piece.type !== "K" && piece.type.length > 1;
 
     // Non-sliding pieces
     const rawDeltas = getRawDeltas(piece.type);
     for (const [dr, dc] of rawDeltas) {
-        // Filter direction for unpromoted pieces
-        if (!isPromoted) {
-            // Pawn, Lance, Knight, Silver can only move forward
-            if (["P", "L", "N", "S"].includes(piece.type)) {
-                if (dr * forward < 0) continue; // must move forward (negative for sente)
-            }
-            // Knight has special forward requirement
-            if (piece.type === "N" && dr * forward >= 0) continue;
-        }
+        // Apply side direction flip (deltas are sente-oriented)
+        const fdr = dr * flip;
 
-        const nr = row + dr;
+        const nr = row + fdr;
         const nc = col + dc;
         if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) continue;
         if (board[nr][nc] && board[nr][nc].side === side) continue;
@@ -152,8 +149,10 @@ export function getLegalMoves(board, row, col) {
     // Sliding pieces (rook, bishop, lance)
     const slidingDirs = getSlidingDirections(piece.type);
     for (const [dr, dc] of slidingDirs) {
-        let nr = row + dr;
-        let nc = col + dc;
+        const fdr = dr * flip;
+        const fdc = dc; // columns are never flipped
+        let nr = row + fdr;
+        let nc = col + fdc;
         while (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
             if (board[nr][nc]) {
                 if (board[nr][nc].side !== side) {
@@ -184,8 +183,8 @@ export function getLegalMoves(board, row, col) {
             } else {
                 moves.push(move);
             }
-            nr += dr;
-            nc += dc;
+            nr += fdr;
+            nc += fdc;
         }
     }
 
@@ -303,20 +302,25 @@ export function hasAnyLegalMove(board, side) {
         }
     }
 
-    // Drop moves (non-pawn only — pawn drops are not relevant for
-    // escaping check in the uchifuzume context, since the side escaping
-    // is the one being checked, not the one dropping a pawn for mate)
+    // Drop moves — test all droppable piece types, not just Gold.
+    // A Rook, Bishop, or Knight drop might block/escape check where Gold cannot.
+    // We do NOT test pawn drops here because uchifuzume only restricts the
+    // side delivering mate, not the side escaping it; but skipping pawn drops
+    // could miss a legal pawn-drop escape. So we test P too.
+    // However, makeDrop would recurse if called here — instead we simulate
+    // the drop directly and check for self-check.
+    const dropTypes = ["R", "B", "G", "S", "N", "L", "P"];
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
             if (board[r][c]) continue;
-            // Try dropping a Gold (the most versatile drop piece for escaping)
-            // If any drop can escape check, the position is not mate
-            board[r][c] = { type: "G", side };
-            if (!isInCheck(board, side)) {
+            for (const dt of dropTypes) {
+                board[r][c] = { type: dt, side };
+                if (!isInCheck(board, side)) {
+                    board[r][c] = null;
+                    return true;
+                }
                 board[r][c] = null;
-                return true;
             }
-            board[r][c] = null;
         }
     }
 

@@ -144,28 +144,20 @@ describe("Shogi rules", () => {
 
     describe("makeDrop — uchifuzume (打ち歩詰め)", () => {
         it("should prevent pawn drop that delivers immediate checkmate", () => {
-            // Construct a position where dropping a pawn checkmates the opponent.
-            // Gote king trapped at (0,0), surrounded by own pieces except the
-            // pawn-check square at (1,0). Sente drops pawn at (1,0) → check + mate.
+            // Gote king at (0,0). Gote pawn at (0,1) blocks right escape.
+            // Sente gold at (2,0) covers (1,0) and (1,1).
+            // Sente drops pawn at (1,0) → check + mate:
+            // - King can't move to (0,1): own pawn blocks.
+            // - King can't move to (1,0): pawn there (defended by gold).
+            // - King can't move to (1,1): covered by sente gold at (2,0).
+            // - Gote pawn at (0,1) moves to (1,1) but king still in check.
+            // - No gote piece can capture the pawn at (1,0).
+            // After the Gold direction fix, gote pieces correctly move downward.
             const board = Array.from({ length: 9 }, () => Array(9).fill(null));
-            // Gote king at (0,0)
             board[0][0] = { type: "K", side: "gote" };
-            // Surround gote king so it cannot move
-            board[0][1] = { type: "G", side: "gote" }; // block right
-            // (1,0) is the only escape square — sente pawn drop there checks
-            // Sente pieces to prevent escape after drop
-            board[0][2] = { type: "G", side: "sente" };   // covers (0,1) if king tries right
-            // Sente king somewhere safe
+            board[0][1] = { type: "P", side: "gote" };
+            board[2][0] = { type: "G", side: "sente" };
             board[8][4] = { type: "K", side: "sente" };
-
-            // Sente drops pawn at (1,0) — this gives check to gote king at (0,0)
-            // Gote king cannot move: (0,1) blocked by own G, (1,0) occupied by pawn,
-            // (1,1) is attacked by the pawn at (1,0) since pawn attacks diagonally.
-            // Actually in Shogi, pawn at (1,0) attacks (0,0) forward — check.
-            // King could try (0,1) but it's own piece. Can gote block? No piece
-            // can reach (1,0) to capture the pawn because it's defended.
-            // Let's make the pawn at (1,0) defended so king can't capture:
-            board[2][0] = { type: "G", side: "sente" }; // defends (1,0)
 
             const success = makeDrop(board, "P", "sente", 1, 0);
             expect(success).toBe(false);
@@ -173,10 +165,9 @@ describe("Shogi rules", () => {
         });
 
         it("should allow pawn drop that gives check but NOT mate", () => {
-            // Gote king at (0,0) with an escape square
+            // Gote king at (0,0) with escape to (0,1) open (no blocking pawn)
             const board = Array.from({ length: 9 }, () => Array(9).fill(null));
             board[0][0] = { type: "K", side: "gote" };
-            // Sente king safe
             board[8][4] = { type: "K", side: "sente" };
             // No surrounding pieces — king can escape to (0,1) or (1,1)
 
@@ -190,9 +181,8 @@ describe("Shogi rules", () => {
             // Same mate position but dropping a Gold instead of a pawn → legal
             const board = Array.from({ length: 9 }, () => Array(9).fill(null));
             board[0][0] = { type: "K", side: "gote" };
-            board[0][1] = { type: "G", side: "gote" }; // block right
-            board[0][2] = { type: "G", side: "sente" }; // covers (0,1)
-            board[2][0] = { type: "G", side: "sente" }; // defends (1,0)
+            board[0][1] = { type: "P", side: "gote" }; // block right
+            board[2][0] = { type: "G", side: "sente" }; // covers (1,0) and (1,1)
             board[8][4] = { type: "K", side: "sente" };
 
             // Drop Gold (not pawn) at (1,0) → check + mate, but uchifuzume
@@ -219,15 +209,33 @@ describe("Shogi rules", () => {
         });
 
         it("should return false when side has no legal moves (mate)", () => {
-            // Minimal: sente king at corner with no moves, gote gold attacking
+            // Sente king at (8,0) corner, gote golds cover all escapes.
+            // After the Gold direction fix, gote golds move DOWN (forward=+1).
             const board = Array.from({ length: 9 }, () => Array(9).fill(null));
-            board[0][0] = { type: "K", side: "sente" };
-            // Surround all escape squares with gote pieces or own pieces
-            board[0][1] = { type: "G", side: "gote" };
-            board[1][0] = { type: "G", side: "gote" };
-            board[1][1] = { type: "G", side: "gote" };
-            // King cannot move (all diagonals/orthogonals covered by gote)
+            board[8][0] = { type: "K", side: "sente" };
+            board[7][0] = { type: "G", side: "gote" };
+            board[7][1] = { type: "G", side: "gote" };
+            // King at (8,0): can move to (8,1),(7,0),(7,1).
+            // (8,1) covered by gold at (7,0) and (7,1).
+            // (7,0) = gote gold (capturable but (7,1) covers it).
+            // (7,1) = gote gold (capturable but (7,0) covers it).
             expect(hasAnyLegalMove(board, "sente")).toBe(false);
+        });
+
+        it("should find drop escape for all piece types including pawn", () => {
+            // Sente king at (0,4) in check from gote rook at (0,8) along row 0.
+            // King can't move: gote golds at (2,3),(2,4),(2,5) cover (1,3/4/5).
+            // Rook covers all of row 0 including (0,3) and (0,5).
+            // Any drop at (0,6) blocks the rook's checking line.
+            // After the Gold direction fix, gote golds correctly move downward
+            // and cover the king's diagonal escapes via backward movement.
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[0][4] = { type: "K", side: "sente" };
+            board[0][8] = { type: "R", side: "gote" };
+            board[2][3] = { type: "G", side: "gote" };
+            board[2][4] = { type: "G", side: "gote" };
+            board[2][5] = { type: "G", side: "gote" };
+            expect(hasAnyLegalMove(board, "sente")).toBe(true);
         });
     });
 

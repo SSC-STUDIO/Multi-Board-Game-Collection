@@ -1,44 +1,40 @@
-# Rev 71 — Shogi uchifuzume (打ち歩詰め) pawn-drop checkmate rule
+# Rev 71: Shogi gote piece direction fix + uchifuzume regression tests
 
-## Task ID
-71
+## Defect
+Shogi `getLegalMoves` in `src/games/shogi/rules.js` did not flip the row
+component of movement deltas for gote pieces. Deltas (GOLD_DELTAS,
+SILVER_DELTAS, KNIGHT_DELTAS, and the Lance sliding direction) are stored
+in sente orientation (forward = decreasing row). For gote (forward =
+increasing row), the row component must be negated.
 
-## Date
-2026-07-13
+The previous code only applied a direction filter for unpromoted P/L/N/S
+pieces (`if (dr * forward < 0) continue`), but did not actually flip the
+deltas. This meant gote Gold Generals, promoted pieces (PS/PN/PL/PP/DR/DB),
+Silvers, Knights, and Lances all moved in the **wrong direction** for gote:
+gote Gold attacked upward (toward row 0) instead of downward (toward row 8).
 
-## Summary
-Shogi `makeDrop` in `src/games/shogi/rules.js` line 251-252 explicitly skips the
-uchifuzume (打ち歩詰め) check with comment "(simplified: skip this check for now)".
-This is a mandatory rule in Shogi: dropping a pawn to deliver immediate checkmate
-is illegal. Both human players and the AI can illegally drop a pawn for checkmate.
-
-## Root Cause
-`makeDrop` validates nifu (double pawn), uchidokoro (dead-end pieces), and bounds,
-but omits the uchifuzume check entirely — the comment even acknowledges the omission.
+This is a fundamental rules correctness bug affecting all gote piece
+movement, check detection, checkmate/stalemate detection, and AI evaluation.
 
 ## Fix
-Add uchifuzume detection in `makeDrop` after all existing checks pass:
-1. Place the pawn on the board.
-2. Check if the opponent is in check via `isInCheck(board, opponent)`.
-3. If in check, verify whether the opponent has any legal escape using `generateAllMovesForSide` — if none, this is checkmate via pawn drop = illegal.
-4. Undo the placement and return false; otherwise restore and return true.
+Added `const flip = side === "gote" ? -1 : 1;` in `getLegalMoves`.
+Applied `const fdr = dr * flip;` to both the non-sliding delta loop and the
+sliding direction loop (including the incremental step). Removed the
+now-unnecessary direction filter for P/L/N/S since `getRawDeltas` only
+returns forward-oriented deltas and the `flip` handles gote direction.
 
-A helper `hasAnyLegalMove(board, side)` is added to check if a side has any legal
-response (board moves + drop moves filtered by self-check). This is used by
-`makeDrop` to detect checkmate.
+Also updated `hasAnyLegalMove` drop escape check to test all droppable
+piece types (P, L, N, S, G, B, R) rather than only Gold.
 
-## Files Modified
-- `src/games/shogi/rules.js` — Add `hasAnyLegalMove` helper; add uchifuzume check in `makeDrop`.
-- `src/games/shogi/rules.test.js` — Add regression tests for uchifuzume.
-- `scripts/verify-hermes.ps1` — Add shogi rules files to allowed list.
+## Files modified
+- `src/games/shogi/rules.js` — direction flip in `getLegalMoves`; `hasAnyLegalMove` all-piece drop check
+- `src/games/shogi/rules.test.js` — updated 6 uchifuzume/hasAnyLegalMove tests for correct gote direction; added 1 new regression test
 
-## Test Plan
-- Existing makeDrop tests should still pass (non-pawn drops, nifu, dead-end).
-- New test: pawn drop that delivers checkmate should return false.
-- New test: pawn drop that delivers check (but not mate) should return true.
-- New test: non-pawn drop that delivers checkmate should return true (uchifuzume only applies to pawn drops).
-- Full gates: `npm run check`, `npm test`, `npm run build` all exit 0.
+## Test evidence
+- Focused: `npx vitest run src/games/shogi/rules.test.js` → 37 passed
+- Full suite: `npx vitest run` → 60 files, 1456 tests, all passed
+- Lint: `npm run check` → 141 modules, exit 0
+- Build: `npm run build` → 168 files, exit 0
 
-## Evidence
-- Focused test: `npx vitest run src/games/shogi/rules.test.js` — exit 0, all tests pass.
-- Full gate: `npm run check` exit 0; `npm test` exit 0 (60 files, 1454 tests); `npm run build` exit 0.
+## Verification
+All gates pass. No regressions detected across 60 test files.
