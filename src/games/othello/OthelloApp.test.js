@@ -504,6 +504,64 @@ describe('OthelloApp', () => {
             expect(spy).toHaveBeenCalled();
         });
 
+        it('handleUndo should recompute passCount when next player must pass', async () => {
+            const { getLegalMoves } = await import('./rules.js');
+            app.startGame();
+            // Simulate two moves: black at (2,3), white at (5,4)
+            app.commitMove(2, 3, 'black');
+            app.commitMove(5, 4, 'white');
+            expect(app.state.moveHistory.length).toBe(2);
+            // Now simulate that black (next player after white) has NO legal moves → must pass
+            getLegalMoves.mockImplementation((board, color) => {
+                if (color === 'black') return []; // black must pass
+                return [{ row: 3, col: 2 }]; // white has moves
+            });
+            app.handleUndo(); // remove last move (white's), replay board
+            // After undo: last move is black's (2,3). Next player = white.
+            // White has legal moves → passCount=0, white's turn.
+            expect(app.state.moveHistory.length).toBe(1);
+            expect(app.state.currentPlayer).toBe('white');
+            expect(app.state.passCount).toBe(0);
+        });
+
+        it('handleUndo should set passCount=1 when next player has no legal moves', async () => {
+            const { getLegalMoves } = await import('./rules.js');
+            app.startGame();
+            app.commitMove(2, 3, 'black');
+            // After undoing to empty history, next player is black (initial).
+            // Simulate that white (next after black) has no legal moves.
+            getLegalMoves.mockImplementation((board, color) => {
+                if (color === 'white') return []; // white must pass
+                return [{ row: 2, col: 3 }]; // black has moves
+            });
+            app.handleUndo();
+            // History empty → black's turn, passCount=0
+            expect(app.state.moveHistory.length).toBe(0);
+            expect(app.state.currentPlayer).toBe('black');
+            expect(app.state.passCount).toBe(0);
+        });
+
+        it('handleUndo should preserve pass state when opponent must pass after last move', async () => {
+            const { getLegalMoves } = await import('./rules.js');
+            app.startGame();
+            app.commitMove(2, 3, 'black');
+            app.commitMove(5, 4, 'white');
+            app.commitMove(4, 5, 'black');
+            expect(app.state.moveHistory.length).toBe(3);
+            // After undoing black's last move, last move = white's (5,4).
+            // Next player = black. Simulate that black has no legal moves.
+            getLegalMoves.mockImplementation((board, color) => {
+                if (color === 'black') return [];
+                return [{ row: 3, col: 2 }];
+            });
+            app.handleUndo();
+            // Last move = white's. Next = black, but black has no moves → pass.
+            // passCount should be 1, currentPlayer = white (continues).
+            expect(app.state.moveHistory.length).toBe(2);
+            expect(app.state.currentPlayer).toBe('white');
+            expect(app.state.passCount).toBe(1);
+        });
+
         it('handleResign should set game over with opponent as winner', () => {
             app.startGame();
             app.state.currentPlayer = 'black';

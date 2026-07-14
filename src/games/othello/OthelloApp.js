@@ -383,8 +383,25 @@ export class OthelloApp extends BoardGameApp {
             makeMove(this.state.board, mv.row, mv.col, mv.color);
         }
         const last = this.state.moveHistory[this.state.moveHistory.length - 1];
-        this.state.currentPlayer = last ? opponent(last.color) : "black";
-        this.state.passCount = 0;
+        // Determine whose turn it is and whether a pass is in effect.
+        // Passes are not recorded in moveHistory, so we recompute: if the
+        // next player (opponent of last mover) has no legal moves, they
+        // must pass — passCount=1 and the last mover continues.
+        if (last) {
+            const nextPlayer = opponent(last.color);
+            const nextHasMoves = getLegalMoves(this.state.board, nextPlayer).length > 0;
+            if (nextHasMoves) {
+                this.state.currentPlayer = nextPlayer;
+                this.state.passCount = 0;
+            } else {
+                // Next player must pass; last mover continues
+                this.state.currentPlayer = last.color;
+                this.state.passCount = 1;
+            }
+        } else {
+            this.state.currentPlayer = "black";
+            this.state.passCount = 0;
+        }
         this.state.lastMove = last || null;
         this.state.gameOver = false;
         this.render();
