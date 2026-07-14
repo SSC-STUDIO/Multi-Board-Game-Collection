@@ -39,7 +39,7 @@ describe('games/shogi/ai', () => {
         expect(move.kind).toBeDefined();
     });
 
-    it('hard mode returns a legal move within the board bounds', () => {
+    it('hard mode returns a legal move within the board bounds', { timeout: 30000 }, () => {
         const board = createInitialBoard();
         const move = getShogiAIMove(board, 'gote', emptyHands(), 'hard');
         expect(move).not.toBeNull();

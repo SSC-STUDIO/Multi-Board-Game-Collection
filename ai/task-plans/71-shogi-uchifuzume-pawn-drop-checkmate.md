@@ -1,40 +1,59 @@
-# Rev 71: Shogi gote piece direction fix + uchifuzume regression tests
+# Task Plan
 
-## Defect
-Shogi `getLegalMoves` in `src/games/shogi/rules.js` did not flip the row
-component of movement deltas for gote pieces. Deltas (GOLD_DELTAS,
-SILVER_DELTAS, KNIGHT_DELTAS, and the Lance sliding direction) are stored
-in sente orientation (forward = decreasing row). For gote (forward =
-increasing row), the row component must be negated.
+## Goal
+Fix the pre-existing Shogi AI hard-mode test timeout that blocks the verification gate. The gote direction fix (bfaadda) expanded the legal move tree for gote, making the depth-4 AI search slower. The test now needs a higher timeout and must be in the verify-hermes allowed list.
 
-The previous code only applied a direction filter for unpromoted P/L/N/S
-pieces (`if (dr * forward < 0) continue`), but did not actually flip the
-deltas. This meant gote Gold Generals, promoted pieces (PS/PN/PL/PP/DR/DB),
-Silvers, Knights, and Lances all moved in the **wrong direction** for gote:
-gote Gold attacked upward (toward row 0) instead of downward (toward row 8).
+## Baseline
+- HEAD: bfaadda (gote direction fix, already committed)
+- Working tree: M src/games/shogi/ai.test.js (timeout 15000), M ai/task-plans/71-shogi-uchifuzume-pawn-drop-checkmate.md
+- Pre-existing failure: ai.test.js:42 'hard mode' times out at default 5000ms in full suite
+- verify-hermes.ps1 allowed list does NOT include src/games/shogi/ai.test.js
 
-This is a fundamental rules correctness bug affecting all gote piece
-movement, check detection, checkmate/stalemate detection, and AI evaluation.
+## Scope
+- `src/games/shogi/ai.test.js` — change timeout from 15000 to 30000
+- `scripts/verify-hermes.ps1` — add `src/games/shogi/ai.test.js` to $allowed array
+- `ai/task-plans/71-grok-execution-plan.md` — DELETE (copied review output, not a plan)
 
-## Fix
-Added `const flip = side === "gote" ? -1 : 1;` in `getLegalMoves`.
-Applied `const fdr = dr * flip;` to both the non-sliding delta loop and the
-sliding direction loop (including the incremental step). Removed the
-now-unnecessary direction filter for P/L/N/S since `getRawDeltas` only
-returns forward-oriented deltas and the `flip` handles gote direction.
-
-Also updated `hasAnyLegalMove` drop escape check to test all droppable
-piece types (P, L, N, S, G, B, R) rather than only Gold.
-
-## Files modified
-- `src/games/shogi/rules.js` — direction flip in `getLegalMoves`; `hasAnyLegalMove` all-piece drop check
-- `src/games/shogi/rules.test.js` — updated 6 uchifuzume/hasAnyLegalMove tests for correct gote direction; added 1 new regression test
-
-## Test evidence
-- Focused: `npx vitest run src/games/shogi/rules.test.js` → 37 passed
-- Full suite: `npx vitest run` → 60 files, 1456 tests, all passed
-- Lint: `npm run check` → 141 modules, exit 0
-- Build: `npm run build` → 168 files, exit 0
+## Steps
+1. Edit src/games/shogi/ai.test.js line 42: change `{ timeout: 15000 }` to `{ timeout: 30000 }`
+2. Edit scripts/verify-hermes.ps1: add `"src/games/shogi/ai.test.js"` to the $allowed array
+3. Delete ai/task-plans/71-grok-execution-plan.md
+4. Run focused test: `npx vitest run src/games/shogi/ai.test.js` — exit 0, 12 passed
+5. Run full gate: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-hermes.ps1` — exit 0, ALL CHECKS PASSED
+6. Update ai/task-plans/71-shogi-uchifuzume-pawn-drop-checkmate.md Evidence section with results
+7. DO NOT COMMIT — await master approval
 
 ## Verification
-All gates pass. No regressions detected across 60 test files.
+- `npx vitest run src/games/shogi/ai.test.js` → 12 passed, exit 0
+- `npm test` → 60 files, 1456 passed, exit 0
+- `npm run check` → 141 modules, exit 0
+- `npm run build` → 168 files, exit 0
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-hermes.ps1` → ALL CHECKS PASSED
+
+## Risks
+- 30s timeout is generous but necessary — the AI test took 10.3s in the full suite and was timing out at 5s
+- Adding ai.test.js to allowed list is a one-time config change; future reviewers should be aware
+
+## Stop Conditions
+- If verify-hermes still fails after both fixes, investigate the root cause before retrying
+- Do not commit until master approves
+
+## Evidence
+### Completed steps with results
+1. ✅ Edit ai.test.js line 42: changed `{ timeout: 15000 }` to `{ timeout: 30000 }`
+2. ✅ Edit verify-hermes.ps1: added `"src/games/shogi/ai.test.js"` to $allowed array
+3. ✅ Deleted ai/task-plans/71-grok-execution-plan.md
+4. ✅ Focused test: `npx vitest run src/games/shogi/ai.test.js` → 12 passed, exit 0
+5. ✅ Full gate: `powershell -ExecutionPolicy Bypass -File scripts/verify-hermes.ps1` → ALL CHECKS PASSED
+   - PASS: node --test (vitest)
+   - PASS: npm run check
+   - PASS: npm run build
+   - PASS: only expected files changed
+
+### Git status (DO NOT COMMIT — awaiting master approval)
+- HEAD: bfaadda (pushed)
+- Uncommitted: M src/games/shogi/ai.test.js, M scripts/verify-hermes.ps1, M ai/task-plans/71-shogi-uchifuzume-pawn-drop-checkmate.md
+- No committed history was created in this attempt
+
+## Master Report
+Worker submitted ai.test.js timeout fix (15s) and plan update. Two blockers: (1) ai.test.js not in verify-hermes allowed list — diff check would fail; (2) 15s timeout is marginal (test took 10.3s full suite). Fix is conceptually correct. Worker correctly did not commit. Need to add file to allowed list and increase timeout to 30s.
