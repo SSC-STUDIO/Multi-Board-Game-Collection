@@ -282,23 +282,31 @@ function moveKey(mv) {
 const TT_SIZE = 1 << 16;
 let transpositionTable = new Map();
 
+function typeHash(type) {
+    let h = 0;
+    for (let i = 0; i < type.length; i++) {
+        h = (h * 31 + type.charCodeAt(i)) | 0;
+    }
+    return h;
+}
+
 function boardHash(board, side, hands) {
     let h = side === 'sente' ? 1 : 0;
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
             const p = board[r][c];
             if (p) {
-                const code = p.type.charCodeAt(0) * 100 + (p.side === 'sente' ? 1 : 0);
+                const code = typeHash(p.type) * 100 + (p.side === 'sente' ? 1 : 0);
                 h = (h * 31 + code + r * 9 + c) | 0;
             }
         }
     }
     // Hand pieces
     for (const p of (hands.sente || [])) {
-        h = (h * 31 + p.type.charCodeAt(0) * 200) | 0;
+        h = (h * 31 + typeHash(p.type) * 200) | 0;
     }
     for (const p of (hands.gote || [])) {
-        h = (h * 31 + p.type.charCodeAt(0) * 300) | 0;
+        h = (h * 31 + typeHash(p.type) * 300) | 0;
     }
     return h;
 }

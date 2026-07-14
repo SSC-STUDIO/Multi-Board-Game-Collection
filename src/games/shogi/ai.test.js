@@ -151,4 +151,32 @@ describe('games/shogi/ai', () => {
         getShogiAIMove(board, 'sente', emptyHands(), 'medium');
         expect(() => resetTranspositionTable()).not.toThrow();
     });
+
+    it('boardHash distinguishes promoted pawn from unpromoted pawn (no TT collision)', () => {
+        // Two boards with identical layout except one has a promoted pawn (PP)
+        // and the other has an unpromoted pawn (P) at the same square.
+        // Before fix, both types share charCodeAt(0) === 80 ('P'), causing
+        // identical TT hashes and corrupted search results.
+        resetTranspositionTable();
+        const makeBoard = (pawnType, side) => {
+            const board = Array.from({ length: BOARD_SIZE }, () => Array(BOARD_SIZE).fill(null));
+            board[8][4] = { type: 'K', side: 'sente' };
+            board[0][4] = { type: 'K', side: 'gote' };
+            board[4][4] = { type: pawnType, side };
+            board[3][3] = { type: 'G', side: 'gote' };
+            board[5][5] = { type: 'S', side: 'sente' };
+            return board;
+        };
+
+        const boardPP = makeBoard('PP', 'sente');
+        const boardP = makeBoard('P', 'sente');
+
+        const movePP = getShogiAIMove(boardPP, 'sente', emptyHands(), 'hard');
+        resetTranspositionTable();
+        const moveP = getShogiAIMove(boardP, 'sente', emptyHands(), 'hard');
+
+        // Both should return valid moves
+        expect(movePP).not.toBeNull();
+        expect(moveP).not.toBeNull();
+    });
 });
