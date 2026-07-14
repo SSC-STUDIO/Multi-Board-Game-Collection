@@ -60,6 +60,50 @@ describe("Shogi rules", () => {
             const validKingMoves = moves.filter(m => !m.promote);
             expect(validKingMoves.length).toBeGreaterThanOrEqual(3);
         });
+
+        it("should give Dragon King all 4 diagonal one-step moves plus rook sliding", () => {
+            // Place a DR (promoted Rook) in the center of an empty board
+            const board = createInitialBoard();
+            for (let r = 0; r < 9; r++)
+                for (let c = 0; c < 9; c++)
+                    board[r][c] = null;
+            board[4][4] = { type: "DR", side: "sente" };
+
+            const moves = getLegalMoves(board, 4, 4);
+
+            // All 4 diagonal squares (one step)
+            expect(moves.some(m => m.row === 3 && m.col === 3)).toBe(true);
+            expect(moves.some(m => m.row === 3 && m.col === 5)).toBe(true);
+            expect(moves.some(m => m.row === 5 && m.col === 3)).toBe(true);
+            expect(moves.some(m => m.row === 5 && m.col === 5)).toBe(true);
+
+            // Orthogonal sliding (rook) — at least one far square
+            expect(moves.some(m => m.row === 0 && m.col === 4)).toBe(true);
+            expect(moves.some(m => m.row === 8 && m.col === 4)).toBe(true);
+            expect(moves.some(m => m.row === 4 && m.col === 0)).toBe(true);
+            expect(moves.some(m => m.row === 4 && m.col === 8)).toBe(true);
+        });
+
+        it("should give Dragon Horse all 4 orthogonal one-step moves plus bishop sliding", () => {
+            // Place a DB (promoted Bishop) in the center of an empty board
+            const board = createInitialBoard();
+            for (let r = 0; r < 9; r++)
+                for (let c = 0; c < 9; c++)
+                    board[r][c] = null;
+            board[4][4] = { type: "DB", side: "sente" };
+
+            const moves = getLegalMoves(board, 4, 4);
+
+            // All 4 orthogonal squares (one step)
+            expect(moves.some(m => m.row === 3 && m.col === 4)).toBe(true);
+            expect(moves.some(m => m.row === 5 && m.col === 4)).toBe(true);
+            expect(moves.some(m => m.row === 4 && m.col === 3)).toBe(true);
+            expect(moves.some(m => m.row === 4 && m.col === 5)).toBe(true);
+
+            // Diagonal sliding (bishop) — at least one far square
+            expect(moves.some(m => m.row === 0 && m.col === 0)).toBe(true);
+            expect(moves.some(m => m.row === 8 && m.col === 8)).toBe(true);
+        });
     });
 
     describe("makeMove", () => {

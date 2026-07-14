@@ -31,7 +31,7 @@ export const PIECES = {
     PP: { name: "Promoted Pawn", kanji: "と", promoted: null, value: 2460 }
 };
 
-// Gold general movement (6 directions)
+// Gold general movement (6 directions — no backward diagonals)
 const GOLD_DELTAS = [[-1, 0], [-1, 1], [-1, -1], [0, 1], [0, -1], [1, 0]];
 
 // Silver general movement (5 directions)
@@ -39,6 +39,14 @@ const SILVER_DELTAS = [[-1, 0], [-1, 1], [-1, -1], [1, 1], [1, -1]];
 
 // Knight movement (2 forward, 1 side)
 const KNIGHT_DELTAS = [[-2, 1], [-2, -1]];
+
+// Dragon King (promoted Rook) non-sliding: one step in all 4 diagonal directions.
+// Sliding orthogonal moves are added separately via getSlidingDirections.
+const DRAGON_KING_DELTAS = [[-1, 1], [-1, -1], [1, 1], [1, -1]];
+
+// Dragon Horse (promoted Bishop) non-sliding: one step in all 4 orthogonal directions.
+// Sliding diagonal moves are added separately via getSlidingDirections.
+const DRAGON_HORSE_DELTAS = [[-1, 0], [1, 0], [0, 1], [0, -1]];
 
 /**
  * Create the initial Shogi board.
@@ -83,8 +91,10 @@ export function createInitialBoard() {
 function getRawDeltas(type) {
     switch (type) {
         case "K": return [[-1, 0], [-1, 1], [-1, -1], [0, 1], [0, -1], [1, 0], [1, 1], [1, -1]];
-        case "G": case "DR": case "DB": case "PS": case "PN": case "PL": case "PP":
+        case "G": case "PS": case "PN": case "PL": case "PP":
             return GOLD_DELTAS;
+        case "DR": return DRAGON_KING_DELTAS;
+        case "DB": return DRAGON_HORSE_DELTAS;
         case "S": return SILVER_DELTAS;
         case "N": return KNIGHT_DELTAS;
         case "P": case "L": return [[-1, 0]];
