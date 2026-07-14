@@ -169,7 +169,12 @@ function minimax(board, depth, alpha, beta, maximizing, aiColor) {
                 return { score, move: null };
             }
             const result = minimax(board, depth - 1, alpha, beta, !maximizing, aiColor);
-            ttStore(hash, depth, result.score, ttExact);
+            // Store at depth-1 (not depth) because the pass recurse used depth-1.
+            // Storing at `depth` would inflate the TT entry's depth, causing
+            // later probes at `depth` to accept a score that was only searched
+            // to depth-1 — a cheaper, less accurate evaluation displacing a
+            // full-depth search.
+            ttStore(hash, depth - 1, result.score, ttExact);
             return { score: result.score, move: null };
         }
         const score = evaluateBoard(board) * (aiColor === "black" ? 1 : -1);
