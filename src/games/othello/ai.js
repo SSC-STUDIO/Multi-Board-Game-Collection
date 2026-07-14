@@ -81,7 +81,8 @@ const TT_SIZE = 1 << 16; // 64K entries
 const ttExact = 0, ttLower = 1, ttUpper = 2;
 let transpositionTable = new Map();
 
-function boardHash(board) {
+/** Compute a transposition-table hash for a board + side-to-move flag. */
+export function boardHash(board, maximizing) {
     let h = 0;
     for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
@@ -92,6 +93,13 @@ function boardHash(board) {
             }
         }
     }
+    // Fold the side-to-move (maximizing flag) into the hash so that the same
+    // board configuration reached from a maximizing node and a minimizing
+    // node does not share a TT entry. Without this, Othello's TT returns a
+    // score computed from the wrong player's perspective, corrupting the
+    // minimax search — the same class of bug fixed for Gomoku (893ed25) and
+    // previously for Chess, Go, Xiangqi, and Shogi.
+    h = (h * 31 + (maximizing ? 100 : 200)) | 0;
     return h;
 }
 
@@ -126,7 +134,7 @@ function minimax(board, depth, alpha, beta, maximizing, aiColor) {
     const currentColor = maximizing ? aiColor : getOpponent(aiColor);
 
     // Transposition table probe
-    const hash = boardHash(board);
+    const hash = boardHash(board, maximizing);
     const ttEntry = ttLookup(hash, depth, alpha, beta);
     if (ttEntry !== null) {
         return { score: ttEntry, move: null };

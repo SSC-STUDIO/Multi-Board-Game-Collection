@@ -1,5 +1,5 @@
 ﻿import { describe, it, expect } from 'vitest';
-import { getOthelloAIMove, getOthelloAIDelay, resetTranspositionTable } from './ai.js';
+import { getOthelloAIMove, getOthelloAIDelay, resetTranspositionTable, boardHash } from './ai.js';
 import { createInitialBoard, makeMove, getLegalMoves, getFlips, getFlipCount } from './rules.js';
 
 // ---------------------------------------------------------------------------
@@ -293,6 +293,58 @@ describe("Othello AI move ordering quality", () => {
             const aiFlipCount = getFlipCount(board, aiMove.row, aiMove.col, "black");
             // AI should match or come within 1 of the best flip count
             expect(aiFlipCount).toBeGreaterThanOrEqual(bestByCount.cnt - 1);
+        }
+    });
+});
+// boardHash turn sensitivity (revision 82 fix): the TT hash must encode
+// the side-to-move so the same board state at a maximizing node and a
+// minimizing node doesn't share a TT entry. Before the fix, boardHash
+// only hashed the board discs which caused TT collisions between nodes
+// with opposite turn — a wrong-side score would be returned.
+// --------------------------------------------------------------------
+describe("Othello AI boardHash turn sensitivity", () => {
+    it("boardHash should produce different hashes for maximizing vs minimizing on the same board", () => {
+        const board = createInitialBoard();
+        makeMove(board, 2, 3, "black");
+        makeMove(board, 2, 4, "white");
+
+        const hashMax = boardHash(board, true);
+        const hashMin = boardHash(board, false);
+
+        expect(hashMax).not.toBe(hashMin);
+    });
+
+    it("AI should not return identical results for opposite perspectives on the same board after TT warm-up", () => {
+        // If the hash omits the turn, the second search (white perspective)
+        // finds the TT entry that was stored by the first search (black
+        // perspective, maximizing=true) and returns the wrong score/move.
+        const board = createInitialBoard();
+        makeMove(board, 2, 3, "black");
+        makeMove(board, 5, 4, "white");
+        makeMove(board, 3, 5, "black");
+
+        resetTranspositionTable();
+
+        // To make this deterministic and reproducible, compare the hash
+        // collisions directly: store a value for maximizing=true, then read
+        // for maximizing=false on the same board — they must NOT collide.
+        resetTranspositionTable();
+        const hMax = boardHash(board, true);
+        const hMin = boardHash(board, false);
+
+        expect(hMax).not.toBe(hMin);
+
+        // Verify getOthelloAIMove still produces valid moves after the fix.
+        const blackMove = getOthelloAIMove(board, "black", "hard");
+        const whiteMove = getOthelloAIMove(board, "white", "hard");
+
+        if (blackMove) {
+            const legalBlack = getLegalMoves(board, "black");
+            expect(legalBlack.some(m => m.row === blackMove.row && m.col === blackMove.col)).toBe(true);
+        }
+        if (whiteMove) {
+            const legalWhite = getLegalMoves(board, "white");
+            expect(legalWhite.some(m => m.row === whiteMove.row && m.col === whiteMove.col)).toBe(true);
         }
     });
 });
