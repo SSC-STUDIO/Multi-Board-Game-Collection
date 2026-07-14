@@ -270,6 +270,71 @@ describe('getBestMove', () => {
         const state = createState({ board, moveHistory: Array(225).fill({}), level: 'easy' });
         expect(getBestMove(state, 'white')).toBeNull();
     });
+
+    // --- minimax terminal win detection (depth >= 2) ---
+    it('minimax: should prefer immediate win over slower win through minimax search', () => {
+        // Black has an open four (3,3)-(3,6): playing (3,2) or (3,7) wins immediately.
+        // White also has a four (7,7)-(7,10) but it's white's turn after black.
+        // Black must take the immediate win, not waste a tempo elsewhere.
+        const board = createBoard(15);
+        board[3][3] = 'black';
+        board[3][4] = 'black';
+        board[3][5] = 'black';
+        board[3][6] = 'black';
+        board[7][7] = 'white';
+        board[7][8] = 'white';
+        board[7][9] = 'white';
+        board[7][10] = 'white';
+        const state = createState({
+            board,
+            moveHistory: [
+                { row: 3, col: 3 }, { row: 7, col: 7 },
+                { row: 3, col: 4 }, { row: 7, col: 8 },
+                { row: 3, col: 5 }, { row: 7, col: 9 },
+                { row: 3, col: 6 }, { row: 7, col: 10 }
+            ],
+            level: 'hard'
+        });
+        const move = getBestMove(state, 'black');
+        expect(move).not.toBeNull();
+        // Black must complete its own five-in-a-row, not block white
+        const isWinningMove = move.row === 3 && (move.col === 2 || move.col === 7);
+        expect(isWinningMove).toBe(true);
+    });
+
+    it('minimax: should detect opponent win in search and block instead of counter-attacking', () => {
+        // White has an open four at (5,5)-(5,8). If black doesn't block at (5,4) or (5,9),
+        // white wins next turn. Black has a closed four (blocked on both sides) —
+        // no immediate win, so must block white's open four.
+        const board = createBoard(15);
+        board[5][5] = 'white';
+        board[5][6] = 'white';
+        board[5][7] = 'white';
+        board[5][8] = 'white';
+        // Black has a fully closed four (blocked on both sides by white)
+        board[10][4] = 'black';
+        board[10][5] = 'black';
+        board[10][6] = 'black';
+        board[10][7] = 'black';
+        board[10][3] = 'white'; // blocks left end
+        board[10][8] = 'white'; // blocks right end
+        const state = createState({
+            board,
+            moveHistory: [
+                { row: 10, col: 4 }, { row: 5, col: 5 },
+                { row: 10, col: 5 }, { row: 5, col: 6 },
+                { row: 10, col: 6 }, { row: 5, col: 7 },
+                { row: 10, col: 7 }, { row: 5, col: 8 },
+                { row: 10, col: 3 }, { row: 10, col: 8 }
+            ],
+            level: 'hard'
+        });
+        const move = getBestMove(state, 'black');
+        expect(move).not.toBeNull();
+        // Black must block white's open four — playing (5,4) or (5,9)
+        const blocksOpponent = move.row === 5 && (move.col === 4 || move.col === 9);
+        expect(blocksOpponent).toBe(true);
+    });
 });
 
 // ---------------------------------------------------------------------------

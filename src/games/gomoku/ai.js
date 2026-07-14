@@ -7,6 +7,7 @@ import {
     THREE_PATTERNS
 } from '../../config/gameConfig.js';
 import {
+    checkWin,
     countOpenPatterns,
     getForbiddenReason,
     getLineInfo,
@@ -74,6 +75,11 @@ export function getBestMove(state, color) {
 
         for (const move of candidates) {
             board[move.row][move.col] = color;
+            // Terminal: if this move wins immediately, skip search.
+            if (checkWin(board, size, move.row, move.col, color)) {
+                board[move.row][move.col] = null;
+                return { row: move.row, col: move.col, score: WIN_SCORE };
+            }
             const childState = { ...state, moveHistory: [...moveHistory, { row: move.row, col: move.col, color }] };
             const score = minimaxSearch(childState, depth - 1, -Infinity, Infinity, false, color, opponent);
             board[move.row][move.col] = null;
@@ -127,6 +133,11 @@ export function getBestMove(state, color) {
 
     for (const move of candidates) {
         board[move.row][move.col] = color;
+        // Terminal: if this move wins immediately, skip search.
+        if (checkWin(board, size, move.row, move.col, color)) {
+            board[move.row][move.col] = null;
+            return { row: move.row, col: move.col, score: WIN_SCORE };
+        }
         const childState = { ...state, moveHistory: [...moveHistory, { row: move.row, col: move.col, color }] };
         const score = minimaxSearch(childState, depth - 1, -Infinity, Infinity, false, color, opponent);
         board[move.row][move.col] = null;
@@ -294,6 +305,10 @@ const TT_SIZE = 1 << 16; // 64K entries
 const ttExact = 0, ttLower = 1, ttUpper = 2;
 let gomokuTT = new Map();
 
+// Terminal win/loss score — must dominate any non-terminal evaluation.
+// evaluateMove uses 1_000_000_000 for an immediate win; search must match.
+const WIN_SCORE = 1_000_000_000;
+
 function boardHashGomoku(board, size) {
     let h = 0;
     for (let r = 0; r < size; r++) {
@@ -359,6 +374,11 @@ function minimaxSearch(state, depth, alpha, beta, isMaximizing, aiColor, opponen
         let maxEval = -Infinity;
         for (const move of scored) {
             board[move.row][move.col] = currentColor;
+            // Terminal: if this move creates 5-in-a-row, return immediately.
+            if (checkWin(board, size, move.row, move.col, currentColor)) {
+                board[move.row][move.col] = null;
+                return WIN_SCORE;
+            }
             const eval_ = minimaxSearch(state, depth - 1, alpha, beta, false, aiColor, opponentColor);
             board[move.row][move.col] = null;
             if (eval_ > maxEval) maxEval = eval_;
@@ -373,6 +393,11 @@ function minimaxSearch(state, depth, alpha, beta, isMaximizing, aiColor, opponen
         let minEval = Infinity;
         for (const move of scored) {
             board[move.row][move.col] = currentColor;
+            // Terminal: if this move creates 5-in-a-row, return immediately.
+            if (checkWin(board, size, move.row, move.col, currentColor)) {
+                board[move.row][move.col] = null;
+                return -WIN_SCORE;
+            }
             const eval_ = minimaxSearch(state, depth - 1, alpha, beta, true, aiColor, opponentColor);
             board[move.row][move.col] = null;
             if (eval_ < minEval) minEval = eval_;
