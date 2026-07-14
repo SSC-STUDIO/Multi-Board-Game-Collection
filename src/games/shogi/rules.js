@@ -138,7 +138,9 @@ export function getLegalMoves(board, row, col) {
             if (promoZone.includes(row) || promoZone.includes(nr)) {
                 move.promote = true;
                 moves.push({ ...move, promote: true });
-                moves.push({ ...move, promote: false });
+                if (!mustPromote(piece.type, side, nr)) {
+                    moves.push({ ...move, promote: false });
+                }
                 continue;
             }
         }
@@ -161,7 +163,9 @@ export function getLegalMoves(board, row, col) {
                         const promoZone = side === "sente" ? PROMOTION_ZONE_SENTE : PROMOTION_ZONE_GOTE;
                         if (promoZone.includes(row) || promoZone.includes(nr)) {
                             moves.push({ ...move, promote: true });
-                            moves.push({ ...move, promote: false });
+                            if (!mustPromote(piece.type, side, nr)) {
+                                moves.push({ ...move, promote: false });
+                            }
                         } else {
                             moves.push(move);
                         }
@@ -176,7 +180,9 @@ export function getLegalMoves(board, row, col) {
                 const promoZone = side === "sente" ? PROMOTION_ZONE_SENTE : PROMOTION_ZONE_GOTE;
                 if (promoZone.includes(row) || promoZone.includes(nr)) {
                     moves.push({ ...move, promote: true });
-                    moves.push({ ...move, promote: false });
+                    if (!mustPromote(piece.type, side, nr)) {
+                        moves.push({ ...move, promote: false });
+                    }
                 } else {
                     moves.push(move);
                 }
@@ -196,6 +202,26 @@ export function getLegalMoves(board, row, col) {
  */
 function canPromote(type) {
     return ["R", "B", "S", "N", "L", "P"].includes(type);
+}
+
+/**
+ * Check if a piece MUST promote when moving to (toRow).
+ * Pawns and Lances have no legal moves on the last rank.
+ * Knights have no legal moves on the last two ranks.
+ * @param {string} type - piece type (must be unpromoted)
+ * @param {'sente'|'gote'} side
+ * @param {number} toRow - destination row
+ * @returns {boolean}
+ */
+function mustPromote(type, side, toRow) {
+    if (side === "sente") {
+        if ((type === "P" || type === "L") && toRow === 0) return true;
+        if (type === "N" && toRow <= 1) return true;
+    } else {
+        if ((type === "P" || type === "L") && toRow === BOARD_SIZE - 1) return true;
+        if (type === "N" && toRow >= BOARD_SIZE - 2) return true;
+    }
+    return false;
 }
 
 /**

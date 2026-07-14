@@ -346,6 +346,58 @@ describe("Shogi rules", () => {
         });
     });
 
+    describe("forced promotion", () => {
+        it("sente pawn moving to last rank must only offer promotion", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[1][4] = { type: "P", side: "sente" };
+            const moves = getLegalMoves(board, 1, 4);
+            const pawnMoves = moves.filter((m) => m.row === 0 && m.col === 4);
+            expect(pawnMoves.length).toBe(1);
+            expect(pawnMoves[0].promote).toBe(true);
+        });
+
+        it("sente lance moving to last rank must only offer promotion", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[2][4] = { type: "L", side: "sente" };
+            const moves = getLegalMoves(board, 2, 4);
+            const lanceMoves = moves.filter((m) => m.row === 0 && m.col === 4);
+            expect(lanceMoves.length).toBe(1);
+            expect(lanceMoves[0].promote).toBe(true);
+        });
+
+        it("sente knight moving to row 0 or 1 must only offer promotion", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[2][4] = { type: "N", side: "sente" };
+            const moves = getLegalMoves(board, 2, 4);
+            const knightMovesRow0 = moves.filter((m) => m.row === 0);
+            const knightMovesRow1 = moves.filter((m) => m.row === 1);
+            for (const m of knightMovesRow0) {
+                expect(m.promote).toBe(true);
+            }
+            for (const m of knightMovesRow1) {
+                expect(m.promote).toBe(true);
+            }
+        });
+
+        it("silver moving to promotion zone still offers both options", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[3][4] = { type: "S", side: "sente" };
+            const moves = getLegalMoves(board, 3, 4);
+            const forwardMoves = moves.filter((m) => m.row === 2 && m.col === 4);
+            expect(forwardMoves.some((m) => m.promote === true)).toBe(true);
+            expect(forwardMoves.some((m) => m.promote === false)).toBe(true);
+        });
+
+        it("gote pawn moving to last rank must only offer promotion", () => {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(null));
+            board[7][4] = { type: "P", side: "gote" };
+            const moves = getLegalMoves(board, 7, 4);
+            const pawnMoves = moves.filter((m) => m.row === 8 && m.col === 4);
+            expect(pawnMoves.length).toBe(1);
+            expect(pawnMoves[0].promote).toBe(true);
+        });
+    });
+
     describe("getPieceLabel", () => {
         it("should return kanji for known piece", () => {
             expect(getPieceLabel("K")).toBe("王");
