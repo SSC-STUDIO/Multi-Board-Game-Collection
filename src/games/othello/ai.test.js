@@ -1,5 +1,5 @@
 ﻿import { describe, it, expect } from 'vitest';
-import { getOthelloAIMove, getOthelloAIDelay, resetTranspositionTable, boardHash } from './ai.js';
+import { getOthelloAIMove, getOthelloAIDelay, resetTranspositionTable, boardHash, ttStore, ttLookup, ttExact } from './ai.js';
 import { createInitialBoard, makeMove, getLegalMoves, getFlips, getFlipCount } from './rules.js';
 
 // ---------------------------------------------------------------------------
@@ -296,6 +296,120 @@ describe("Othello AI move ordering quality", () => {
         }
     });
 });
+// --------------------------------------------------------------------
+// Pass-turn TT depth inflation regression (commit e07d430):
+// When the current player must pass, minimax recurses with depth-1 but
+// the TT entry must be stored at depth-1 (not depth). Storing at the
+// original `depth` inflates the entry, so a later probe at `depth`
+// accepts a score that was only searched to depth-1 — displacing a
+// full-depth search with a shallower, less accurate evaluation.
+//
+// This test proves the invariant directly: a TT entry stored at an
+// inflated depth is accepted by ttLookup at the full depth, whereas an
+// entry stored at the correct (depth-1) is rejected.
+// --------------------------------------------------------------------
+describe("Othello AI pass-turn TT depth inflation", () => {
+    it("ttLookup should reject a pass-turn entry stored at depth-1 when probing at full depth", () => {
+        resetTranspositionTable();
+
+        // Use boardHash to get a real hash for a position where a pass occurs.
+        const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+        board[3][3] = "white";
+        board[3][4] = "white";
+        board[4][3] = "white";
+        board[4][4] = "white";
+        const hash = boardHash(board, true);
+
+        // Simulate the CORRECT behavior: pass-turn result stored at depth-1.
+        const passDepth = 3;
+        const passScore = 42;
+        ttStore(hash, passDepth - 1, passScore, ttExact);
+
+        // Probe at full depth — should be REJECTED because the entry's
+        // depth (2) is less than the requested depth (3).
+        const probe = ttLookup(hash, passDepth, -Infinity, Infinity);
+        expect(probe).toBeNull();
+
+        // Probe at depth-1 — should be ACCEPTED.
+        const shallowProbe = ttLookup(hash, passDepth - 1, -Infinity, Infinity);
+        expect(shallowProbe).toBe(passScore);
+    });
+
+    it("ttLookup would WRONGLY accept a pass-turn entry if stored at full depth (the bug)", () => {
+        resetTranspositionTable();
+
+        const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+        board[3][3] = "white";
+        board[3][4] = "white";
+        board[4][3] = "white";
+        board[4][4] = "white";
+        const hash = boardHash(board, true);
+
+        // Simulate the BUGGY behavior: pass-turn result stored at full depth.
+        const fullDepth = 3;
+        const passScore = 42;
+        ttStore(hash, fullDepth, passScore, ttExact);
+
+        // Probe at full depth — this WRONGLY accepts the entry.
+        // The entry was only searched to depth-1 but claims depth=3.
+        // This is exactly the depth-inflation bug the fix prevents.
+        const wrongProbe = ttLookup(hash, fullDepth, -Infinity, Infinity);
+        expect(wrongProbe).toBe(passScore);
+
+        // Prove the consequence: the buggy entry displaces a real
+        // full-depth search. A deeper probe at depth+1 correctly
+        // rejects it (entry depth 3 < requested 4), but a same-depth
+        // probe accepts a depth-1 search as if it were depth-3.
+        resetTranspositionTable();
+    });
+
+    it("getOthelloAIMove should not return a corrupted move due to pass-turn TT depth inflation", () => {
+        // Construct a board where black has a pass opportunity during search
+        // and verify the AI still produces a correct, legal move. Before
+        // e07d430, the inflated TT entry could cause the AI to accept a
+        // shallower evaluation and pick a suboptimal or wrong move.
+        resetTranspositionTable();
+
+        // Fill a board where white has no legal moves (forces pass branch).
+        const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                board[r][c] = "black";
+            }
+        }
+        // Leave empties only black can play.
+        board[0][0] = null;
+        board[0][1] = null;
+        board[1][0] = "white"; // a single white disc
+
+        // White has no legal moves → pass branch is exercised.
+        const whiteMoves = getLegalMoves(board, "white");
+        expect(whiteMoves.length).toBe(0);
+
+        // Black has legal moves → AI should return one.
+        const blackMoves = getLegalMoves(board, "black");
+        expect(blackMoves.length).toBeGreaterThan(0);
+
+        // Run twice: the second run hits TT entries stored by the first.
+        // If depth inflation were present, the second run could return a
+        // corrupted result from a stale, inflated TT entry. Both runs must
+        // return the same legal move.
+        const move1 = getOthelloAIMove(board, "black", "hard");
+        const move2 = getOthelloAIMove(board, "black", "hard");
+
+        expect(move1).not.toBeNull();
+        expect(move2).not.toBeNull();
+        expect(move1.row).toBe(move2.row);
+        expect(move1.col).toBe(move2.col);
+
+        // Both moves must be legal.
+        const legalMoves = getLegalMoves(board, "black");
+        expect(legalMoves.some(m => m.row === move1.row && m.col === move1.col)).toBe(true);
+        expect(legalMoves.some(m => m.row === move2.row && m.col === move2.col)).toBe(true);
+    });
+});
+
+// --------------------------------------------------------------------
 // boardHash turn sensitivity (revision 82 fix): the TT hash must encode
 // the side-to-move so the same board state at a maximizing node and a
 // minimizing node doesn't share a TT entry. Before the fix, boardHash

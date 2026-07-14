@@ -78,7 +78,7 @@ function orderMoves(board, moves, color) {
 // ---------------------------------------------------------------------------
 
 const TT_SIZE = 1 << 16; // 64K entries
-const ttExact = 0, ttLower = 1, ttUpper = 2;
+export const ttExact = 0, ttLower = 1, ttUpper = 2;
 let transpositionTable = new Map();
 
 /** Compute a transposition-table hash for a board + side-to-move flag. */
@@ -103,7 +103,7 @@ export function boardHash(board, maximizing) {
     return h;
 }
 
-function ttLookup(hash, depth, alpha, beta) {
+export function ttLookup(hash, depth, alpha, beta) {
     const entry = transpositionTable.get(hash);
     if (!entry || entry.depth < depth) return null;
     if (entry.flag === ttExact) return entry.score;
@@ -112,7 +112,7 @@ function ttLookup(hash, depth, alpha, beta) {
     return null;
 }
 
-function ttStore(hash, depth, score, flag) {
+export function ttStore(hash, depth, score, flag) {
     if (transpositionTable.size >= TT_SIZE) {
         // Simple eviction: clear half the table
         let count = 0;
