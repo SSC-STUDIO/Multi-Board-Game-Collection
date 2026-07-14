@@ -309,8 +309,8 @@ let gomokuTT = new Map();
 // evaluateMove uses 1_000_000_000 for an immediate win; search must match.
 const WIN_SCORE = 1_000_000_000;
 
-function boardHashGomoku(board, size) {
-    let h = 0;
+function boardHashGomoku(board, size, isMaximizing) {
+    let h = isMaximizing ? 1 : 0;
     for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
             const p = board[r][c];
@@ -347,7 +347,7 @@ function minimaxSearch(state, depth, alpha, beta, isMaximizing, aiColor, opponen
     const { size } = options;
 
     // Check transposition table
-    const hash = boardHashGomoku(board, size);
+    const hash = boardHashGomoku(board, size, isMaximizing);
     const ttEntry = ttLookupGomoku(hash, depth, alpha, beta);
     if (ttEntry !== null) return ttEntry;
 
