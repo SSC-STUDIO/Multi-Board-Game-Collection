@@ -335,10 +335,15 @@ function ttStore(hash, depth, score, flag) {
 /**
  * Minimax with alpha-beta pruning.
  */
-function search(board, side, hands, depth, alpha, beta) {
+function search(board, side, hands, depth, alpha, beta, isRoot = false) {
     const hash = boardHash(board, side, hands);
-    const ttHit = ttLookup(hash, depth, alpha, beta);
-    if (ttHit !== null) return { score: ttHit, move: null };
+    // At the root, skip the TT probe: a TT hit returns { move: null },
+    // which causes the caller to discard the deep search and fall through
+    // to the weaker static-eval fallback.
+    if (!isRoot) {
+        const ttHit = ttLookup(hash, depth, alpha, beta);
+        if (ttHit !== null) return { score: ttHit, move: null };
+    }
 
     const oppSide = side === 'sente' ? 'gote' : 'sente';
 
@@ -425,7 +430,7 @@ export function getShogiAIMove(board, side, hands, level = 'medium') {
 
     const depth = depthForLevel(level);
 
-    const { move } = search(board, side, hands, depth, -Infinity, Infinity);
+    const { move } = search(board, side, hands, depth, -Infinity, Infinity, true);
     if (move) return move;
 
     // Fallback: evaluate and pick best by static eval

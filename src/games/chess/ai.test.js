@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 
 import { createChessState } from './state.js';
-import { getChessAIMove, getChessAIDelay, evaluate } from './ai.js';
+import { getChessAIMove, getChessAIDelay, evaluate, resetTranspositionTable } from './ai.js';
 import { getLegalMoves, applyMove, isCheckmate } from './rules.js';
 
 beforeAll(() => {
@@ -97,5 +97,52 @@ describe('games/chess/ai', () => {
         const s2 = makeState(false);
         const m2 = getChessAIMove(s2);
         expect(m2).not.toBeNull();
+    });
+
+    it('AI 重复搜索同一局面仍返回合法走法（root TT hit 不丢走法）', () => {
+        // Regression: before the isRoot fix, calling getChessAIMove twice on
+        // the same position caused the second call to hit the TT at the root.
+        // The TT probe returns { move: null }, so the caller fell through to
+        // the weaker static-eval fallback — discarding the deep search.
+        // After the fix, the root search skips the TT probe and always
+        // iterates moves, returning a valid bestMove on every call.
+        resetTranspositionTable();
+        const state = createChessState({ level: 'medium' });
+        // Use a simplified midgame position to ensure a non-trivial search
+        state.board = Array.from({ length: 8 }, () => Array(8).fill(null));
+        state.board[7][4] = 'wK'; // e1
+        state.board[7][3] = 'wQ'; // d1
+        state.board[0][4] = 'bK'; // e8
+        state.board[0][3] = 'bQ'; // d8
+        state.turn = 'w';
+        state.castlingRights = { wK: false, wQ: false, bK: false, bQ: false };
+        state.enPassantTarget = null;
+        state.halfmoveClock = 0;
+
+        // First call: populates TT including the root entry
+        const m1 = getChessAIMove(state);
+        expect(m1).not.toBeNull();
+        expect(m1).toHaveProperty('from');
+        expect(m1).toHaveProperty('to');
+
+        // Second call on the SAME position: before fix, TT hit at root
+        // returned move:null → fallthrough to static eval.
+        // After fix: root skips TT probe, returns a valid move.
+        const m2 = getChessAIMove(state);
+        expect(m2).not.toBeNull();
+        expect(m2).toHaveProperty('from');
+        expect(m2).toHaveProperty('to');
+
+        // Both moves must be legal
+        const legal = getLegalMoves(state.board, state);
+        const isLegal = (m) =>
+            legal.some((lm) =>
+                lm.from[0] === m.from[0] && lm.from[1] === m.from[1]
+                && lm.to[0] === m.to[0] && lm.to[1] === m.to[1]
+            );
+        expect(isLegal(m1)).toBe(true);
+        expect(isLegal(m2)).toBe(true);
+
+        resetTranspositionTable();
     });
 });

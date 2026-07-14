@@ -225,10 +225,17 @@ function orderMoves(moves, depth = 0) {
 /**
  * alpha-beta 搜索。返回 { score, move }。
  */
-function search(board, state, depth, alpha, beta) {
+function search(board, state, depth, alpha, beta, isRoot = false) {
     const hash = boardHash(board, state);
-    const ttEntry = ttLookup(hash, depth, alpha, beta);
-    if (ttEntry !== null) return { score: ttEntry, move: null };
+    // At the root, skip the TT probe: a TT hit returns { move: null },
+    // which causes the caller to discard the deep search and fall through
+    // to the weaker static-eval fallback. By skipping the probe at the
+    // root, we guarantee the search always iterates moves and returns a
+    // bestMove.
+    if (!isRoot) {
+        const ttEntry = ttLookup(hash, depth, alpha, beta);
+        if (ttEntry !== null) return { score: ttEntry, move: null };
+    }
 
     if (isCheckmate(board, state)) {
         // 被将死：当前执方失败，返回极大劣势（白被将死 → -inf，黑被将死 → +inf）
@@ -314,7 +321,7 @@ export function getChessAIMove(state) {
     }
 
     const depth = depthForLevel(state.options?.level);
-    const { move } = search(state.board, state, depth, -Infinity, Infinity);
+    const { move } = search(state.board, state, depth, -Infinity, Infinity, true);
     if (move) return move;
 
     // 理论上应总能找到一步；保险：挑分数最优的合法走法。

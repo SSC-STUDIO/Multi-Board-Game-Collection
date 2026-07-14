@@ -130,14 +130,16 @@ export function resetTranspositionTable() { transpositionTable.clear(); }
 // Minimax with alpha-beta pruning + move ordering + TT
 // ---------------------------------------------------------------------------
 
-function minimax(board, depth, alpha, beta, maximizing, aiColor) {
+function minimax(board, depth, alpha, beta, maximizing, aiColor, isRoot = false) {
     const currentColor = maximizing ? aiColor : getOpponent(aiColor);
 
-    // Transposition table probe
+    // Transposition table probe — skip at the root to always return a move.
     const hash = boardHash(board, maximizing);
-    const ttEntry = ttLookup(hash, depth, alpha, beta);
-    if (ttEntry !== null) {
-        return { score: ttEntry, move: null };
+    if (!isRoot) {
+        const ttEntry = ttLookup(hash, depth, alpha, beta);
+        if (ttEntry !== null) {
+            return { score: ttEntry, move: null };
+        }
     }
 
     const moves = getLegalMoves(board, currentColor);
@@ -248,6 +250,6 @@ export function getOthelloAIMove(board, aiColor, level = "medium") {
     if (empty < 10) depth = Math.max(depth, 6);
     else if (empty < 20) depth = Math.max(depth, 3);
 
-    const { move } = minimax(board, depth, -Infinity, Infinity, true, aiColor);
+    const { move } = minimax(board, depth, -Infinity, Infinity, true, aiColor, true);
     return move || moves[0];
 }

@@ -216,10 +216,15 @@ function orderMoves(moves, depth = 0) {
         .map((x) => x.mv);
 }
 
-function search(board, state, depth, alpha, beta) {
+function search(board, state, depth, alpha, beta, isRoot = false) {
     const hash = boardHash(board, state);
-    const ttEntry = ttLookup(hash, depth, alpha, beta);
-    if (ttEntry !== null) return { score: ttEntry, move: null };
+    // At the root, skip the TT probe: a TT hit returns { move: null },
+    // which causes the caller to discard the deep search and fall through
+    // to the weaker static-eval fallback.
+    if (!isRoot) {
+        const ttEntry = ttLookup(hash, depth, alpha, beta);
+        if (ttEntry !== null) return { score: ttEntry, move: null };
+    }
 
     if (isCheckmate(board, state)) {
         return { score: state.turn === 'r' ? -99_999 : 99_999, move: null };
@@ -296,7 +301,7 @@ export function getXiangqiAIMove(state) {
     if (legal.length === 0) return null;
 
     const depth = depthForLevel(state.options?.level);
-    const { move } = search(state.board, state, depth, -Infinity, Infinity);
+    const { move } = search(state.board, state, depth, -Infinity, Infinity, true);
     if (move) return move;
 
     const scored = legal.map((mv) => {
