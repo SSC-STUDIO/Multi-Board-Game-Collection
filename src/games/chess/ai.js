@@ -61,6 +61,20 @@ function boardHash(board, state) {
             }
         }
     }
+    // Castling rights: 4 bits packed into one integer
+    const cr = state.castlingRights || {};
+    let castleBits = 0;
+    if (cr.wK) castleBits |= 1;
+    if (cr.wQ) castleBits |= 2;
+    if (cr.bK) castleBits |= 4;
+    if (cr.bQ) castleBits |= 8;
+    h = (h * 31 + castleBits) | 0;
+    // En passant target square (or -1 if none)
+    const ep = state.enPassantTarget;
+    const epSq = ep ? ep[0] * 8 + ep[1] : -1;
+    h = (h * 31 + epSq) | 0;
+    // Halfmove clock (50-move rule)
+    h = (h * 31 + (state.halfmoveClock || 0)) | 0;
     return h;
 }
 
