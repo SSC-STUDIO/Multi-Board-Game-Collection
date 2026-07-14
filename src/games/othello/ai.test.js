@@ -213,6 +213,58 @@ describe("Othello AI transposition table", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Pass-at-depth-0 regression: the minimax pass branch must not recurse
+// infinitely when depth=0 and the current player must pass.
+// ---------------------------------------------------------------------------
+describe("Othello AI pass at depth 0", () => {
+    it("should not stack-overflow when AI color must pass at a depth-0 leaf", () => {
+        resetTranspositionTable();
+        // Construct a board where white (AI) has NO legal moves but black does.
+        // This forces the pass branch in minimax. With the bug, depth-1=-1
+        // skips the base case and recurses infinitely.
+        const board = Array.from({ length: 8 }, () => Array(8).fill(null));
+        // Fill almost the entire board with black, leaving only a few empty
+        // squares that only black can play.
+        for (let r = 0; r < 8; r++) {
+            for (let c = 0; c < 8; c++) {
+                board[r][c] = "black";
+            }
+        }
+        // Leave two empty squares. Black can play them (flipping white discs),
+        // but white has no discs to flip → white has no legal moves.
+        board[0][0] = null;
+        board[0][1] = null;
+        // Place a single white disc so the game isn't over.
+        board[1][0] = "white";
+
+        // White has no legal moves (no black discs to flip).
+        const whiteMoves = getLegalMoves(board, "white");
+        expect(whiteMoves.length).toBe(0);
+
+        // Black has at least one legal move.
+        const blackMoves = getLegalMoves(board, "black");
+        expect(blackMoves.length).toBeGreaterThan(0);
+
+        // This call previously triggered infinite recursion via the pass
+        // branch at depth=0. It should return null (no moves for white).
+        const move = getOthelloAIMove(board, "white", "easy");
+        expect(move).toBeNull();
+    });
+
+    it("should return a move when AI color has moves even if opponent must pass mid-search", () => {
+        resetTranspositionTable();
+        // Use the standard initial board — the search should complete
+        // without stack overflow even if a pass occurs at a depth-0 leaf.
+        const board = createInitialBoard();
+        const blackMoves = getLegalMoves(board, "black");
+        expect(blackMoves.length).toBeGreaterThan(0);
+
+        const move = getOthelloAIMove(board, "black", "easy");
+        expect(move).not.toBeNull();
+    });
+});
+
+// ---------------------------------------------------------------------------
 // Move ordering: the AI should prefer high-flip / high-positional moves
 // ---------------------------------------------------------------------------
 describe("Othello AI move ordering quality", () => {

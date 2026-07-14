@@ -151,6 +151,15 @@ function minimax(board, depth, alpha, beta, maximizing, aiColor) {
             // Previously this passed a hard-coded `false`, which corrupted the
             // search when the AI's own color had to pass (it kept evaluating
             // from the wrong perspective and never alternated correctly).
+            //
+            // Guard: when depth === 0, do NOT recurse — the depth-1 call would
+            // produce depth=-1 which skips the base case and recurses infinitely.
+            // Return the static evaluation instead.
+            if (depth === 0) {
+                const score = evaluateBoard(board) * (aiColor === "black" ? 1 : -1);
+                ttStore(hash, depth, score, ttExact);
+                return { score, move: null };
+            }
             const result = minimax(board, depth - 1, alpha, beta, !maximizing, aiColor);
             ttStore(hash, depth, result.score, ttExact);
             return { score: result.score, move: null };
