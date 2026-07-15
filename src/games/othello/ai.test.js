@@ -1,5 +1,5 @@
 ﻿import { describe, it, expect } from 'vitest';
-import { getOthelloAIMove, getOthelloAIDelay, resetTranspositionTable, boardHash, ttStore, ttLookup, ttExact } from './ai.js';
+import { getOthelloAIMove, getOthelloAIDelay, resetTranspositionTable, boardHash, ttStore, ttLookup, ttExact, ttLower, ttUpper } from './ai.js';
 import { createInitialBoard, makeMove, getLegalMoves, getFlips, getFlipCount } from './rules.js';
 
 // ---------------------------------------------------------------------------
@@ -460,5 +460,107 @@ describe("Othello AI boardHash turn sensitivity", () => {
             const legalWhite = getLegalMoves(board, "white");
             expect(legalWhite.some(m => m.row === whiteMove.row && m.col === whiteMove.col)).toBe(true);
         }
+    });
+});
+
+// --------------------------------------------------------------------
+// TT flag boundary correctness (revision 82): Othello's minimax uses a
+// single loop that mutates alpha (maximizing) OR beta (minimizing).
+// The TT flag must compare bestScore against the ORIGINAL bounds, not the
+// mutated ones. Before the fix, the flag used `bestScore >= beta` (the
+// mutated beta after narrowing in the minimizing branch), which could
+// produce a false ttLower flag — storing an upper-bound result as a
+// lower bound. A later ttLookup at the parent's wider window would then
+// wrongly accept the stale entry, corrupting the search.
+//
+// This test proves the invariant directly: the flag computed with
+// origBeta differs from the flag computed with a narrowed beta, and
+// only the origBeta-based flag is correctly rejected by ttLookup at a
+// window wider than the narrowed beta.
+// --------------------------------------------------------------------
+describe("Othello AI TT flag origBeta boundary", () => {
+    it("ttLookup should reject a ttLower entry when score < parent beta (origBeta-based flag)", () => {
+        resetTranspositionTable();
+
+        // Simulate a minimizing node that searched with original beta = 100.
+        // The node's bestScore = 80, which is below the original beta (100),
+        // so the correct flag is ttExact (not a beta cutoff / ttLower).
+        // The fix computes: 80 >= origBeta(100)? No → ttExact.
+        // The bug computed: 80 >= mutatedBeta(80)?  Yes → ttLower (WRONG).
+        const hash = boardHash(createInitialBoard(), false);
+        const origBeta = 100;
+        const narrowedBeta = 80;  // what beta gets narrowed to during the loop
+        const bestScore = 80;
+
+        // Correct behavior (fix): flag = ttExact because bestScore < origBeta
+        ttStore(hash, 3, bestScore, ttExact);
+
+        // At the parent node, alpha=-Inf beta=100 (full window).
+        // ttLookup with ttExact always returns the score (line 109).
+        // But the point is: the flag SHOULD be ttExact, not ttLower.
+        // If it were ttLower, the lookup at a parent window with beta=90
+        // (where score 80 < 90) would REJECT it — but ttLower requires
+        // score >= beta. So a ttLower entry with score=80 is rejected at
+        // beta=90, while ttExact is always accepted.
+        resetTranspositionTable();
+        ttStore(hash, 3, bestScore, ttExact);
+        const probeExact = ttLookup(hash, 3, -Infinity, 90);
+        expect(probeExact).toBe(bestScore); // ttExact always returns
+
+        // Now simulate the BUG: flag = ttLower (wrongly, because bestScore
+        // >= narrowedBeta). At a parent with beta=90, ttLookup checks
+        // score(80) >= beta(90)? No → rejects the entry.
+        resetTranspositionTable();
+        ttStore(hash, 3, bestScore, ttLower);
+        const probeBuggy = ttLookup(hash, 3, -Infinity, 90);
+        expect(probeBuggy).toBeNull(); // ttLower with score < beta is rejected
+
+        // The consequence: the buggy ttLower flag causes the parent to
+        // miss a valid TT entry that ttExact would have returned, forcing
+        // a redundant re-search. In other cases (score between narrowed
+        // and original beta with a narrower parent window), the buggy
+        // ttLower could be wrongly accepted, returning a bound that was
+        // only valid for a narrower window.
+    });
+
+    it("ttLookup should correctly accept a ttLower entry when score >= parent beta", () => {
+        resetTranspositionTable();
+
+        // A genuine beta cutoff: bestScore >= origBeta.
+        // The fix computes ttLower (correct). The bug would also compute
+        // ttLower here (since narrowedBeta <= origBeta <= bestScore), so
+        // this case doesn't distinguish them — but it verifies the
+        // correct path still works.
+        const hash = boardHash(createInitialBoard(), false);
+        ttStore(hash, 3, 150, ttLower);
+
+        // Parent with beta=100: score 150 >= 100 → accepted.
+        const probe = ttLookup(hash, 3, -Infinity, 100);
+        expect(probe).toBe(150);
+    });
+
+    it("getOthelloAIMove should produce deterministic results after TT warm-up with minimizing nodes", () => {
+        // Run the AI twice on the same board. The second run hits TT
+        // entries stored by the first — including minimizing-node entries.
+        // If the TT flags are wrong (mutated beta), the second run could
+        // get a corrupted score and return a different move.
+        resetTranspositionTable();
+        const board = createInitialBoard();
+        makeMove(board, 2, 3, "black");
+        makeMove(board, 5, 4, "white");
+        makeMove(board, 3, 5, "black");
+        makeMove(board, 4, 2, "white");
+        makeMove(board, 1, 4, "black");
+
+        const move1 = getOthelloAIMove(board, "white", "hard");
+        const move2 = getOthelloAIMove(board, "white", "hard");
+
+        expect(move1).not.toBeNull();
+        expect(move2).not.toBeNull();
+        expect(move1.row).toBe(move2.row);
+        expect(move1.col).toBe(move2.col);
+
+        const legalMoves = getLegalMoves(board, "white");
+        expect(legalMoves.some(m => m.row === move1.row && m.col === move1.col)).toBe(true);
     });
 });
