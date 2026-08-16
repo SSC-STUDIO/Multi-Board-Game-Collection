@@ -151,6 +151,8 @@ export const RENDER_CONFIG = {
         platformHeight: 0.42,
         platformRadiusPadding: 4.8,
         floorSize: 64,
+        // 基于图像的环境光照（IBL）强度：为棋子/棋盘的 PBR 材质提供柔和反射
+        environmentIntensity: 0.55,
     },
 };
 
