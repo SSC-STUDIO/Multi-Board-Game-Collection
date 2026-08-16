@@ -29,3 +29,20 @@
 - Make focused changes — don't refactor unrelated code in the same commit
 - If a task needs >3 file reads, summarize what you know first to save context
 - Don't re-read files you already read in this session
+
+## Cursor Cloud specific instructions
+- This is a vanilla JS (ES Modules) + Three.js board game collection. No build/bundler is
+  needed to run it in dev — the app is served as static files. Dependencies (`npm install`)
+  are handled by the startup update script.
+- Dev server: `npm run serve` starts a plain static file server (`tools/serve.mjs`) at
+  `http://localhost:4173` (override with `PORT`). This is the correct way to run/develop the
+  web app; `npm run dev`/`vite` and `npm run build` exist but are not needed for local dev.
+- Lint/tests/build commands are documented in `CLAUDE.md` and `package.json` scripts. Quick
+  reference: lint = `npm run check` (syntax-checks all `src/**/*.js`), tests =
+  `npm test` (Vitest, ~1500 tests). Run from the repo root.
+- Electron desktop (`npm run start`, `build:win`, etc.) needs a native desktop/display and is
+  not usable headless in this VM. Android (`android:build:debug`) needs the Android SDK/Gradle,
+  which is not installed. Stick to the web app for cloud-agent development/testing.
+- Gomoku/Go boards render via Three.js (WebGL). `page.screenshot()` on the Gomoku 3D scene can
+  time out under headless Chromium/SwiftShader (see `CLAUDE.md` "已知问题"); this is a headless
+  limitation, not an app bug. The Gomoku move flow uses a two-step select→confirm interaction.
