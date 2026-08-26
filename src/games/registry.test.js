@@ -3,13 +3,8 @@ import { describe, it, expect } from 'vitest';
 import { GAMES, findGame, listGames, listAvailableGames } from './registry.js';
 
 describe('games/registry', () => {
-    it('includes all four planned games + gomoku', () => {
-        const ids = GAMES.map((game) => game.id);
-        expect(ids).toContain('gomoku');
-        expect(ids).toContain('go');
-        expect(ids).toContain('chess');
-        expect(ids).toContain('xiangqi');
-        expect(ids).toContain('junqi');
+    it('includes only gomoku and go', () => {
+        expect(GAMES.map((game) => game.id)).toEqual(['gomoku', 'go']);
     });
 
     it('every entry has id, titleKey, taglineKey and a status', () => {
@@ -24,7 +19,7 @@ describe('games/registry', () => {
 
     it('available entries provide a loadModule factory', () => {
         const available = listAvailableGames();
-        expect(available.length).toBeGreaterThan(0);
+        expect(available).toHaveLength(2);
         available.forEach((game) => {
             expect(typeof game.loadModule).toBe('function');
         });
@@ -32,7 +27,9 @@ describe('games/registry', () => {
 
     it('findGame returns null for unknown ids', () => {
         expect(findGame('unknown')).toBeNull();
+        expect(findGame('chess')).toBeNull();
         expect(findGame('gomoku')?.id).toBe('gomoku');
+        expect(findGame('go')?.id).toBe('go');
     });
 
     it('listGames returns a fresh array (safe to mutate)', () => {
@@ -44,12 +41,19 @@ describe('games/registry', () => {
     it('gomoku is marked available with core capabilities', () => {
         const gomoku = findGame('gomoku');
         expect(gomoku?.status).toBe('available');
-        expect(gomoku?.capabilities).toEqual(expect.arrayContaining(['llm-coach', 'image-import']));
+        expect(gomoku?.capabilities).toEqual(
+            expect.arrayContaining(['llm-coach', 'image-import', '3d-scene'])
+        );
+    });
+
+    it('go is marked available with 3d and coach capabilities', () => {
+        const go = findGame('go');
+        expect(go?.status).toBe('available');
+        expect(go?.capabilities).toEqual(expect.arrayContaining(['3d-scene', 'llm-coach']));
     });
 
     it('coming-soon games (if any) have no loadModule', () => {
         const pending = GAMES.filter((game) => game.status === 'coming-soon');
-        // Sprint 1~4 完成后全部上线；允许 0 款 coming-soon
         pending.forEach((game) => {
             expect(game.loadModule).toBeUndefined();
         });

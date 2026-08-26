@@ -2,7 +2,7 @@
   "name": "board-games",
   "productName": "多棋类合集 · Board Games",
   "version": "1.0.0",
-  "description": "五子棋、围棋、国际象棋、中国象棋和军棋翻翻棋合一的多棋类游戏平台",
+  "description": "五子棋与围棋合一的棋类游戏平台",
   "main": "electron-main.js",
   "author": "Your Name",
   "license": "MIT",

@@ -1,7 +1,5 @@
 /**
- * 多游戏启动器的注册表。
- * 每个棋类游戏（Gomoku、Go、Chess、Xiangqi、Junqi）以一个条目登记，包含标识、
- * 元数据、可用状态与懒加载的 enter() 工厂。
+ * 启动器注册表：仅登记五子棋与围棋。
  * 启动器 UI 只消费元数据；真正进入游戏时才调用 enter() 把应用挂载到 DOM。
  * @module games/registry
  */
@@ -56,91 +54,6 @@ export const GAMES = [
         loadModule: () => import('./go/GoApp.js').then((m) => ({
             enter(root) {
                 return new m.GoApp(root);
-            }
-        }))
-    },
-    {
-        id: 'chess',
-        titleKey: 'gameChessTitle',
-        taglineKey: 'gameChessTagline',
-        category: 'abstract',
-        boardTopology: 'grid',
-        status: 'available',
-        capabilities: ['3d-scene', 'llm-coach'],
-        glyph: '♞',
-        accent: '#c7c0ad',
-        accentAlt: '#424049',
-        loadModule: () => import('./chess/ChessApp.js').then((m) => ({
-            enter(root) {
-                return new m.ChessApp(root);
-            }
-        }))
-    },
-    {
-        id: 'xiangqi',
-        titleKey: 'gameXiangqiTitle',
-        taglineKey: 'gameXiangqiTagline',
-        category: 'abstract',
-        boardTopology: 'intersection',
-        status: 'available',
-        capabilities: ['3d-scene', 'llm-coach'],
-        glyph: '車',
-        accent: '#d48a5b',
-        accentAlt: '#5f1f1a',
-        loadModule: () => import('./xiangqi/XiangqiApp.js').then((m) => ({
-            enter(root) {
-                return new m.XiangqiApp(root);
-            }
-        }))
-    },
-    {
-        id: 'junqi',
-        titleKey: 'gameJunqiTitle',
-        taglineKey: 'gameJunqiTagline',
-        category: 'imperfect-info',
-        boardTopology: 'unique',
-        status: 'available',
-        capabilities: ['3d-scene', 'llm-coach'],
-        glyph: '軍',
-        accent: '#7b8a6f',
-        accentAlt: '#2d402f',
-        loadModule: () => import('./junqi/JunqiApp.js').then((m) => ({
-            enter(root) {
-                return new m.JunqiApp(root);
-            }
-        }))
-    },
-    {
-        id: 'shogi',
-        titleKey: 'gameShogiTitle',
-        taglineKey: 'gameShogiTagline',
-        category: 'abstract',
-        boardTopology: 'grid',
-        status: 'available',
-        capabilities: ['llm-coach'],
-        glyph: '\u5C06',
-        accent: '#d48a5b',
-        accentAlt: '#5f1f1a',
-        loadModule: () => import('./shogi/ShogiApp.js').then((m) => ({
-            enter(root) {
-                return new m.ShogiApp(root);
-            }
-        }))
-    },
-    {
-        id: 'othello',
-        titleKey: 'gameOthelloTitle',
-        taglineKey: 'gameOthelloTagline',
-        category: 'abstract',
-        boardTopology: 'grid',
-        status: 'available',
-        capabilities: ['llm-coach'],
-        glyph: '\u25CF',
-        accent: '#4a7a4a',
-        accentAlt: '#2d402f',
-        loadModule: () => import('./othello/OthelloApp.js').then((m) => ({
-            enter(root) {
-                return new m.OthelloApp(root);
             }
         }))
     }

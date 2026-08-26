@@ -15,9 +15,6 @@ A clear and concise description of what this PR does.
 
 - [ ] Gomoku (Five in a Row)
 - [ ] Go (Weiqi/Baduk)
-- [ ] Chess
-- [ ] Xiangqi (Chinese Chess)
-- [ ] Junqi (Military Chess)
 - [ ] General / All Games
 - [ ] N/A (build/CI/docs)
 

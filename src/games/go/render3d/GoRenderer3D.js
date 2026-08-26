@@ -20,9 +20,10 @@ import {
     CameraController,
     MaterialFactory,
     StoneBuilder,
-    AnimationManager
-,
-    ParticleSystem} from '../../../render3d/index.js';
+    AnimationManager,
+    EnvironmentBuilder,
+    ParticleSystem
+} from '../../../render3d/index.js';
 import { boardToWorld, worldToBoard } from '../../../config/renderConfig.js';
 
 const BOARD_COLOR = '#d6a86a';
@@ -156,6 +157,9 @@ export class GoRenderer3D {
         this.lightingSetup.setPresentationMode('game');
         this.lightingSetup.setup('competition');
 
+        this.environmentBuilder = new EnvironmentBuilder(config);
+        this.sceneManager.add(this.environmentBuilder.build(this.boardSize, 'competition'));
+
         this.materialFactory = new MaterialFactory(config);
         this.stoneBuilder = new StoneBuilder(config);
         this.sceneManager.add(this.stoneBuilder.createStonesGroup());
@@ -169,11 +173,6 @@ export class GoRenderer3D {
             const dt = this._lastFrameTime ? (now - this._lastFrameTime) / 1000 : 0.016;
             this._lastFrameTime = now;
             this.particleSystem?.update(dt);
-            this.ambientTimer += dt;
-            if (this.ambientTimer > 4) {
-                this.ambientTimer = 0;
-                this.particleSystem?.emitAmbientParticles();
-            }
         };
 
         this.buildBoard();
@@ -501,6 +500,7 @@ export class GoRenderer3D {
         this.boardTexture?.dispose();
         this.stoneBuilder?.dispose?.();
         this.materialFactory?.dispose?.();
+        this.environmentBuilder?.dispose?.();
         this.lightingSetup?.dispose?.();
         this.animationManager?.dispose?.();
         this.cameraController?.dispose?.();

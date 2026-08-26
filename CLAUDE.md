@@ -2,15 +2,15 @@
 
 ## 项目概述
 
-Board Games 是一款多款棋盘游戏合集，采用原生 JavaScript + Three.js 构建，集成五子棋、围棋、国际象棋、中国象棋和军棋翻翻棋于一体。支持 Web、Android (Capacitor) 和桌面端 (Electron) 多平台发布。
+Board Games 是五子棋与围棋合集，采用原生 JavaScript + Three.js 构建。支持 Web、Android (Capacitor) 和桌面端 (Electron) 多平台发布。
 
 **核心特性**：
-- 5 款游戏：五子棋、围棋、国际象棋、中国象棋、军棋翻翻棋
-- 统一启动器：从启动器选择任意游戏进入
+- 2 款游戏：五子棋、围棋
+- 统一启动器：从启动器选择游戏进入
 - 多种游戏模式：PvP、PvE（AI）、练习模式
 - 围棋：中国规则/日本规则计分、让子、3D 渲染（Three.js）
 - 五子棋：禁手规则（Renju）、3D 渲染（Three.js）三档 AI 难度、QI 指导（LLM Coach）
-- 3D 场景：Three.js 沉浸式场景（家/公园/比赛现场），支持场景切换
+- 3D 场景：共用桌面布景，家/公园/比赛三种氛围（光照、雾、相机、色调）
 - LLM Coach：可选接入外部 LLM API 获取智能建议
 
 ## 技术栈
@@ -36,18 +36,14 @@ src/
 ├── game/                 # 五子棋游戏逻辑 (遗留，games/gomoku 为重构版)
 ├── games/                # 各游戏独立模块
 │   ├── gomoku/           # 五子棋 (state.js, rules.js, ai.js)
-│   ├── go/               # 围棋 (state.js, rules.js, 含计分+3D渲染)
-│   ├── chess/            # 国际象棋 (state.js, rules.js)
-│   ├── xiangqi/          # 中国象棋 (state.js, rules.js)
-│   └── junqi/flip/       # 军棋翻翻棋 (state.js, rules.js)
+│   └── go/               # 围棋 (state.js, rules.js, 含计分+3D渲染)
 ├── ui/                   # 表现层 (DOM 操作、渲染)
 │   ├── dom.js           # DOM 引用获取、事件绑定
 │   └── render.js        # UI 渲染、状态同步
 ├── render3d/             # 3D 渲染模块 (Three.js)
 │   ├── GomokuRenderer3D.js  # 五子棋 3D 渲染器
-│   ├── scenes/          # 场景预设 (home/park/competition)
+│   ├── scenes/tabletop.js   # 共用桌面布景 + 三种氛围
 │   └── ...               # SceneManager, CameraController 等
-├── render3d/go/          # 围棋 3D 渲染模块 (Three.js)
 ├── config/               # 配置层
 │   ├── gameConfig.js    # 游戏常量、默认选项、模式标签
 │   ├── sceneConfig.js   # 3D 场景配置

@@ -2,6 +2,13 @@ export const SCENE_SPECS = {
     home: {
         i18nKey: 'sceneHome',
         updateInterval: 1 / 22,
+        tabletop: {
+            floor: 0x2a1c14,
+            table: 0x6b4423,
+            legs: 0x3d2a1c,
+            backdrop: 0x241810,
+            lamp: 0xe8c9a0
+        },
         ui: {
             previewImage: 'assets/scene-previews/home.jpg',
             setupTitleKey: 'sceneHomeMood',
@@ -120,6 +127,13 @@ export const SCENE_SPECS = {
     park: {
         i18nKey: 'scenePark',
         updateInterval: 1 / 20,
+        tabletop: {
+            floor: 0x3d4a32,
+            table: 0x6a5a3a,
+            legs: 0x3f4632,
+            backdrop: 0x7aa0b8,
+            lamp: 0xf2e2b8
+        },
         ui: {
             previewImage: 'assets/scene-previews/park.jpg',
             setupTitleKey: 'sceneParkMood',
@@ -236,6 +250,13 @@ export const SCENE_SPECS = {
     competition: {
         i18nKey: 'sceneCompetition',
         updateInterval: 1 / 24,
+        tabletop: {
+            floor: 0x1a1c22,
+            table: 0x4a3a28,
+            legs: 0x2c241c,
+            backdrop: 0x2a3040,
+            lamp: 0xcfc6b8
+        },
         ui: {
             previewImage: 'assets/scene-previews/competition.jpg',
             setupTitleKey: 'sceneCompetitionMood',

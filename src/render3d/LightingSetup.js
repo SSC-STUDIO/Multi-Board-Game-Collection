@@ -25,10 +25,6 @@ export class LightingSetup {
         this.createHemisphereLight();
         this.createDirectionalLight('main');
         this.createDirectionalLight('fill');
-        this.createDirectionalLight('rim');
-        this.createPointLight('accentA');
-        this.createPointLight('accentB');
-        this.createSpotLight();
         this.applyPreset(scenePreset);
     }
 
@@ -48,11 +44,9 @@ export class LightingSetup {
         this.applyAmbient(preset.ambient);
         this.applyHemisphere(preset.hemisphere);
         this.applyDirectional(this.lights.main, preset.main);
-        this.applyDirectional(this.lights.fill, preset.fill);
-        this.applyDirectional(this.lights.rim, preset.rim);
-        this.applyPoint(this.lights.accentA, preset.accentA);
-        this.applyPoint(this.lights.accentB, preset.accentB);
-        this.applySpot(this.lights.spot, preset.spot);
+        if (this.lights.fill && preset.fill) {
+            this.applyDirectional(this.lights.fill, preset.fill);
+        }
         this.lastUpdateTime = null;
 
         this.sceneManager.setNeedsRender();
@@ -124,61 +118,8 @@ export class LightingSetup {
         return Math.min(requestedSize, qualitySize);
     }
 
-    update(timeSeconds = performance.now() / 1000) {
-        const preset = this.resolveLightingPreset(this.currentPreset);
-
-        if (this.lastUpdateTime !== null && timeSeconds - this.lastUpdateTime < this.updateInterval) {
-            return false;
-        }
-
-        this.lastUpdateTime = timeSeconds;
-
-        if (this.currentPreset === 'home') {
-            const daylight = (Math.sin(timeSeconds * 0.12) + 1) / 2;
-            const nightfall = 1 - daylight;
-            const flicker = (Math.sin(timeSeconds * 3.4) + Math.sin(timeSeconds * 5.2 + 0.3)) * 0.03;
-
-            this.lights.ambient.intensity = preset.ambient.intensity - 0.05 + daylight * 0.08;
-            this.lights.hemisphere.intensity = preset.hemisphere.intensity - 0.04 + daylight * 0.08;
-            this.lights.main.intensity = preset.main.intensity - 0.08 + daylight * 0.14;
-            this.lights.fill.intensity = preset.fill.intensity - 0.08 + daylight * 0.1;
-            this.lights.rim.intensity = preset.rim.intensity + daylight * 0.08;
-            this.lights.accentA.intensity = preset.accentA.intensity + nightfall * 0.72 + flicker;
-            this.lights.accentB.intensity = 0.22 + daylight * 0.72;
-            this.lights.spot.intensity = preset.spot.intensity + nightfall * 0.42 + flicker * 2;
-            return true;
-        }
-
-        if (this.currentPreset === 'park') {
-            const breeze = (Math.sin(timeSeconds * 0.44) + 1) / 2;
-            const sparkle = Math.sin(timeSeconds * 1.18);
-
-            this.lights.ambient.intensity = preset.ambient.intensity + breeze * 0.05;
-            this.lights.hemisphere.intensity = preset.hemisphere.intensity + breeze * 0.06;
-            this.lights.main.intensity = preset.main.intensity + breeze * 0.14;
-            this.lights.fill.intensity = preset.fill.intensity + sparkle * 0.05;
-            this.lights.rim.intensity = preset.rim.intensity + (Math.sin(timeSeconds * 0.7 + 0.5) + 1) * 0.04;
-            this.lights.accentA.intensity = preset.accentA.intensity + (Math.sin(timeSeconds * 0.9) + 1) * 0.08;
-            this.lights.accentB.intensity = preset.accentB.intensity + (Math.cos(timeSeconds * 0.82) + 1) * 0.05;
-            this.lights.accentA.position.x = preset.accentA.position.x + Math.sin(timeSeconds * 0.2) * 0.8;
-            this.lights.accentA.position.y = preset.accentA.position.y + Math.sin(timeSeconds * 0.16) * 0.24;
-            return true;
-        }
-
-        const drift = Math.sin(timeSeconds * 0.16);
-        const breathe = (Math.sin(timeSeconds * 0.28) + 1) / 2;
-
-        this.lights.ambient.intensity = preset.ambient.intensity + breathe * 0.015;
-        this.lights.hemisphere.intensity = preset.hemisphere.intensity + breathe * 0.01;
-        this.lights.main.intensity = preset.main.intensity + breathe * 0.03;
-        this.lights.fill.intensity = preset.fill.intensity + breathe * 0.02;
-        this.lights.rim.intensity = preset.rim.intensity + breathe * 0.015;
-        this.lights.accentA.intensity = preset.accentA.intensity + breathe * 0.025;
-        this.lights.accentB.intensity = preset.accentB.intensity + breathe * 0.02;
-        this.lights.spot.intensity = preset.spot.intensity + breathe * 0.04;
-        this.lights.spot.position.x = preset.spot.position.x + drift * 0.14;
-        this.lights.spot.target.position.x = preset.spot.target.x + drift * 0.08;
-        return true;
+    update(_timeSeconds = performance.now() / 1000) {
+        return false;
     }
 
     createAmbientLight() {

@@ -46,9 +46,7 @@ const STATIC_ASSETS = [
   '/src/render3d/MaterialFactory.js',
   '/src/render3d/ParticleSystem.js',
   '/src/render3d/scenes/props.js',
-  '/src/render3d/scenes/homeStudy.js',
-  '/src/render3d/scenes/parkPavilion.js',
-  '/src/render3d/scenes/tournamentHall.js',
+  '/src/render3d/scenes/tabletop.js',
 
   // Config
   '/src/config/gameConfig.js',

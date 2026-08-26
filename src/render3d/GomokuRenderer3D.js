@@ -106,13 +106,7 @@ export class GomokuRenderer3D {
         const dt = this.sceneManager?.clock?.getDelta?.() ?? 0.016;
         this.particleSystem?.update(dt);
 
-        // Emit ambient particles every 3 seconds
         this.ambientTimer += dt;
-        if (this.ambientTimer > 3) {
-            this.ambientTimer = 0;
-            this.particleSystem?.emitAmbientParticles();
-            this.sceneManager?.setNeedsRender();
-        }
 
         const timeSeconds = performance.now() / 1000;
         const environmentAnimated = this.environmentBuilder?.update(timeSeconds) ?? false;
@@ -179,17 +173,7 @@ export class GomokuRenderer3D {
         this.cameraController?.updateFrameState(this.boardSize);
 
         if (sceneChanged) {
-            const oldEnvironment = this.sceneManager.scene.getObjectByName('environment');
-            if (oldEnvironment) {
-                this.sceneManager.remove(oldEnvironment);
-            }
-
-            if (this.environmentBuilder) {
-                this.environmentBuilder.dispose();
-            }
-
-            this.environmentBuilder = this.createEnvironmentBuilder();
-            this.sceneManager.add(this.environmentBuilder.build(this.boardSize, this.scenePreset));
+            this.environmentBuilder?.applyMood(this.scenePreset);
         }
 
         this.lightingSetup?.applyPreset(this.scenePreset);

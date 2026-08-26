@@ -8,29 +8,29 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#07111d">
     <meta name="color-scheme" content="dark">
-    <title data-i18n="appTitle">多棋类合�?· Board Games</title>
+    <title data-i18n="appTitle">棋类合集 · Board Games</title>
     
-    <meta property="og:title" content="Multi-Board-Game-Collection �?5-in-1 Board Game Suite">
-    <meta property="og:description" content="5 classic board games with Three.js 3D rendering, LLM AI Coach, and cross-platform support. Gomoku, Go, Chess, Xiangqi, and Junqi in one app.">
+    <meta property="og:title" content="Multi-Board-Game-Collection �?Gomoku & Go Board Game Suite">
+    <meta property="og:description" content="Gomoku and Go with Three.js 3D rendering, LLM AI Coach, and cross-platform support.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ssc-studio.github.io/Multi-Board-Game-Collection/">
     <meta property="og:image" content="https://ssc-studio.github.io/Multi-Board-Game-Collection/assets/screenshots/screenshot_01.png">
     <meta property="og:site_name" content="Multi-Board-Game-Collection">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Multi-Board-Game-Collection �?5-in-1 Board Game Suite">
-    <meta name="twitter:description" content="5 classic board games with Three.js 3D rendering, LLM AI Coach, and cross-platform support.">
+    <meta name="twitter:title" content="Multi-Board-Game-Collection �?Gomoku & Go Board Game Suite">
+    <meta name="twitter:description" content="Gomoku and Go with Three.js 3D rendering, LLM AI Coach, and cross-platform support.">
     <meta name="twitter:image" content="https://ssc-studio.github.io/Multi-Board-Game-Collection/assets/screenshots/screenshot_01.png">
     
     <link rel="canonical" href="https://ssc-studio.github.io/Multi-Board-Game-Collection/">
     <meta name="robots" content="index, follow">
     <meta name="author" content="SSC-STUDIO">
     <meta name="application-name" content="Multi-Board-Game-Collection">
-    <meta name="keywords" content="board games, gomoku, go, weiqi, baduk, chess, xiangqi, junqi, military chess, AI, three.js, 3D, open source, strategy games, 棋盘游戏, 五子�? 围棋, 象棋">
-    <meta name="description" content="五子棋、围棋、国际象棋、中国象棋和军棋翻翻棋合一的多棋类游戏平台，支�?AI 对战�?D 棋盘和多端运行�?>
+    <meta name="keywords" content="board games, gomoku, go, weiqi, baduk, AI, three.js, 3D, open source, strategy games, 棋盘游戏, 五子棋, 围棋">
+    <meta name="description" content="五子棋与围棋合一的棋类游戏，支持 AI 对战、3D 棋盘和多端运行。">
     <link rel="icon" href="data:,">
     <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
     <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-title" content="多棋类合�?>
+    <meta name="apple-mobile-web-app-title" content="棋类合集">
     <link rel="stylesheet" href="src/styles/base.css">
     <link rel="stylesheet" href="src/styles/main.css">
     <link rel="stylesheet" href="src/styles/layout.css">
@@ -50,7 +50,7 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Multi-Board-Game-Collection",
-        "description": "5 classic board games with Three.js 3D rendering, LLM AI Coach, and cross-platform support.",
+        "description": "Gomoku and Go with Three.js 3D rendering, LLM AI Coach, and cross-platform support.",
         "applicationCategory": "GameApplication",
         "operatingSystem": "Web, Windows, macOS, Linux, Android",
         "url": "https://ssc-studio.github.io/Multi-Board-Game-Collection/",
@@ -64,9 +64,9 @@
             "name": "SSC-STUDIO",
             "url": "https://github.com/SSC-STUDIO"
         },
-        "keywords": "board games, gomoku, go, chess, xiangqi, junqi, AI, three.js, 3D, open source",
+        "keywords": "board games, gomoku, go, AI, three.js, 3D, open source",
         "featureList": [
-            "5 classic board games in one app",
+            "Gomoku and Go in one app",
             "Three.js 3D rendering",
             "LLM AI Coach",
             "3 difficulty levels per game",
@@ -165,8 +165,8 @@
             </div>
             <header class="launcher-header">
                 <span class="launcher-kicker" data-i18n="launcherWelcome">3D 棋类大厅</span>
-                <h1 id="launcher-heading" class="launcher-title" data-i18n="launcherTitle">五种棋类，一�?3D 对弈大厅</h1>
-                <p class="launcher-subtitle" data-i18n="launcherSubtitle">从连珠、围地到王车、楚河汉界与陆战铁路，每款棋保留自己的规则和 3D 棋盘�?/p>
+                <h1 id="launcher-heading" class="launcher-title" data-i18n="launcherTitle">两款棋类，一座 3D 对弈大厅</h1>
+                <p class="launcher-subtitle" data-i18n="launcherSubtitle">五子棋连珠与围棋围地，各自保留规则与 3D 棋盘。</p>
             </header>
             <div id="launcher-grid" class="launcher-grid" role="list"></div>
         </section>
@@ -233,7 +233,7 @@
                             <div id="setup-scene-mood" class="scene-preview-title">比赛大厅</div>
                             <span id="setup-scene-ambience" class="scene-preview-pill">馆场底噪</span>
                         </div>
-                        <p id="setup-scene-copy" class="scene-preview-copy">馆内顶灯、屏幕和观众席构成克制的正式比赛环境�?/p>
+                        <p id="setup-scene-copy" class="scene-preview-copy">冷白赛场灯光，突出棋盘本身。</p>
                     </div>
                 </div>
 
@@ -973,392 +973,6 @@
             </div>
         </section>
 
-        <!-- 国际象棋独立面板 -->
-        <section id="chess-root" class="chess-root hidden" aria-label="国际象棋对局">
-            <section id="chess-setup" class="chess-setup glass-panel hidden" aria-labelledby="chess-setup-heading">
-                <header class="chess-setup-header">
-                    <span class="launcher-kicker" data-i18n="gameChessTitle">国际象棋</span>
-                    <h2 id="chess-setup-heading" class="chess-setup-title" data-i18n="chessSetupTitle">开始一局国际象棋</h2>
-                    <p class="chess-setup-subtitle" data-i18n="chessSetupSubtitle">选择模式与难度，准备开局�?/p>
-                </header>
-                <div class="chess-setup-options">
-                    <div class="option-row">
-                        <label class="option-label" data-i18n="chessMode">模式</label>
-                        <div class="option-buttons" id="chess-mode-options" role="radiogroup">
-                            <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
-                            <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
-                                                    <button class="option-btn" type="button" data-mode="qi" role="radio" aria-checked="false" data-i18n="qi">QI 教练</button>
-</div>
-                    </div>
-                    <div class="option-row" id="chess-level-row">
-                        <label class="option-label" data-i18n="aiLevel">AI 难度</label>
-                        <div class="option-buttons" id="chess-level-options" role="radiogroup">
-                            <button class="option-btn" type="button" data-level="easy" role="radio" aria-checked="false" data-i18n="easy">轻松</button>
-                            <button class="option-btn active" type="button" data-level="medium" role="radio" aria-checked="true" data-i18n="medium">进阶</button>
-                            <button class="option-btn" type="button" data-level="hard" role="radio" aria-checked="false" data-i18n="hard">大师</button>
-                        </div>
-                    </div>
-                    <div class="option-row" id="chess-color-row">
-                        <label class="option-label" data-i18n="chessYourColor">执子颜色</label>
-                        <div class="option-buttons" id="chess-color-options" role="radiogroup">
-                            <button class="option-btn active" type="button" data-color="w" role="radio" aria-checked="true" data-i18n="chessColorWhite">执白（先手）</button>
-                            <button class="option-btn" type="button" data-color="b" role="radio" aria-checked="false" data-i18n="chessColorBlack">执黑（后手）</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="chess-setup-actions">
-                    <button id="chess-back-to-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
-                    <button id="chess-start-btn" class="primary-btn" type="button" data-i18n="startGame">开始游�?/button>
-                </div>
-            </section>
-
-            <section id="chess-game" class="chess-game hidden" aria-label="国际象棋对局界面">
-                <header class="chess-hud glass-panel">
-                    <div class="chess-hud-cluster">
-                        <div class="chess-hud-chip">
-                            <span class="hud-label" data-i18n="currentStone">当前执子</span>
-                            <span id="chess-current-player" class="hud-value">白方</span>
-                        </div>
-                        <div class="chess-hud-chip">
-                            <span class="hud-label" data-i18n="chessMoveCount">手数</span>
-                            <span id="chess-move-count" class="hud-value">0</span>
-                        </div>
-                        <div class="chess-hud-chip chess-hud-last">
-                            <span class="hud-label" data-i18n="chessLastMove">最后一�?/span>
-                            <span id="chess-last-move" class="hud-value">-</span>
-                        </div>
-                        <div class="chess-hud-chip">
-                            <span class="hud-label" data-i18n="chessCapturedByWhite">白方吃子</span>
-                            <span id="chess-captured-white" class="hud-value">-</span>
-                        </div>
-                        <div class="chess-hud-chip">
-                            <span class="hud-label" data-i18n="chessCapturedByBlack">黑方吃子</span>
-                            <span id="chess-captured-black" class="hud-value">-</span>
-                        </div>
-                    </div>
-                    <button id="chess-back-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
-                </header>
-                <div id="chess-message" class="message glass-panel hidden" role="alert"></div>
-                <main class="chess-stage">
-                    <div id="chess-board-shell" class="chess-board-shell glass-panel">
-                        <div id="chess-board-3d" class="board-game-3d"></div>
-                        <div id="chess-board" class="chess-board" role="grid" aria-label="国际象棋棋盘"></div>
-                    </div>
-                </main>
-                <footer class="chess-controls glass-panel" role="toolbar">
-                    <button id="chess-undo-btn" class="control-btn" type="button" data-i18n="undo">悔棋</button>
-                    <button id="chess-hint-btn" class="control-btn" type="button" data-i18n-aria-label="hint" data-i18n-tooltip="tooltipHint">
-                        <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                            <path fill="currentColor" d="M9 21h6v-2H9v2Zm3-19a7 7 0 0 0-4 12.75V17h8v-2.25A7 7 0 0 0 12 2Zm2.86 11.2-.86.55V15h-4v-1.25l-.86-.55A5 5 0 1 1 14.86 13.2Z"/>
-                        </svg>
-                        <span class="btn-label" data-i18n="hint">提示</span>
-                    </button>
-                    <button id="chess-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
-                    <button id="chess-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
-                </footer>
-                <div class="game-coach-hint glass-panel hidden" data-game="chess">
-                    <div class="coach-hint-head">
-                        <span class="coach-hint-title" data-i18n="coachTitle">QI 指导</span>
-                        <button class="ghost-btn coach-mini-btn" data-i18n-aria-label="llmSettingsButton" data-game-settings="chess" type="button">
-                            <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19.4 13.5c.08-.48.08-1 0-1.48l2.1-1.64-2-3.46-2.48 1a7.4 7.4 0 0 0-1.28-.74L15.36 4h-4l-.38 3.18c-.46.18-.88.43-1.28.74l-2.48-1-2 3.46 2.1 1.64a7.8 7.8 0 0 0 0 1.48l-2.1 1.64 2 3.46 2.48-1c.4.3.82.55 1.28.74l.38 3.18h4l.38-3.18c.46-.19.88-.44 1.28-.74l2.48 1 2-3.46-2.1-1.64ZM13.36 15.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>
-                            <span class="btn-label" data-i18n="llmSettingsButton">LLM 设置</span>
-                        </button>
-                    </div>
-                    <div class="coach-hint-status">
-                        <span class="coach-chip" data-game-source="chess">-</span>
-                        <span class="coach-chip coach-status" data-game-coach-status="chess">-</span>
-                    </div>
-                    <div class="coach-hint-recommend">
-                        <span class="meta-label" data-i18n="coachRecommended">推荐</span>
-                        <span class="panel-value" data-game-coach-move="chess">-</span>
-                    </div>
-                    <div class="coach-hint-reason">
-                        <span class="meta-label" data-i18n="coachReason">原因</span>
-                        <p class="panel-note" data-game-coach-insight="chess" data-i18n="coachWaiting">等待你的回合...</p>
-                    </div>
-                    <div class="coach-hint-risk">
-                        <span class="meta-label" data-i18n="coachRisk">风险</span>
-                        <p class="panel-note" data-game-coach-risk="chess" data-i18n="coachWaiting">等待你的回合...</p>
-                    </div>
-                </div>
-
-            </section>
-
-            <div id="chess-promotion-overlay" class="confirm-overlay hidden" aria-hidden="true">
-                <div class="confirm-card glass-panel" role="dialog" aria-modal="true">
-                    <h2 class="confirm-title" data-i18n="chessPromoteTitle">选择升变</h2>
-                    <div id="chess-promotion-buttons" class="chess-promotion-buttons">
-                        <button class="primary-btn" type="button" data-promotion="Q">�?<span data-i18n="chessPromoteQueen">�?/span></button>
-                        <button class="ghost-btn" type="button" data-promotion="R">�?<span data-i18n="chessPromoteRook">�?/span></button>
-                        <button class="ghost-btn" type="button" data-promotion="B">�?<span data-i18n="chessPromoteBishop">�?/span></button>
-                        <button class="ghost-btn" type="button" data-promotion="N">�?<span data-i18n="chessPromoteKnight">�?/span></button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="chess-result-overlay" class="result-overlay hidden" aria-hidden="true">
-                <div class="result-card glass-panel" role="dialog" aria-modal="true">
-                    <div id="chess-result-badge" class="result-badge" data-i18n="gameEnd">对局结束</div>
-                    <h3 id="chess-result-title" class="result-title">对局结束</h3>
-                    <p id="chess-result-detail" class="result-detail"></p>
-                    <div class="result-actions">
-                        <button id="chess-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
-                        <button id="chess-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
-                        <button id="chess-result-postgame-btn" class="ghost-btn" type="button" data-i18n="coachPostGameRequest">请求复盘分析</button>
-                    </div>
-                    <div id="chess-result-postgame-panel" class="postgame-panel hidden">
-                        <h4 data-i18n="coachPostGameTitle">复盘分析</h4>
-                        <div id="chess-result-postgame-content" class="postgame-content"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 中国象棋独立面板 -->
-        <section id="xiangqi-root" class="xiangqi-root hidden" aria-label="中国象棋对局">
-            <section id="xiangqi-setup" class="xiangqi-setup glass-panel hidden" aria-labelledby="xiangqi-setup-heading">
-                <header class="xiangqi-setup-header">
-                    <span class="launcher-kicker" data-i18n="gameXiangqiTitle">中国象棋</span>
-                    <h2 id="xiangqi-setup-heading" class="xiangqi-setup-title" data-i18n="xiangqiSetupTitle">开始一局中国象棋</h2>
-                    <p class="xiangqi-setup-subtitle" data-i18n="xiangqiSetupSubtitle">红先黑后，车马炮 将相士，楚河汉界�?/p>
-                </header>
-                <div class="xiangqi-setup-options">
-                    <div class="option-row">
-                        <label class="option-label" data-i18n="xiangqiMode">模式</label>
-                        <div class="option-buttons" id="xiangqi-mode-options" role="radiogroup">
-                            <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
-                            <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
-                                                    <button class="option-btn" type="button" data-mode="qi" role="radio" aria-checked="false" data-i18n="qi">QI 教练</button>
-</div>
-                    </div>
-                    <div class="option-row" id="xiangqi-level-row">
-                        <label class="option-label" data-i18n="aiLevel">AI 难度</label>
-                        <div class="option-buttons" id="xiangqi-level-options" role="radiogroup">
-                            <button class="option-btn" type="button" data-level="easy" role="radio" aria-checked="false" data-i18n="easy">轻松</button>
-                            <button class="option-btn active" type="button" data-level="medium" role="radio" aria-checked="true" data-i18n="medium">进阶</button>
-                            <button class="option-btn" type="button" data-level="hard" role="radio" aria-checked="false" data-i18n="hard">大师</button>
-                        </div>
-                    </div>
-                    <div class="option-row" id="xiangqi-color-row">
-                        <label class="option-label" data-i18n="xiangqiYourColor">执子颜色</label>
-                        <div class="option-buttons" id="xiangqi-color-options" role="radiogroup">
-                            <button class="option-btn active" type="button" data-color="r" role="radio" aria-checked="true" data-i18n="xiangqiColorRed">执红（先手）</button>
-                            <button class="option-btn" type="button" data-color="b" role="radio" aria-checked="false" data-i18n="xiangqiColorBlack">执黑（后手）</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="xiangqi-setup-actions">
-                    <button id="xiangqi-back-to-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
-                    <button id="xiangqi-start-btn" class="primary-btn" type="button" data-i18n="startGame">开始游�?/button>
-                </div>
-            </section>
-
-            <section id="xiangqi-game" class="xiangqi-game hidden" aria-label="中国象棋对局界面">
-                <header class="xiangqi-hud glass-panel">
-                    <div class="xiangqi-hud-cluster">
-                        <div class="xiangqi-hud-chip">
-                            <span class="hud-label" data-i18n="currentStone">当前执子</span>
-                            <span id="xiangqi-current-player" class="hud-value">红方</span>
-                        </div>
-                        <div class="xiangqi-hud-chip">
-                            <span class="hud-label" data-i18n="xiangqiMoveCount">手数</span>
-                            <span id="xiangqi-move-count" class="hud-value">0</span>
-                        </div>
-                        <div class="xiangqi-hud-chip xiangqi-hud-last">
-                            <span class="hud-label" data-i18n="xiangqiLastMove">最后一�?/span>
-                            <span id="xiangqi-last-move" class="hud-value">-</span>
-                        </div>
-                    </div>
-                    <button id="xiangqi-back-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
-                </header>
-                <div id="xiangqi-message" class="message glass-panel hidden" role="alert"></div>
-                <main class="xiangqi-stage">
-                    <div id="xiangqi-board-shell" class="xiangqi-board-shell glass-panel">
-                        <div class="xiangqi-river-label xiangqi-river-left" data-i18n="xiangqiRiverLeft">�?�?/div>
-                        <div class="xiangqi-river-label xiangqi-river-right" data-i18n="xiangqiRiverRight">�?�?/div>
-                        <div id="xiangqi-board-3d" class="board-game-3d"></div>
-                        <div id="xiangqi-board" class="xiangqi-board" role="grid" aria-label="中国象棋棋盘"></div>
-                    </div>
-                </main>
-                <footer class="xiangqi-controls glass-panel" role="toolbar">
-                    <button id="xiangqi-undo-btn" class="control-btn" type="button" data-i18n="undo">悔棋</button>
-                    <button id="xiangqi-hint-btn" class="control-btn" type="button" data-i18n-aria-label="hint" data-i18n-tooltip="tooltipHint">
-                        <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                            <path fill="currentColor" d="M9 21h6v-2H9v2Zm3-19a7 7 0 0 0-4 12.75V17h8v-2.25A7 7 0 0 0 12 2Zm2.86 11.2-.86.55V15h-4v-1.25l-.86-.55A5 5 0 1 1 14.86 13.2Z"/>
-                        </svg>
-                        <span class="btn-label" data-i18n="hint">提示</span>
-                    </button>
-                    <button id="xiangqi-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
-                    <button id="xiangqi-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
-                </footer>
-                <div class="game-coach-hint glass-panel hidden" data-game="xiangqi">
-                    <div class="coach-hint-head">
-                        <span class="coach-hint-title" data-i18n="coachTitle">QI 指导</span>
-                        <button class="ghost-btn coach-mini-btn" data-i18n-aria-label="llmSettingsButton" data-game-settings="xiangqi" type="button">
-                            <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19.4 13.5c.08-.48.08-1 0-1.48l2.1-1.64-2-3.46-2.48 1a7.4 7.4 0 0 0-1.28-.74L15.36 4h-4l-.38 3.18c-.46.18-.88.43-1.28.74l-2.48-1-2 3.46 2.1 1.64a7.8 7.8 0 0 0 0 1.48l-2.1 1.64 2 3.46 2.48-1c.4.3.82.55 1.28.74l.38 3.18h4l.38-3.18c.46-.19.88-.44 1.28-.74l2.48 1 2-3.46-2.1-1.64ZM13.36 15.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>
-                            <span class="btn-label" data-i18n="llmSettingsButton">LLM 设置</span>
-                        </button>
-                    </div>
-                    <div class="coach-hint-status">
-                        <span class="coach-chip" data-game-source="xiangqi">-</span>
-                        <span class="coach-chip coach-status" data-game-coach-status="xiangqi">-</span>
-                    </div>
-                    <div class="coach-hint-recommend">
-                        <span class="meta-label" data-i18n="coachRecommended">推荐</span>
-                        <span class="panel-value" data-game-coach-move="xiangqi">-</span>
-                    </div>
-                    <div class="coach-hint-reason">
-                        <span class="meta-label" data-i18n="coachReason">原因</span>
-                        <p class="panel-note" data-game-coach-insight="xiangqi" data-i18n="coachWaiting">等待你的回合...</p>
-                    </div>
-                    <div class="coach-hint-risk">
-                        <span class="meta-label" data-i18n="coachRisk">风险</span>
-                        <p class="panel-note" data-game-coach-risk="xiangqi" data-i18n="coachWaiting">等待你的回合...</p>
-                    </div>
-                </div>
-
-            </section>
-
-            <div id="xiangqi-result-overlay" class="result-overlay hidden" aria-hidden="true">
-                <div class="result-card glass-panel" role="dialog" aria-modal="true">
-                    <div id="xiangqi-result-badge" class="result-badge" data-i18n="gameEnd">对局结束</div>
-                    <h3 id="xiangqi-result-title" class="result-title">对局结束</h3>
-                    <p id="xiangqi-result-detail" class="result-detail"></p>
-                    <div class="result-actions">
-                        <button id="xiangqi-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
-                        <button id="xiangqi-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
-                        <button id="xiangqi-result-postgame-btn" class="ghost-btn" type="button" data-i18n="coachPostGameRequest">请求复盘分析</button>
-                    </div>
-                    <div id="xiangqi-result-postgame-panel" class="postgame-panel hidden">
-                        <h4 data-i18n="coachPostGameTitle">复盘分析</h4>
-                        <div id="xiangqi-result-postgame-content" class="postgame-content"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 军棋独立面板 -->
-        <section id="junqi-root" class="junqi-root hidden" aria-label="军棋对局">
-            <section id="junqi-setup" class="junqi-setup glass-panel hidden" aria-labelledby="junqi-setup-heading">
-                <header class="junqi-setup-header">
-                    <span class="launcher-kicker" data-i18n="gameJunqiTitle">军棋</span>
-                    <h2 id="junqi-setup-heading" class="junqi-setup-title" data-i18n="junqiSetupTitle">开始一局军棋</h2>
-                    <p class="junqi-setup-subtitle" data-i18n="junqiSetupSubtitle">默认二人陆战棋：上下布阵、铁路行营、PVE 数字裁判；也可切换军棋翻翻棋�?/p>
-                </header>
-                <div class="junqi-setup-options">
-                    <div class="option-row">
-                        <label class="option-label" data-i18n="junqiVariant">变体</label>
-                        <div class="option-buttons" id="junqi-variant-options" role="radiogroup">
-                            <button class="option-btn active" type="button" data-variant="classic" role="radio" aria-checked="true" data-i18n="junqiVariantClassic">二人陆战�?/button>
-                            <button class="option-btn" type="button" data-variant="flip" role="radio" aria-checked="false" data-i18n="junqiVariantFlip">翻翻�?/button>
-                        </div>
-                    </div>
-                    <div class="option-row" id="junqi-template-row">
-                        <label class="option-label" data-i18n="junqiTemplate">布阵</label>
-                        <div class="option-buttons" id="junqi-template-options" role="radiogroup">
-                            <button class="option-btn active" type="button" data-template="0" role="radio" aria-checked="true" data-i18n="junqiTemplateBalanced">均衡�?/button>
-                            <button class="option-btn" type="button" data-template="1" role="radio" aria-checked="false" data-i18n="junqiTemplateAttack">进攻�?/button>
-                            <button class="option-btn" type="button" data-template="2" role="radio" aria-checked="false" data-i18n="junqiTemplateRail">铁路�?/button>
-                        </div>
-                    </div>
-                    <div class="option-row">
-                        <label class="option-label" data-i18n="chessMode">模式</label>
-                        <div class="option-buttons" id="junqi-mode-options" role="radiogroup">
-                            <button class="option-btn active" type="button" data-mode="pvp" role="radio" aria-checked="true" data-i18n="pvp">人人对战</button>
-                            <button class="option-btn" type="button" data-mode="pve" role="radio" aria-checked="false" data-i18n="pve">人机对战</button>
-                                                    <button class="option-btn" type="button" data-mode="qi" role="radio" aria-checked="false" data-i18n="qi">QI 教练</button>
-</div>
-                    </div>
-                    <div class="option-row" id="junqi-level-row">
-                        <label class="option-label" data-i18n="aiLevel">AI 难度</label>
-                        <div class="option-buttons" id="junqi-level-options" role="radiogroup">
-                            <button class="option-btn" type="button" data-level="easy" role="radio" aria-checked="false" data-i18n="easy">轻松</button>
-                            <button class="option-btn active" type="button" data-level="medium" role="radio" aria-checked="true" data-i18n="medium">进阶</button>
-                            <button class="option-btn" type="button" data-level="hard" role="radio" aria-checked="false" data-i18n="hard">大师</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="junqi-setup-actions">
-                    <button id="junqi-back-to-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
-                    <button id="junqi-start-btn" class="primary-btn" type="button" data-i18n="startGame">开始游�?/button>
-                </div>
-            </section>
-
-            <section id="junqi-game" class="junqi-game hidden" aria-label="军棋对局界面">
-                <header class="junqi-hud glass-panel">
-                    <div class="junqi-hud-cluster">
-                        <div class="junqi-hud-chip">
-                            <span class="hud-label" data-i18n="currentStone">当前执子</span>
-                            <span id="junqi-current-player" class="hud-value">首翻</span>
-                        </div>
-                        <div class="junqi-hud-chip">
-                            <span class="hud-label" data-i18n="moveCountLabel">手数</span>
-                            <span id="junqi-move-count" class="hud-value">0</span>
-                        </div>
-                        <div class="junqi-hud-chip junqi-hud-last">
-                            <span class="hud-label" data-i18n="lastMove">最后一�?/span>
-                            <span id="junqi-last-move" class="hud-value">-</span>
-                        </div>
-                    </div>
-                    <button id="junqi-back-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
-                </header>
-                <div id="junqi-message" class="message glass-panel hidden" role="alert"></div>
-                <div id="junqi-hint" class="junqi-hint">提示</div>
-                <main class="junqi-stage">
-                    <div id="junqi-board-shell" class="junqi-board-shell glass-panel">
-                        <div id="junqi-board-3d" class="board-game-3d"></div>
-                        <div id="junqi-board" class="junqi-board" role="grid" aria-label="军棋棋盘"></div>
-                    </div>
-                </main>
-                <footer class="junqi-controls glass-panel" role="toolbar">
-                    <button id="junqi-resign-btn" class="control-btn control-btn-danger" type="button" data-i18n="resign">认输</button>
-                    <button id="junqi-restart-btn" class="control-btn" type="button" data-i18n="restart">重开</button>
-                </footer>
-                <div class="game-coach-hint glass-panel hidden" data-game="junqi">
-                    <div class="coach-hint-head">
-                        <span class="coach-hint-title" data-i18n="coachTitle">QI 指导</span>
-                        <button class="ghost-btn coach-mini-btn" data-i18n-aria-label="llmSettingsButton" data-game-settings="junqi" type="button">
-                            <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19.4 13.5c.08-.48.08-1 0-1.48l2.1-1.64-2-3.46-2.48 1a7.4 7.4 0 0 0-1.28-.74L15.36 4h-4l-.38 3.18c-.46.18-.88.43-1.28.74l-2.48-1-2 3.46 2.1 1.64a7.8 7.8 0 0 0 0 1.48l-2.1 1.64 2 3.46 2.48-1c.4.3.82.55 1.28.74l.38 3.18h4l.38-3.18c.46-.19.88-.44 1.28-.74l2.48 1 2-3.46-2.1-1.64ZM13.36 15.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>
-                            <span class="btn-label" data-i18n="llmSettingsButton">LLM 设置</span>
-                        </button>
-                    </div>
-                    <div class="coach-hint-status">
-                        <span class="coach-chip" data-game-source="junqi">-</span>
-                        <span class="coach-chip coach-status" data-game-coach-status="junqi">-</span>
-                    </div>
-                    <div class="coach-hint-recommend">
-                        <span class="meta-label" data-i18n="coachRecommended">推荐</span>
-                        <span class="panel-value" data-game-coach-move="junqi">-</span>
-                    </div>
-                    <div class="coach-hint-reason">
-                        <span class="meta-label" data-i18n="coachReason">原因</span>
-                        <p class="panel-note" data-game-coach-insight="junqi" data-i18n="coachWaiting">等待你的回合...</p>
-                    </div>
-                    <div class="coach-hint-risk">
-                        <span class="meta-label" data-i18n="coachRisk">风险</span>
-                        <p class="panel-note" data-game-coach-risk="junqi" data-i18n="coachWaiting">等待你的回合...</p>
-                    </div>
-                </div>
-
-            </section>
-
-            <div id="junqi-result-overlay" class="result-overlay hidden" aria-hidden="true">
-                <div class="result-card glass-panel" role="dialog" aria-modal="true">
-                    <div id="junqi-result-badge" class="result-badge" data-i18n="gameEnd">对局结束</div>
-                    <h3 id="junqi-result-title" class="result-title">对局结束</h3>
-                    <p id="junqi-result-detail" class="result-detail"></p>
-                    <div class="result-actions">
-                        <button id="junqi-result-restart-btn" class="primary-btn" type="button" data-i18n="playAgain">再来一局</button>
-                        <button id="junqi-result-launcher-btn" class="ghost-btn" type="button" data-i18n="launcherBackToLauncher">返回选择</button>
-                        <button id="junqi-result-postgame-btn" class="ghost-btn" type="button" data-i18n="coachPostGameRequest">请求复盘分析</button>
-                    </div>
-                    <div id="junqi-result-postgame-panel" class="postgame-panel hidden">
-                        <h4 data-i18n="coachPostGameTitle">复盘分析</h4>
-                        <div id="junqi-result-postgame-content" class="postgame-content"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </div>
 
     <script type="module" src="src/main.js"></script>

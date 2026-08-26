@@ -8,7 +8,7 @@ vi.mock('../../games/registry.js', () => ({
     listGames: () => [
         { id: 'gomoku', titleKey: 'gomoku', taglineKey: 'gomokuTag', accent: '#e6b15b', status: 'available' },
         { id: 'go', titleKey: 'go', taglineKey: 'goTag', accent: '#8aa9b8', status: 'available' },
-        { id: 'chess', titleKey: 'chess', taglineKey: 'chessTag', accent: '#c7c0ad', status: 'coming-soon' }
+        { id: 'future-game', titleKey: 'futureGame', taglineKey: 'futureGameTag', accent: '#c7c0ad', status: 'coming-soon' }
     ],
     findGame: vi.fn((id) => {
         const games = {
@@ -238,7 +238,7 @@ describe('LauncherController.buildCard', () => {
     it('disables button for coming-soon games', () => {
         const { root } = createMockRoot();
         const ctrl = new LauncherController({ root });
-        const card = ctrl.buildCard({ id: 'chess', titleKey: 'chess', taglineKey: 'chessTag', accent: '#c7c0ad', status: 'coming-soon' });
+        const card = ctrl.buildCard({ id: 'future-game', titleKey: 'futureGame', taglineKey: 'futureGameTag', accent: '#c7c0ad', status: 'coming-soon' });
         const btn = card.children[card.children.length - 1];
         expect(btn.disabled).toBe(true);
         expect(btn.className).toContain('ghost-btn');
@@ -285,12 +285,12 @@ describe('LauncherController.handleGridClick', () => {
 
     it('shows toast for coming-soon game', () => {
         const onToast = vi.fn();
-        findGame.mockReturnValueOnce({ id: 'chess', status: 'coming-soon' });
+        findGame.mockReturnValueOnce({ id: 'future-game', status: 'coming-soon' });
         const { root } = createMockRoot();
         const ctrl = new LauncherController({ root, onToast });
         const target = {
             closest: vi.fn(() => target),
-            dataset: { gameId: 'chess' }
+            dataset: { gameId: 'future-game' }
         };
         ctrl.handleGridClick({ target });
         expect(onToast).toHaveBeenCalledWith('comingSoon');

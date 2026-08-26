@@ -182,7 +182,7 @@ describe('aiCommentary Service', () => {
     });
 
     it('should support all 6 game types', async () => {
-      const gameTypes = ['gomoku', 'go', 'chess', 'xiangqi', 'junqi', 'othello'];
+      const gameTypes = ['gomoku', 'go'];
 
       for (const gameType of gameTypes) {
         fetchWithTimeout.mockResolvedValue({

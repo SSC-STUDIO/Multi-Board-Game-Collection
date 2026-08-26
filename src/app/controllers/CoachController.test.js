@@ -810,39 +810,6 @@ describe('CoachController.refreshCoachGuidance non-Gomoku LLM-only path', () => 
         expect(app.state.coachSuggestion).toBeNull();
         document.body = { dataset: {} };
     });
-    it('works for Chess game type via DOM dataset', async () => {
-        const app = createApp({ options: { size: 8, rule: 'standard', mode: 'qi', playerColor: 'black', gameType: 'chess' } });
-        document.body = { dataset: { activeGame: 'chess' } };
-        vi.mocked(getMoveGuidance).mockReturnValue(null);
-        vi.mocked(requestLlmCoachAdvice).mockResolvedValue({ recommended: null });
-        const controller = new CoachController(app);
-        controller.refreshCoachGuidance();
-        expect(app.state.coachSuggestion).toBeNull();
-        expect(controller.getGameType()).toBe('chess');
-        document.body = { dataset: {} };
-    });
-    it('works for Xiangqi game type via DOM dataset', async () => {
-        const app = createApp({ options: { size: 9, rule: 'standard', mode: 'qi', playerColor: 'black', gameType: 'xiangqi' } });
-        document.body = { dataset: { activeGame: 'xiangqi' } };
-        vi.mocked(getMoveGuidance).mockReturnValue(null);
-        vi.mocked(requestLlmCoachAdvice).mockResolvedValue({ recommended: null });
-        const controller = new CoachController(app);
-        controller.refreshCoachGuidance();
-        expect(app.state.coachSuggestion).toBeNull();
-        expect(controller.getGameType()).toBe('xiangqi');
-        document.body = { dataset: {} };
-    });
-    it('works for Junqi game type via DOM dataset', async () => {
-        const app = createApp({ options: { size: 13, rule: 'standard', mode: 'qi', playerColor: 'black', gameType: 'junqi' } });
-        document.body = { dataset: { activeGame: 'junqi' } };
-        vi.mocked(getMoveGuidance).mockReturnValue(null);
-        vi.mocked(requestLlmCoachAdvice).mockResolvedValue({ recommended: null });
-        const controller = new CoachController(app);
-        controller.refreshCoachGuidance();
-        expect(app.state.coachSuggestion).toBeNull();
-        expect(controller.getGameType()).toBe('junqi');
-        document.body = { dataset: {} };
-    });
     it('sets disabled status when LLM is not configured for non-Gomoku', () => {
         const app = createApp({ llmSettings: { enabled: false } });
         vi.mocked(getMoveGuidance).mockReturnValue(null);

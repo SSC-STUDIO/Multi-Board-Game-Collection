@@ -16,26 +16,6 @@ const COMMENTARY_PROMPTS = {
     go: {
         system: "You are a concise Go commentator. After each move, provide a brief 1-2 sentence explanation of the move purpose. Focus on: territory influence, group safety, and tactical opportunities. Be direct and insightful.",
         format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
-    },
-    chess: {
-        system: "You are a concise Chess commentator. After each move, provide a brief 1-2 sentence explanation. Focus on: tactical threats, positional improvements, and strategic plans. Be direct and insightful.",
-        format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
-    },
-    xiangqi: {
-        system: "You are a concise Xiangqi (Chinese Chess) commentator. After each move, provide a brief 1-2 sentence explanation. Focus on: control of key positions, piece coordination, and tactical threats. Be direct and insightful.",
-        format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
-    },
-    junqi: {
-        system: "You are a concise Junqi (Military Chess) commentator. After each move, provide a brief 1-2 sentence explanation. Focus on: piece revelation implications, attack-defense balance, and flag protection. Be direct and insightful.",
-        format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
-    },
-    othello: {
-        system: "You are a concise Othello (Reversi) commentator. After each move, provide a brief 1-2 sentence explanation. Focus on: disc flips, positional advantage, corner control, and mobility. Be direct and insightful.",
-        format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
-    },
-    shogi: {
-        system: "You are a concise Shogi (Japanese Chess) commentator. After each move, provide a brief 1-2 sentence explanation. Focus on: piece exchanges, drop tactics, promotion timing, and king safety. Be direct and insightful.",
-        format: "Respond with a single short paragraph (1-2 sentences max) explaining the last move. No move notation, no headers, just the commentary."
     }
 };
 
@@ -45,7 +25,7 @@ const COMMENTARY_PROMPTS = {
  * @param {Object} options.settings - Normalized LLM settings
  * @param {Object} options.snapshot - Game state snapshot including last move and board
  * @param {AbortSignal} [options.signal] - Abort signal
- * @param {string} options.gameType - Game type key (gomoku, go, chess, xiangqi, junqi, othello, shogi)
+ * @param {string} options.gameType - Game type key (gomoku, go)
  * @returns {Promise<string>} Commentary text
  */
 export async function requestMoveCommentary({ settings, snapshot, signal, gameType } = {}) {

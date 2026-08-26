@@ -133,21 +133,7 @@ export class ParticleSystem {
      * 环境粒子（背景浮动光点）
      */
     emitAmbientParticles() {
-        const color = new THREE.Color(0.3, 0.4, 0.6);
-
-        for (let i = 0; i < 50; i++) {
-            this.addParticle({
-                x: (Math.random() - 0.5) * 30,
-                y: Math.random() * 15,
-                z: (Math.random() - 0.5) * 30,
-                vx: (Math.random() - 0.5) * 0.2,
-                vy: Math.random() * 0.1,
-                vz: (Math.random() - 0.5) * 0.2,
-                color: color,
-                size: 0.03 + Math.random() * 0.03,
-                lifetime: 5 + Math.random() * 5,
-            });
-        }
+        return;
     }
 
     /**

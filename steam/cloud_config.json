@@ -42,21 +42,6 @@
           "gamesWon": 0,
           "winningStreak": 0
         },
-        "chess": {
-          "gamesPlayed": 0,
-          "gamesWon": 0,
-          "winningStreak": 0
-        },
-        "xiangqi": {
-          "gamesPlayed": 0,
-          "gamesWon": 0,
-          "winningStreak": 0
-        },
-        "junqi": {
-          "gamesPlayed": 0,
-          "gamesWon": 0,
-          "winningStreak": 0
-        },
         "total": {
           "gamesPlayed": 0,
           "gamesWon": 0,

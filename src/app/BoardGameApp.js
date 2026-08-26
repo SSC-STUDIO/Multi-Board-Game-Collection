@@ -1,7 +1,7 @@
 /**
  * 棋类游戏公共基类。
  *
- * 封装所有子游戏（Go/Chess/Xiangqi/Junqi）共享的生命周期骨架：
+ * 封装围棋共享的生命周期骨架：
  * - Launcher 桥接（__reenter / enterSetupQuiet / dispose）
  * - 面板切换（enterSetup / showRoot / hideRoot）
  * - 选项组绑定（bindOptionGroup）

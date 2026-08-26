@@ -231,7 +231,7 @@ export function setupLanguageSwitch(dom, onChange = null) {
 /**
  * Build a guidance DOM mapping for non-Gomoku games using game-specific prefixed IDs.
  * @param {Document|HTMLElement} root
- * @param {string} prefix - e.g. 'go', 'chess', 'xiangqi', 'junqi'
+ * @param {string} prefix - e.g. 'go'
  * @returns {Object} guidance DOM mapping compatible with updateGuidance()
  */
 function safeQuery(el, sel) {

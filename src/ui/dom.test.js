@@ -323,22 +323,22 @@ describe('buildGameCoachMapping', () => {
     it('queries correct selectors with prefix', () => {
         const root = makeFakeRoot();
         const fakeEl = mockEl('div');
-        registerSelector(root, '.game-coach-hint[data-game="chess"]', fakeEl);
-        registerSelector(root, '[data-game-source="chess"]', mockEl('span'));
-        registerSelector(root, '[data-game-coach-status="chess"]', mockEl('span'));
-        registerSelector(root, '[data-game-coach-move="chess"]', mockEl('span'));
-        registerSelector(root, '[data-game-coach-insight="chess"]', mockEl('span'));
-        registerSelector(root, '[data-game-coach-risk="chess"]', mockEl('span'));
-        registerSelector(root, '[data-game-settings="chess"]', mockEl('button'));
+        registerSelector(root, '.game-coach-hint[data-game="go"]', fakeEl);
+        registerSelector(root, '[data-game-source="go"]', mockEl('span'));
+        registerSelector(root, '[data-game-coach-status="go"]', mockEl('span'));
+        registerSelector(root, '[data-game-coach-move="go"]', mockEl('span'));
+        registerSelector(root, '[data-game-coach-insight="go"]', mockEl('span'));
+        registerSelector(root, '[data-game-coach-risk="go"]', mockEl('span'));
+        registerSelector(root, '[data-game-settings="go"]', mockEl('button'));
 
-        const mapping = buildGameCoachMapping(root, 'chess');
+        const mapping = buildGameCoachMapping(root, 'go');
         expect(mapping.card).toBe(fakeEl);
         expect(mapping.settings).not.toBeNull();
     });
 
     it('returns null for selectors that are not present in root', () => {
         const root = makeFakeRoot();
-        const mapping = buildGameCoachMapping(root, 'xiangqi');
+        const mapping = buildGameCoachMapping(root, 'missing');
         expect(mapping.card).toBeNull();
         expect(mapping.source).toBeNull();
         expect(mapping.settings).toBeNull();

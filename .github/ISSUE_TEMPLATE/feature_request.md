@@ -22,9 +22,6 @@ A clear and concise description of any alternative solutions or features you've 
 
 - [ ] Gomoku (Five in a Row)
 - [ ] Go (Weiqi/Baduk)
-- [ ] Chess
-- [ ] Xiangqi (Chinese Chess)
-- [ ] Junqi (Military Chess)
 - [ ] General / All Games
 
 ## Feature Category

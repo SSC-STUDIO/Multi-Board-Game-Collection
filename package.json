@@ -1,7 +1,7 @@
 {
   "name": "board-games",
   "version": "1.0.0",
-  "description": "多款棋盘游戏合集 / Multi-Board Game Collection - 五子棋、围棋、国际象棋、中国象棋、军棋翻翻棋",
+  "description": "五子棋与围棋合集 / Gomoku and Go with 3D boards and optional LLM coaching",
   "private": true,
   "type": "module",
   "author": "Your Name",
@@ -34,14 +34,8 @@
   "keywords": [
     "gomoku",
     "go",
-    "chess",
-    "xiangqi",
-    "junqi",
     "五子棋",
     "围棋",
-    "国际象棋",
-    "中国象棋",
-    "军棋",
     "board game",
     "strategy",
     "game"
