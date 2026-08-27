@@ -7,10 +7,11 @@ import * as THREE from 'three';
 import { boardToWorld } from '../config/renderConfig.js';
 
 export class ParticleSystem {
-    constructor(scene) {
+    constructor(scene, options = {}) {
         this.scene = scene;
         this.geometry = new THREE.BufferGeometry();
-        this.maxParticles = 1000;
+        this.maxParticles = options.maxParticles ?? 1000;
+        this.dropBurst = options.dropBurst ?? 20;
         this.activeCount = 0;
 
         // 粒子属性
@@ -49,7 +50,7 @@ export class ParticleSystem {
             ? new THREE.Color(0.2, 0.2, 0.2)
             : new THREE.Color(0.95, 0.95, 0.9);
 
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < this.dropBurst; i++) {
             this.addParticle({
                 x: x + (Math.random() - 0.5) * 0.3,
                 y: y,

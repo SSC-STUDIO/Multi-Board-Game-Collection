@@ -37,6 +37,14 @@ const TERRITORY_BLACK = 0x1a1a1a;
 const TERRITORY_WHITE = 0xf0f0f0;
 const HINT_MARKER_COLOR = 0xff9800;
 
+/**
+ * 主光阴影相机半宽：棋盘表面总半径 + 余量，限制在 [10, 26]。
+ */
+function computeGoShadowExtent(boardSize, cellSize) {
+    const totalSize = (boardSize + 1) * cellSize;
+    return Math.min(26, Math.max(10, totalSize / 2 + 2));
+}
+
 /** 不同路数的星位。坐标是 (row, col)。 */
 export function getStarPoints(size) {
     if (size === 19) {
@@ -156,6 +164,7 @@ export class GoRenderer3D {
         this.lightingSetup = new LightingSetup(this.sceneManager, config);
         this.lightingSetup.setPresentationMode('game');
         this.lightingSetup.setup('competition');
+        this.lightingSetup.setShadowExtent(computeGoShadowExtent(this.boardSize, this.cellSize));
 
         this.environmentBuilder = new EnvironmentBuilder(config);
         this.sceneManager.add(this.environmentBuilder.build(this.boardSize, 'competition'));
@@ -165,7 +174,14 @@ export class GoRenderer3D {
         this.sceneManager.add(this.stoneBuilder.createStonesGroup());
 
         this.animationManager = new AnimationManager(this.sceneManager, config);
-        this.particleSystem = new ParticleSystem(this.sceneManager.scene);
+        const deviceProfile = config.deviceProfile || {};
+        const lowEndGraphics = Boolean(
+            deviceProfile.isExtremeLowEnd || deviceProfile.isMobile || deviceProfile.isLowMemory
+        );
+        this.particleSystem = new ParticleSystem(
+            this.sceneManager.scene,
+            lowEndGraphics ? { maxParticles: 360, dropBurst: 9 } : { maxParticles: 1000, dropBurst: 16 }
+        );
         this.ambientTimer = 0;
 
         this.sceneManager.onBeforeRender = () => {
@@ -273,6 +289,7 @@ export class GoRenderer3D {
         this.boardSize = size;
         this.clearStones();
         this.buildBoard();
+        this.lightingSetup?.setShadowExtent(computeGoShadowExtent(size, this.cellSize));
         this.cameraController?.fitToBoard(size, false);
         this.applyGoCameraFrame(false);
     }

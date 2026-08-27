@@ -24,6 +24,13 @@ export class SceneManager {
         this.onBeforeRender = null;
         this.onAfterRender = null;
         this.boundHandleResize = this.handleResize.bind(this);
+        this.boundAnimate = this.animate.bind(this);
+        this.boundHandleVisibility = () => this.handleVisibilityChange();
+
+        // 自适应分辨率：帧时间采样驱动 resolutionScale 在 [0.7, 1] 区间浮动
+        this.resolutionScale = 1;
+        this.frameTimes = [];
+        this.lastFrameTime = null;
 
         this.init();
     }
@@ -67,6 +74,8 @@ export class SceneManager {
         this.renderer.setClearColor(0x000000, 0);
         this.renderer.shadowMap.enabled = shadowMapEnabled;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        // 阴影按需更新：仅在真实渲染帧前置位，静止画面零阴影开销
+        this.renderer.shadowMap.autoUpdate = false;
         this.renderer.toneMapping = toneMapping;
         this.renderer.toneMappingExposure = toneMappingExposure;
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -106,6 +115,16 @@ export class SceneManager {
 
     setupEventListeners() {
         window.addEventListener('resize', this.boundHandleResize);
+        document.addEventListener('visibilitychange', this.boundHandleVisibility);
+    }
+
+    handleVisibilityChange() {
+        if (document.hidden) {
+            this.stopRenderLoop();
+            return;
+        }
+        this.lastFrameTime = null;
+        this.startRenderLoop();
     }
 
     handleResize() {
@@ -126,12 +145,52 @@ export class SceneManager {
     getPixelRatio() {
         const devicePixelRatio = window.devicePixelRatio || this.config.deviceProfile?.devicePixelRatio || 1;
         const pixelRatioCap = this.config.renderer.pixelRatioCap ?? 2;
-        return Math.max(1, Math.min(devicePixelRatio, pixelRatioCap));
+        const target = Math.max(1, Math.min(devicePixelRatio, pixelRatioCap));
+        return Math.max(0.55, target * this.resolutionScale);
+    }
+
+    /** 按当前分辨率缩放重新应用画布尺寸（不改动 CSS 尺寸） */
+    applyResolution() {
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+        if (!width || !height) {
+            return;
+        }
+        this.renderer.setPixelRatio(this.getPixelRatio());
+        this.renderer.setSize(width, height, false);
+        this.needsRender = true;
+    }
+
+    /**
+     * 帧时间采样 → 自适应分辨率调整。
+     * 低于 ~45fps 时按 0.88 缩小，高于 ~75fps 且未满档时按 1.06 回升。
+     */
+    updateResolutionScale(deltaMs) {
+        if (this.options.adaptiveResolution === false) {
+            return;
+        }
+        this.frameTimes.push(deltaMs);
+        if (this.frameTimes.length < 45) {
+            return;
+        }
+        const avg = this.frameTimes.reduce((sum, value) => sum + value, 0) / this.frameTimes.length;
+        this.frameTimes.length = 0;
+
+        const previous = this.resolutionScale;
+        if (avg > 22 && this.resolutionScale > 0.7) {
+            this.resolutionScale = Math.max(0.7, this.resolutionScale * 0.88);
+        } else if (avg < 13.5 && this.resolutionScale < 1) {
+            this.resolutionScale = Math.min(1, this.resolutionScale * 1.06);
+        }
+        if (Math.abs(previous - this.resolutionScale) > 0.01) {
+            this.applyResolution();
+        }
     }
 
     startRenderLoop() {
         if (this.isRunning) return;
         this.isRunning = true;
+        this.lastFrameTime = null;
         this.animate();
     }
 
@@ -146,7 +205,12 @@ export class SceneManager {
     animate() {
         if (!this.isRunning) return;
 
-        this.animationId = requestAnimationFrame(this.animate.bind(this));
+        const now = performance.now();
+        const deltaMs = this.lastFrameTime === null ? 16.7 : now - this.lastFrameTime;
+        this.lastFrameTime = now;
+        this.animationId = requestAnimationFrame(this.boundAnimate);
+
+        this.updateResolutionScale(deltaMs);
 
         if (this.onBeforeRender) {
             this.onBeforeRender();
@@ -155,6 +219,8 @@ export class SceneManager {
         this.controls.update();
 
         if (this.needsRender) {
+            // 仅在真实渲染前刷新阴影贴图；空闲帧完全跳过阴影计算
+            this.renderer.shadowMap.needsUpdate = true;
             this.renderer.render(this.scene, this.camera);
             this.needsRender = false;
         }
@@ -251,6 +317,7 @@ export class SceneManager {
     dispose() {
         this.stopRenderLoop();
         window.removeEventListener('resize', this.boundHandleResize);
+        document.removeEventListener('visibilitychange', this.boundHandleVisibility);
 
         if (this.controls) {
             this.controls.dispose();

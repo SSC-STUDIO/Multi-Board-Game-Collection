@@ -92,8 +92,8 @@
 
 .game-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) 246px;
+    gap: 14px;
     align-items: start;
     margin-bottom: 18px;
 }

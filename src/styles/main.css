@@ -5836,3 +5836,206 @@ a:focus-visible {
     .result-resign .result-card { background: linear-gradient(145deg, rgba(35,28,20,0.98), rgba(50,35,22,0.98)); }
     .move-list { scrollbar-color: #5a4a38 transparent; }
 }
+
+/* ===== Compact HUD density + icon-only pass ===== */
+
+.hud-top {
+    padding: 7px 12px;
+    gap: 14px;
+}
+
+.hud-top-cluster {
+    flex-wrap: nowrap;
+    gap: 8px;
+}
+
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    padding: 4px 11px;
+    border-radius: 11px;
+}
+
+.status-chip.wide {
+    min-width: 0;
+}
+
+.status-chip .hud-label,
+.go-hud-chip .hud-label {
+    font-size: 0.72rem;
+    opacity: 0.72;
+}
+
+.status-chip .hud-value,
+.go-hud-chip .hud-value {
+    font-size: 0.92rem;
+}
+
+.chip-turn {
+    gap: 9px;
+}
+
+.chip-glyph {
+    flex: none;
+    opacity: 0.66;
+}
+
+.hud-side {
+    padding: 9px;
+    gap: 9px;
+}
+
+.panel-block,
+.panel-stage-row,
+.turn-spotlight {
+    gap: 7px;
+    padding: 10px 11px;
+    border-radius: 11px;
+}
+
+.panel-heading,
+.go-panel-heading {
+    font-size: 0.74rem;
+}
+
+.meta-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 10px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    min-width: 0;
+}
+
+.meta-label {
+    font-size: 0.68rem;
+    opacity: 0.62;
+    white-space: nowrap;
+}
+
+.meta-value {
+    font-size: 0.86rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.panel-stage-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.phase-pill {
+    flex: none;
+    min-height: 26px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+}
+
+.stage-title {
+    font-size: 0.98rem;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stage-subtitle {
+    display: none;
+}
+
+.turn-spotlight {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.spotlight-label {
+    flex: none;
+}
+
+.spotlight-text {
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.panel-momentum .panel-note {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.controls-row {
+    justify-content: center;
+    gap: 9px;
+}
+
+.move-list {
+    font-size: 0.82rem;
+    line-height: 1.45;
+    max-height: 38vh;
+}
+
+/* Icon-only buttons: label kept in DOM for a11y/i18n but visually hidden */
+.control-btn--icon {
+    aspect-ratio: 1 / 1;
+    padding: 9px;
+    justify-content: center;
+    border-radius: 13px;
+}
+
+.control-btn--icon .btn-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    clip-path: inset(50%);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+body[data-device-form='mobile'] .control-btn--icon,
+body[data-device-form='tablet'] .control-btn--icon {
+    aspect-ratio: auto;
+    padding: 10px 16px;
+}
+
+body[data-device-form='mobile'] .control-btn--icon .btn-label,
+body[data-device-form='tablet'] .control-btn--icon .btn-label {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    clip-path: none;
+    overflow: visible;
+}
+
+.tools-panel .tool-grid {
+    grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
+    gap: 8px;
+}
+
+.tools-panel .tool-grid > :last-child {
+    grid-column: auto;
+}
+
+.panel-block:hover,
+.turn-spotlight:hover,
+.status-chip:hover {
+    transform: none;
+}

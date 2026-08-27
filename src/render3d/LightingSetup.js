@@ -18,6 +18,8 @@ export class LightingSetup {
         this.presentationMode = 'setup';
         this.lastUpdateTime = null;
         this.updateInterval = 1 / 24;
+        // 主光阴影相机半宽：随棋盘尺寸动态收紧，保证阴影分辨率集中
+        this.shadowExtent = 18;
     }
 
     setup(scenePreset = 'competition') {
@@ -25,6 +27,10 @@ export class LightingSetup {
         this.createHemisphereLight();
         this.createDirectionalLight('main');
         this.createDirectionalLight('fill');
+        this.createDirectionalLight('rim');
+        this.createPointLight('accentA');
+        this.createPointLight('accentB');
+        this.createSpotLight();
         this.applyPreset(scenePreset);
     }
 
@@ -46,6 +52,32 @@ export class LightingSetup {
         this.applyDirectional(this.lights.main, preset.main);
         if (this.lights.fill && preset.fill) {
             this.applyDirectional(this.lights.fill, preset.fill);
+        }
+        if (this.lights.rim) {
+            if (preset.rim) {
+                this.applyDirectional(this.lights.rim, preset.rim);
+            } else {
+                this.lights.rim.intensity = 0;
+            }
+        }
+        ['accentA', 'accentB'].forEach((name) => {
+            const light = this.lights[name];
+            if (!light) {
+                return;
+            }
+            if (preset[name]) {
+                this.applyPoint(light, preset[name]);
+            } else {
+                light.intensity = 0;
+                light.visible = false;
+            }
+        });
+        if (this.lights.spot) {
+            if (preset.spot) {
+                this.applySpot(this.lights.spot, preset.spot);
+            } else {
+                this.lights.spot.visible = false;
+            }
         }
         this.lastUpdateTime = null;
 
@@ -118,6 +150,28 @@ export class LightingSetup {
         return Math.min(requestedSize, qualitySize);
     }
 
+    /**
+     * 设置主光阴影相机半宽（世界单位）。棋盘越大范围越宽，
+     * 让 shadow map 像素集中在棋盘上而非空旷地板。
+     * @param {number} extent 半宽（世界单位），限制在 [10, 26]
+     */
+    setShadowExtent(extent = 18) {
+        const next = Math.min(26, Math.max(10, Number(extent) || 18));
+        if (next === this.shadowExtent) {
+            return;
+        }
+        this.shadowExtent = next;
+        const main = this.lights.main;
+        if (main?.shadow) {
+            main.shadow.camera.left = -next;
+            main.shadow.camera.right = next;
+            main.shadow.camera.top = next;
+            main.shadow.camera.bottom = -next;
+            main.shadow.camera.updateProjectionMatrix?.();
+        }
+        this.sceneManager.setNeedsRender();
+    }
+
     update(_timeSeconds = performance.now() / 1000) {
         return false;
     }
@@ -180,14 +234,15 @@ export class LightingSetup {
         light.castShadow = light.userData.isPrimaryShadowLight && Boolean(settings.castShadow);
         if (light.castShadow) {
             const shadowMapSize = this.getShadowMapSize(settings.shadowMapSize);
+            const extent = this.shadowExtent;
             light.shadow.mapSize.width = shadowMapSize;
             light.shadow.mapSize.height = shadowMapSize;
             light.shadow.camera.near = 0.5;
-            light.shadow.camera.far = 60;
-            light.shadow.camera.left = -18;
-            light.shadow.camera.right = 18;
-            light.shadow.camera.top = 18;
-            light.shadow.camera.bottom = -18;
+            light.shadow.camera.far = extent * 3.2 + 16;
+            light.shadow.camera.left = -extent;
+            light.shadow.camera.right = extent;
+            light.shadow.camera.top = extent;
+            light.shadow.camera.bottom = -extent;
             light.shadow.bias = -0.00012;
             light.shadow.normalBias = 0.02;
         }

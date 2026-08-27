@@ -212,6 +212,7 @@
   "tooltipImmersiveToggle": "切换沉浸 HUD",
   "tooltipUndo": "撤回上一步",
   "tooltipHint": "显示推荐落点",
+"tooltipGoPass": "虚手，放弃一手",
   "tooltipSwap": "开局前切换先后",
   "tooltipRestart": "重新开始这一局",
   "tooltipResign": "结束当前对局",

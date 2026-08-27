@@ -26,6 +26,15 @@ const MARKER_THEMES = {
 
 const WINNING_PULSE_TAG_PREFIX = 'winning-pulse';
 
+/**
+ * 主光阴影相机半宽：棋盘对角半径 + 边框余量，限制在 [10, 26]。
+ * 让 shadow map 像素集中于棋盘及落子阴影带。
+ */
+function computeShadowExtent(boardSize, cellSize, borderWidth) {
+    const halfSpan = ((Math.max(boardSize, 5) - 1) * cellSize) / 2;
+    return Math.min(26, Math.max(10, halfSpan + (borderWidth || 0) + 2.4));
+}
+
 export class GomokuRenderer3D {
     constructor(container, options = {}) {
         this.container = container;
@@ -73,6 +82,9 @@ export class GomokuRenderer3D {
         this.lightingSetup = new LightingSetup(this.sceneManager, this.config);
         this.lightingSetup.setPresentationMode(this.presentationMode);
         this.lightingSetup.setup(this.scenePreset);
+        this.lightingSetup.setShadowExtent(
+            computeShadowExtent(this.boardSize, this.cellSize, this.config.board.borderWidth)
+        );
 
         this.boardBuilder = this.createBoardBuilder();
         this.environmentBuilder = this.createEnvironmentBuilder();
@@ -92,7 +104,14 @@ export class GomokuRenderer3D {
         this.cameraController.fitToBoard(this.boardSize, false);
 
         this.animationManager = new AnimationManager(this.sceneManager, this.config);
-        this.particleSystem = new ParticleSystem(this.sceneManager.scene);
+        const deviceProfile = this.config.deviceProfile || {};
+        const lowEndGraphics = Boolean(
+            deviceProfile.isExtremeLowEnd || deviceProfile.isMobile || deviceProfile.isLowMemory
+        );
+        this.particleSystem = new ParticleSystem(
+            this.sceneManager.scene,
+            lowEndGraphics ? { maxParticles: 360, dropBurst: 9 } : { maxParticles: 1000, dropBurst: 16 }
+        );
         this.sceneManager.onBeforeRender = () => this.handleFrame();
 
         this.interactionHandler = new InteractionHandler(this.sceneManager, {
@@ -136,6 +155,9 @@ export class GomokuRenderer3D {
 
         this.boardSize = size;
         this.clearWinningPulseState();
+        this.lightingSetup?.setShadowExtent(
+            computeShadowExtent(size, this.cellSize, this.config.board.borderWidth)
+        );
 
         const oldBoard = this.sceneManager.scene.getObjectByName('board');
         if (oldBoard) {

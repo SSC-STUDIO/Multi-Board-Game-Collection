@@ -212,6 +212,7 @@
   "tooltipImmersiveToggle": "Toggle the immersive HUD",
   "tooltipUndo": "Undo the last move",
   "tooltipHint": "Show a recommended move",
+"tooltipGoPass": "Pass your turn",
   "tooltipSwap": "Swap sides before the opening",
   "tooltipRestart": "Restart this game",
   "tooltipResign": "End the current game",
