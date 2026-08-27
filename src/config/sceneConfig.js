@@ -87,7 +87,7 @@ export const SCENE_SPECS = {
             },
             fill: { color: 0xffcf9f, intensity: 0.42, position: { x: -4.8, y: 6.2, z: 4.4 } },
             rim: { color: 0x97b9de, intensity: 0.14, position: { x: 0.8, y: 4.4, z: -9.2 } },
-            accentA: { color: 0xffc48a, intensity: 1.1, distance: 18, decay: 1.7, position: { x: -4.9, y: 3.9, z: 2.6 } },
+            accentA: { color: 0xffc48a, intensity: 1.34, distance: 18, decay: 1.7, position: { x: -4.9, y: 3.9, z: 2.6 } },
             accentB: { color: 0xffb97a, intensity: 0.38, distance: 14, decay: 2, position: { x: 4.4, y: 3, z: -4.6 } },
             spot: {
                 color: 0xffd7ab,
@@ -198,7 +198,7 @@ export const SCENE_SPECS = {
         },
         lighting: {
             fogColor: 0xadc6d1,
-            fogDensity: 0.0065,
+            fogDensity: 0.005,
             exposure: 1.2,
             ambient: { color: 0xf9fff0, intensity: 0.64 },
             hemisphere: { skyColor: 0xb9def7, groundColor: 0x5b7651, intensity: 0.44 },
@@ -339,10 +339,10 @@ export const SCENE_SPECS = {
             accentB: { color: 0xd7dee6, intensity: 0.28, distance: 22, decay: 1.85, position: { x: -4.4, y: 4.8, z: -5.2 } },
             spot: {
                 color: 0xf6f1e8,
-                intensity: 1.96,
+                intensity: 2.1,
                 distance: 34,
-                angle: 0.48,
-                penumbra: 0.72,
+                angle: 0.4,
+                penumbra: 0.55,
                 position: { x: 0, y: 10.6, z: 1.4 },
                 target: { x: 0, y: 0, z: -0.2 }
             },
