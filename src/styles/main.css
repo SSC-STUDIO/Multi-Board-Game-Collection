@@ -6055,3 +6055,11 @@ body[data-device-form='tablet'] .control-btn--icon .btn-label {
 .turn-spotlight + .panel-block {
     border-top: 1px solid rgba(255,255,255,0.04);
 }
+
+/* ===== Compact V3: meta 4-col + wood denser === */
+@media (min-width: 1100px) {
+    .meta-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px 8px;
+    }
+}

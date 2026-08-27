@@ -82,7 +82,7 @@
 .status-bar {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
+    gap: 10px;
     background: rgba(255, 255, 255, 0.75);
     border-radius: 16px;
     padding: 14px 16px;

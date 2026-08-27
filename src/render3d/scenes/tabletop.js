@@ -28,7 +28,7 @@ function getWoodGrainTexture(builder) {
     ctx.fillStyle = '#ece4d2';
     ctx.fillRect(0, 0, 256, 256);
 
-    for (let i = 0; i < 170; i += 1) {
+    for (let i = 0; i < 200; i += 1) {
         const x = Math.random() * 256;
         const width = 0.6 + Math.random() * 2.6;
         const alpha = 0.04 + Math.random() * 0.15;
@@ -49,7 +49,7 @@ function getWoodGrainTexture(builder) {
     }
 
     // 少量更深的宽年轮带
-    for (let i = 0; i < 9; i += 1) {
+    for (let i = 0; i < 12; i += 1) {
         const x = Math.random() * 256;
         const width = 5 + Math.random() * 10;
         ctx.strokeStyle = `rgba(96, 70, 40, ${(0.05 + Math.random() * 0.06).toFixed(3)})`;
