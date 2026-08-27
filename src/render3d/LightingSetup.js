@@ -147,7 +147,11 @@ export class LightingSetup {
 
     getShadowMapSize(requestedSize = 2048) {
         const qualitySize = this.config.lighting?.main?.shadowMapSize ?? requestedSize;
-        return Math.min(requestedSize, qualitySize);
+        let size = Math.min(requestedSize, qualitySize);
+        const dp = this.config.deviceProfile || {};
+        const isLowEndShadow = Boolean(dp.isMobile || dp.isExtremeLowEnd || dp.isLowMemory);
+        if (isLowEndShadow) size = Math.min(size, 1024);
+        return size;
     }
 
     /**
