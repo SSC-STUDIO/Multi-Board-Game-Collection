@@ -9,6 +9,11 @@ if (typeof globalThis.localStorage === 'undefined') {
     };
 }
 
+// Node 20 CI runners lack `navigator`; Node 22+ may expose a partial one.
+if (typeof globalThis.navigator === 'undefined') {
+    globalThis.navigator = { language: 'en-US', maxTouchPoints: 0 };
+}
+
 if (typeof globalThis.matchMedia === 'undefined') {
     globalThis.matchMedia = () => ({
         matches: false,

@@ -874,14 +874,18 @@ class I18n {
     }
 
     detectLanguage() {
-        // 从 localStorage 获取
-        const saved = localStorage.getItem('gomoku-lang');
-        if (saved && translations[saved]) {
-            return saved;
+        // 从 localStorage 获取（Node/CI 等无 DOM 环境需兜底）
+        try {
+            const saved = globalThis.localStorage?.getItem?.('gomoku-lang');
+            if (saved && translations[saved]) {
+                return saved;
+            }
+        } catch {
+            /* ignore unavailable storage */
         }
 
         // 从浏览器语言检测
-        const browserLang = navigator.language.toLowerCase();
+        const browserLang = String(globalThis.navigator?.language || '').toLowerCase();
         if (browserLang.startsWith('zh')) {
             return 'zh';
         }
