@@ -5169,9 +5169,9 @@ body.launcher-open .hud-bottom {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 12px 18px;
-    border-radius: 18px;
+    gap: 10px;
+    padding: 7px 14px;
+    border-radius: 13px;
 }
 
 .go-hud-cluster {
@@ -5181,12 +5181,14 @@ body.launcher-open .hud-bottom {
 }
 
 .go-hud-chip {
-    display: flex;
-    flex-direction: column;
-    padding: 8px 14px;
-    border-radius: 12px;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 9px;
     background: rgba(255, 255, 255, 0.06);
-    min-width: 92px;
+    min-width: 0;
 }
 
 .go-hud-chip .hud-label {
@@ -5382,7 +5384,7 @@ body.launcher-open .hud-bottom {
 }
 
 .go-controls .control-btn {
-    min-width: 108px;
+    min-width: 0;
 }
 
 .go-result-scores {
