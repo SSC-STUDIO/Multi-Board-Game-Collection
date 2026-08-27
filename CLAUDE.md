@@ -134,7 +134,7 @@ npx vitest run src/games/go/rules.test.js
 
 ## 已知问题
 
-1. **LLM Coach 网络错误处理**：`llmCoach.js` 依赖外部 API，网络异常处理需加强
+1. **LLM Coach 网络错误处理**：`llmCoach.js` 依赖外部 API。已支持瞬时错误（network_error/timeout）自动重试（`fetchWithRetry`，默认 2 次线性退避 400ms 起），HTTP/配置/解析错误不重试；超长流式响应与代理层断连仍需观察
 2. **3D 移动端性能**：低端设备上 Three.js 场景可能卡顿，PixelRatio 已有限制但仍需优化
 3. **Electron 在 WSL 中不可用**：需要 Windows 原生环境构建和测试
 4. **Gomoku 3D 截图在 headless Chromium 中不可用**：Three.js 场景使用 SwiftShader 渲染时 `page.screenshot()` 超时（已知 Playwright + headless 限制）。Go 3D 渲染（较简单结构）可正常截图。不影响真实用户。

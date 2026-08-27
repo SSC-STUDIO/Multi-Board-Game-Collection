@@ -4,6 +4,10 @@
 const STORAGE_KEY = 'gomoku-llm-coach-settings';
 const REQUEST_TIMEOUT_MS = 12_000;
 const REQUEST_TEMPERATURE = 0.2;
+/** 可重试的瞬时错误码：网络抖动与超时值得再试；配置/HTTP/解析错误重试无意义 */
+const RETRYABLE_ERROR_CODES = new Set(['network_error', 'timeout']);
+const DEFAULT_MAX_RETRIES = 2;
+const DEFAULT_RETRY_DELAY_MS = 400;
 const DIFFICULTY_CONFIG = {
     easy: {
         hint: 'Explain like you are teaching a beginner. Use simple language, explain basic concepts, and focus on fundamental strategies.',
@@ -216,7 +220,7 @@ export async function requestLlmCoachAdvice({ settings, snapshot, signal, gameTy
         }
 
         const request = buildChatCompletionRequest(snapshot, createBoardImageDataUrl(snapshot, gameType), normalized.model, gameType, difficulty);
-        const response = await fetchWithTimeout(`${normalized.baseUrl}/v1/chat/completions`, {
+        const response = await fetchWithRetry(`${normalized.baseUrl}/v1/chat/completions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -267,7 +271,7 @@ export async function requestPostGameAnalysis({ settings, snapshot, signal, game
         }
         const boardImageData = createBoardImageDataUrl(snapshot, gameType);
         const request = buildPostGameRequest(snapshot, boardImageData, normalized.model, gameType);
-        const response = await fetchWithTimeout(normalized.baseUrl + "/v1/chat/completions", {
+        const response = await fetchWithRetry(normalized.baseUrl + "/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -449,6 +453,63 @@ export async function fetchWithTimeout(url, options) {
         window.clearTimeout(timeoutId);
         parentSignal?.removeEventListener?.('abort', abortFromParent);
     }
+}
+
+/**
+ * 等待指定毫秒；若父级信号中止则立即返回（由调用方在下一轮循环检测并放弃重试）。
+ * @param {number} ms - 等待时长
+ * @param {AbortSignal} [signal] - 上层取消信号
+ */
+function delayForRetry(ms, signal) {
+    if (!ms) return Promise.resolve();
+    return new Promise((resolve) => {
+        if (signal?.aborted) {
+            resolve();
+            return;
+        }
+        const timerId = window.setTimeout(resolve, ms);
+        signal?.addEventListener('abort', () => window.clearTimeout(timerId), { once: true });
+    });
+}
+
+/**
+ * 带瞬时错误重试的 fetch 包装器：对 `network_error` / `timeout` 按线性退避重试，
+ * 配置缺失、HTTP 错误、响应解析失败等非瞬时错误直接抛出不重试。
+ * 重试等待期间上层 AbortSignal 触发时尽快结束等待，并在下一轮尝试前放弃。
+ * @param {string} url - 请求地址
+ * @param {RequestInit & { signal?: AbortSignal, timeoutMs?: number, retries?: number, retryDelayMs?: number }} [options] - fetch 选项与重试配置
+ * @returns {Promise<Response>} fetch 响应
+ */
+export async function fetchWithRetry(url, options = {}) {
+    const maxRetries = Number.isInteger(options.retries) && options.retries >= 0
+        ? options.retries
+        : DEFAULT_MAX_RETRIES;
+    const retryDelayMs = Number.isFinite(options.retryDelayMs)
+        ? Math.max(0, options.retryDelayMs)
+        : DEFAULT_RETRY_DELAY_MS;
+    const { retries: _retries, retryDelayMs: _retryDelay, ...fetchOptions } = options;
+
+    let lastError = null;
+    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+        if (options.signal?.aborted) {
+            throw new LlmCoachError('LLM request was aborted.', 'aborted');
+        }
+
+        try {
+            return await fetchWithTimeout(url, fetchOptions);
+        } catch (error) {
+            const code = error instanceof LlmCoachError ? error.code : null;
+            if (options.signal?.aborted || code === 'aborted' || !RETRYABLE_ERROR_CODES.has(code)) {
+                throw error;
+            }
+            lastError = error;
+            if (attempt < maxRetries) {
+                await delayForRetry(retryDelayMs * (attempt + 1), options.signal);
+            }
+        }
+    }
+
+    throw lastError || new LlmCoachError('LLM request failed.', 'network_error');
 }
 
 /**

@@ -39,6 +39,7 @@ const {
     loadLlmCoachSettings,
     saveLlmCoachSettings,
     fetchWithTimeout,
+    fetchWithRetry,
     requestLlmCoachAdvice,
     requestPostGameAnalysis
 } = await import('./llmCoach.js');
@@ -257,6 +258,75 @@ describe('fetchWithTimeout', () => {
         });
 
         await expect(fetchWithTimeout('https://x', { signal: controller.signal })).rejects.toThrow(LlmCoachError);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// fetchWithRetry
+// ---------------------------------------------------------------------------
+describe('fetchWithRetry', () => {
+    beforeEach(() => {
+        globalThis.fetch = vi.fn();
+    });
+
+    it('should retry once on transient network failure and succeed', async () => {
+        globalThis.fetch.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+        const mockResponse = { ok: true };
+        globalThis.fetch.mockResolvedValueOnce(mockResponse);
+
+        const resp = await fetchWithRetry('https://api.test/v1', { retries: 2, retryDelayMs: 1 });
+
+        expect(resp).toBe(mockResponse);
+        expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw after exhausting retries on persistent network failure', async () => {
+        globalThis.fetch.mockRejectedValue(new TypeError('network down'));
+
+        await expect(fetchWithRetry('https://bad', { retries: 2, retryDelayMs: 1 }))
+            .rejects.toThrow('network down');
+        // 1 initial attempt + 2 retries
+        expect(globalThis.fetch).toHaveBeenCalledTimes(3);
+    });
+
+    it('should not retry when parent signal aborted between attempts', async () => {
+        const controller = new AbortController();
+        globalThis.fetch.mockImplementation(async () => {
+            controller.abort();
+            throw new TypeError('Failed to fetch');
+        });
+
+        await expect(fetchWithRetry('https://x', { signal: controller.signal, retries: 3, retryDelayMs: 1 }))
+            .rejects.toThrow(LlmCoachError);
+        // aborts before the 2nd attempt
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not retry http-level errors surfaced by callers', async () => {
+        // A non-ok response resolves normally at the transport layer;
+        // retry only applies to network_error/timeout, so a single call happens.
+        globalThis.fetch.mockResolvedValue({ ok: false, status: 500, json: () => Promise.resolve({}) });
+
+        const resp = await fetchWithRetry('https://api.test/v1', { retries: 2, retryDelayMs: 1 });
+        expect(resp.ok).toBe(false);
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('requestLlmCoachAdvice should recover from one transient failure', async () => {
+        const settings = { enabled: true, baseUrl: 'https://api.test', model: 'gpt-4o', apiKey: 'sk-test' };
+        const snapshot = { boardSize: 15, board: [], moveHistory: [], currentPlayer: 'black', lastMove: null };
+        globalThis.fetch.mockRejectedValueOnce(new TypeError('flaky'));
+        globalThis.fetch.mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({
+                choices: [{ message: { content: '{"recommended":{"row":7,"col":7},"alternatives":[],"reason":"center","risk":"low","plan":"control"}' } }],
+                usage: null
+            })
+        });
+
+        const advice = await requestLlmCoachAdvice({ settings, snapshot, gameType: 'gomoku' });
+        expect(advice.reason).toBe('center');
+        expect(globalThis.fetch).toHaveBeenCalledTimes(2);
     });
 });
 
