@@ -99,7 +99,7 @@
     {
       "id": "ALL_ROOKERIES",
       "name": "All-Rounder",
-      "description": "Play all 5 game types",
+      "description": "Play both Gomoku and Go",
       "icon": "achievement_allround.png",
       "hidden": false,
       "rarity": "rare"
@@ -113,25 +113,17 @@
       "rarity": "rare"
     },
     {
-      "id": "CHECKMATE_VICTORY",
-      "name": "Checkmate!",
-      "description": "Win a Chess game by checkmate",
-      "icon": "achievement_checkmate.png",
-      "hidden": false,
-      "rarity": "common"
-    },
-    {
-      "id": "CAPTURE_THE_FLAG",
-      "name": "Capture the Flag",
-      "description": "Win a Junqi game by capturing the flag",
-      "icon": "achievement_flag.png",
+      "id": "GO_TERRITORY",
+      "name": "Territory Sense",
+      "description": "Win a scored Go game on 19×19",
+      "icon": "achievement_go_territory.png",
       "hidden": false,
       "rarity": "rare"
     },
     {
       "id": "3D_ENJOYER",
       "name": "3D Connoisseur",
-      "description": "Try all 5 camera presets in 3D mode",
+      "description": "Try all three tabletop moods in 3D mode",
       "icon": "achievement_3d.png",
       "hidden": false,
       "rarity": "common"

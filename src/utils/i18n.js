@@ -38,7 +38,7 @@ function flattenTranslations(obj) {
 const translations = {
     zh: {
         // 设置界面
-        appTitle: '多棋类合集 · Board Games',
+        appTitle: '五子棋与围棋 · Board Games',
         skipToGame: '跳转到棋盘',
         setupTitle: '五子棋',
         setupSubtitle: '进入五子棋 3D 棋盘，直接开局。',
@@ -199,11 +199,6 @@ const translations = {
         goScoreDetail: '按中国规则数子。贴目 {komi}。',
         goResignDetail: '对方认输，本局结束。',
 
-        // 国际象棋
-
-        // 中国象棋
-
-        // 军棋 Junqi
         coachSourceLocal: '本地 AI',
         coachSourceLlm: 'LLM',
         coachStatusLocal: '本地推荐已显示',
@@ -451,7 +446,7 @@ const translations = {
     },
     en: {
         // Setup
-        appTitle: 'Board Games Collection',
+        appTitle: 'Gomoku & Go',
         skipToGame: 'Skip to Game',
         setupTitle: 'Gomoku',
         setupSubtitle: 'Enter the Gomoku 3D board and start at once.',
@@ -612,11 +607,6 @@ const translations = {
         goScoreDetail: 'Chinese (area) scoring. Komi {komi}.',
         goResignDetail: 'The opponent resigned. The game ends.',
 
-        // Chess
-
-        // Xiangqi
-
-        // Junqi
         coachSourceLocal: 'Local AI',
         coachSourceLlm: 'LLM',
         coachStatusLocal: 'Local suggestion shown',
