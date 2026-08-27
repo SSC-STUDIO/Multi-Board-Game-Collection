@@ -6039,3 +6039,19 @@ body[data-device-form='tablet'] .control-btn--icon .btn-label {
 .status-chip:hover {
     transform: none;
 }
+/* ===== Compact V2: 2-col move history on wide === */
+@media (min-width: 1100px) {
+    .move-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px 10px;
+        align-content: start;
+    }
+    .move-list:empty {
+        display: block;
+    }
+}
+.panel-block + .panel-block,
+.turn-spotlight + .panel-block {
+    border-top: 1px solid rgba(255,255,255,0.04);
+}

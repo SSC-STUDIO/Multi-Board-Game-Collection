@@ -63,8 +63,8 @@ function getWoodGrainTexture(builder) {
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(2, 1.4);
-    texture.anisotropy = 4;
+    texture.repeat.set(2.8, 1.6);
+    texture.anisotropy = 8;
     texture.colorSpace = THREE.SRGBColorSpace;
 
     builder.sharedTextures.set(key, texture);
@@ -142,7 +142,7 @@ export function buildTabletop(builder, ctx, preset = 'competition') {
         roughness: 0.42,
         metalness: 0.18,
         emissive: new THREE.Color(mood.lamp),
-        emissiveIntensity: 0.32
+        emissiveIntensity: 0.42
     });
 
     addPlane(builder, group, 'tabletop-floor', [42, 48], [0, ctx.floorY, 0], floorMat, {
