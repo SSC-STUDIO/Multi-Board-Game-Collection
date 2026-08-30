@@ -144,8 +144,8 @@ const translations = {
         devPanelClose: '关闭面板',
 
         // 多游戏启动器
-        launcherTitle: '五种棋类，一座 3D 对弈大厅',
-        launcherSubtitle: '从连珠、围地到王车、楚河汉界与陆战铁路，每款棋保留自己的规则和 3D 棋盘。',
+        launcherTitle: '七种棋类，一座 3D 对弈大厅',
+        launcherSubtitle: '从连珠、围地到王车、楚河汉界、陆战铁路，再到将棋与黑白棋，每款棋保留自己的规则和 3D 棋盘。',
         launcherWelcome: '3D 棋类大厅',
         launcherAvailableBadge: '已上线',
         launcherComingSoonBadge: '开发中',
@@ -670,8 +670,8 @@ const translations = {
         devPanelClose: 'Close panel',
 
         // Multi-game launcher
-        launcherTitle: 'Five board games, one 3D match hall',
-        launcherSubtitle: 'From five-in-a-row and territory fights to kings, rivers, and railways, each game keeps its own rules and 3D board.',
+        launcherTitle: 'Seven board games, one 3D match hall',
+        launcherSubtitle: 'From five-in-a-row and territory fights to kings, rivers, railways, shogi drops, and disc flips, each game keeps its own rules and 3D board.',
         launcherWelcome: '3D Board Game Hall',
         launcherAvailableBadge: 'Live',
         launcherComingSoonBadge: 'In progress',
