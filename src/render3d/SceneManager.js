@@ -5,6 +5,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { getOptimalConfig } from '../config/renderConfig.js';
 
 export class SceneManager {
@@ -17,6 +18,7 @@ export class SceneManager {
         this.camera = null;
         this.renderer = null;
         this.controls = null;
+        this.environmentTexture = null;
         this.animationId = null;
         this.isRunning = false;
         this.needsRender = true;
@@ -32,6 +34,7 @@ export class SceneManager {
         this.createScene();
         this.createCamera();
         this.createRenderer();
+        this.setupEnvironment();
         this.createControls();
         this.setupEventListeners();
         this.startRenderLoop();
@@ -72,6 +75,39 @@ export class SceneManager {
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         this.container.appendChild(this.renderer.domElement);
+    }
+
+    /**
+     * 生成基于图像的环境光照（IBL）。
+     * 使用 RoomEnvironment 通过 PMREMGenerator 预处理成环境贴图，
+     * 只赋给 scene.environment（保持 scene.background 透明），
+     * 让棋子/棋盘等 PBR 材质获得柔和的高光与反射，提升 3D 质感。
+     */
+    setupEnvironment() {
+        if (!this.renderer || !this.scene) {
+            return;
+        }
+
+        let pmremGenerator = null;
+        let roomEnvironment = null;
+        try {
+            pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+            roomEnvironment = new RoomEnvironment();
+            const renderTarget = pmremGenerator.fromScene(roomEnvironment, 0.04);
+            this.environmentTexture = renderTarget.texture;
+            this.scene.environment = this.environmentTexture;
+
+            const intensity = this.config.environment?.environmentIntensity ?? 0.55;
+            if ('environmentIntensity' in this.scene) {
+                this.scene.environmentIntensity = intensity;
+            }
+        } catch (error) {
+            console.warn('[SceneManager] 环境贴图初始化失败，已跳过 IBL:', error);
+            this.environmentTexture = null;
+        } finally {
+            roomEnvironment?.dispose?.();
+            pmremGenerator?.dispose?.();
+        }
     }
 
     createControls() {
@@ -254,6 +290,14 @@ export class SceneManager {
 
         if (this.controls) {
             this.controls.dispose();
+        }
+
+        if (this.scene) {
+            this.scene.environment = null;
+        }
+        if (this.environmentTexture) {
+            this.environmentTexture.dispose();
+            this.environmentTexture = null;
         }
 
         if (this.renderer) {
