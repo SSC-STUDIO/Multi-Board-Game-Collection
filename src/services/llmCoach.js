@@ -4,6 +4,10 @@
 const STORAGE_KEY = 'gomoku-llm-coach-settings';
 const REQUEST_TIMEOUT_MS = 12_000;
 const REQUEST_TEMPERATURE = 0.2;
+/** 可重试的瞬时错误码：网络抖动与超时值得再试；配置/HTTP/解析错误重试无意义 */
+const RETRYABLE_ERROR_CODES = new Set(['network_error', 'timeout']);
+const DEFAULT_MAX_RETRIES = 2;
+const DEFAULT_RETRY_DELAY_MS = 400;
 const DIFFICULTY_CONFIG = {
     easy: {
         hint: 'Explain like you are teaching a beginner. Use simple language, explain basic concepts, and focus on fundamental strategies.',
@@ -33,36 +37,6 @@ const GAME_COACH_CONFIG = {
         moveHint: 'For Go, recommended move uses {row, col} for an intersection, or {pass: true} to pass. Alternatives are other viable points.',
         analyzePrefix: 'Analyze this Go position for the human player.'
     },
-    chess: {
-        role: 'You are an International Chess teaching coach.',
-        rules: 'Chess: White moves first. Standard piece movement rules apply. Special moves: castling, en passant, pawn promotion. Checkmate wins; stalemate is a draw.',
-        moveHint: 'For Chess, recommended move uses {from: {row, col}, to: {row, col}, promotion?: "Q"|"R"|"B"|"N"}. Row 0 is rank 1 (white back rank).',
-        analyzePrefix: 'Analyze this Chess position for the human player.'
-    },
-    xiangqi: {
-        role: 'You are a Chinese Chess (Xiangqi) teaching coach.',
-        rules: 'Xiangqi: Red moves first. Pieces move on intersections of a 9x10 board with a river in the middle. Generals and advisors stay in the palace. Elephants cannot cross the river. Cannon captures by jumping over exactly one piece.',
-        moveHint: 'For Xiangqi, recommended move uses {from: {row, col}, to: {row, col}}. Row 0 is the top edge.',
-        analyzePrefix: 'Analyze this Xiangqi position for the human player.'
-    },
-    junqi: {
-        role: 'You are a Military Chess (Junqi/Flip Chess) teaching coach.',
-        rules: 'Junqi Flip: All pieces start face-down. Players flip one piece per turn to determine sides, then alternate moves. Higher rank captures lower. Bombs destroy attackers. Mines block all except engineers. Flag capture wins.',
-        moveHint: 'For Junqi, recommended move uses {action: "flip"|"move", row, col, to?: {row, col}}. Flipping reveals a hidden piece.',
-        analyzePrefix: 'Analyze this Junqi position for the human player.'
-    },
-    othello: {
-        role: 'You are an Othello (Reversi) teaching coach.',
-        rules: 'Othello: 8x8 board. Black moves first. A move places a disc on an empty square and must bracket one or more opponent discs in a straight line; all bracketed discs flip to the current player color. If a player has no legal move, they pass. Game ends when neither player can move. Player with the most discs wins. Corners are the most valuable squares; X-squares and C-squares next to corners are dangerous.',
-        moveHint: 'For Othello, recommended move uses {row, col} for an empty square that legally flips at least one opponent disc. Alternatives are other high-value legal moves, prioritizing corners and edges.',
-        analyzePrefix: 'Analyze this Othello position for the human player.'
-    },
-    shogi: {
-        role: 'You are a Shogi (Japanese Chess) teaching coach.',
-        rules: 'Shogi: 9x9 board. Sente (first player) moves first. Pieces are captured and may be dropped back onto empty squares (drops are unique to Shogi). Promotion applies in the last three ranks; a moved piece may promote unless it is a King or Gold. Promoted pieces gain new movement. Checkmate of the king wins; the TwoPawn (doubling unpromoted pawns on a file) and similar illegal drop rules apply.',
-        moveHint: 'For Shogi, recommended move uses {from: {row, col}, to: {row, col}, promote?: true|false} for a board move, or {drop: true, type, to: {row, col}} to drop a captured piece. Row 0 is the far side (Gote back rank), row 8 is Sente back rank.',
-        analyzePrefix: 'Analyze this Shogi position for the human player.'
-    }
 };
 
 const DEFAULT_SETTINGS = {
@@ -246,7 +220,7 @@ export async function requestLlmCoachAdvice({ settings, snapshot, signal, gameTy
         }
 
         const request = buildChatCompletionRequest(snapshot, createBoardImageDataUrl(snapshot, gameType), normalized.model, gameType, difficulty);
-        const response = await fetchWithTimeout(`${normalized.baseUrl}/v1/chat/completions`, {
+        const response = await fetchWithRetry(`${normalized.baseUrl}/v1/chat/completions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -297,7 +271,7 @@ export async function requestPostGameAnalysis({ settings, snapshot, signal, game
         }
         const boardImageData = createBoardImageDataUrl(snapshot, gameType);
         const request = buildPostGameRequest(snapshot, boardImageData, normalized.model, gameType);
-        const response = await fetchWithTimeout(normalized.baseUrl + "/v1/chat/completions", {
+        const response = await fetchWithRetry(normalized.baseUrl + "/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -356,12 +330,7 @@ export async function testLlmCoachConnection(settings, { signal } = {}) {
  */
 const POST_GAME_ADVICE = {
     gomoku: "For Gomoku: evaluate five-in-a-row threats, Renji forbidden-move avoidance, opening theory, and mid-game attack-defend balance.",
-    go: "For Go: evaluate territory vs influence, life-and-death, ko fights, and endgame scoring.",
-    chess: "For Chess: evaluate material balance, king safety, pawn structure, piece activity, and tactical motifs.",
-    xiangqi: "For Xiangqi: evaluate material, river-crossing advantages, palace defense, and checkmate nets.",
-    junqi: "For Junqi: evaluate flag protection, rank hierarchy, railway mobility, and tactical reveals.",
-    othello: "For Othello: evaluate corner control, disc parity, mobility, frontier discs (X/C-square risks), and stable disc endgame counting.",
-    shogi: "For Shogi: evaluate material balance, promotions, king safety (castle formations), tempo, drop tactics, and endgame mate nets."
+    go: "For Go: evaluate territory vs influence, life-and-death, ko fights, and endgame scoring."
 };
 
 function buildPostGameRequest(snapshot, boardImageDataUrl, model, gameType) {
@@ -487,6 +456,63 @@ export async function fetchWithTimeout(url, options) {
 }
 
 /**
+ * 等待指定毫秒；若父级信号中止则立即返回（由调用方在下一轮循环检测并放弃重试）。
+ * @param {number} ms - 等待时长
+ * @param {AbortSignal} [signal] - 上层取消信号
+ */
+function delayForRetry(ms, signal) {
+    if (!ms) return Promise.resolve();
+    return new Promise((resolve) => {
+        if (signal?.aborted) {
+            resolve();
+            return;
+        }
+        const timerId = window.setTimeout(resolve, ms);
+        signal?.addEventListener('abort', () => window.clearTimeout(timerId), { once: true });
+    });
+}
+
+/**
+ * 带瞬时错误重试的 fetch 包装器：对 `network_error` / `timeout` 按线性退避重试，
+ * 配置缺失、HTTP 错误、响应解析失败等非瞬时错误直接抛出不重试。
+ * 重试等待期间上层 AbortSignal 触发时尽快结束等待，并在下一轮尝试前放弃。
+ * @param {string} url - 请求地址
+ * @param {RequestInit & { signal?: AbortSignal, timeoutMs?: number, retries?: number, retryDelayMs?: number }} [options] - fetch 选项与重试配置
+ * @returns {Promise<Response>} fetch 响应
+ */
+export async function fetchWithRetry(url, options = {}) {
+    const maxRetries = Number.isInteger(options.retries) && options.retries >= 0
+        ? options.retries
+        : DEFAULT_MAX_RETRIES;
+    const retryDelayMs = Number.isFinite(options.retryDelayMs)
+        ? Math.max(0, options.retryDelayMs)
+        : DEFAULT_RETRY_DELAY_MS;
+    const { retries: _retries, retryDelayMs: _retryDelay, ...fetchOptions } = options;
+
+    let lastError = null;
+    for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+        if (options.signal?.aborted) {
+            throw new LlmCoachError('LLM request was aborted.', 'aborted');
+        }
+
+        try {
+            return await fetchWithTimeout(url, fetchOptions);
+        } catch (error) {
+            const code = error instanceof LlmCoachError ? error.code : null;
+            if (options.signal?.aborted || code === 'aborted' || !RETRYABLE_ERROR_CODES.has(code)) {
+                throw error;
+            }
+            lastError = error;
+            if (attempt < maxRetries) {
+                await delayForRetry(retryDelayMs * (attempt + 1), options.signal);
+            }
+        }
+    }
+
+    throw lastError || new LlmCoachError('LLM request failed.', 'network_error');
+}
+
+/**
  * 锟?OpenAI 鍏煎鍝嶅簲涓彁鍙栧姪鎵嬫秷鎭鏂囷拷?
  * @param {any} payload - 鍘熷鍝嶅簲 JSON
  * @returns {string} 绾枃鏈姪鎵嬪唴锟?
@@ -559,112 +585,11 @@ function extractJsonObjectText(content) {
  */
 function createBoardImageDataUrl(snapshot, gameType) {
     const gt = gameType || 'gomoku';
-    if (gt === 'chess' || gt === 'xiangqi') {
-        return createGridBoardImageUrl(snapshot, gt);
-    }
-    if (gt === 'othello') {
-        return createOthelloBoardImageUrl(snapshot);
-    }
-    if (gt === 'shogi') {
-        return createShogiBoardImageUrl(snapshot);
-    }
     return createIntersectionBoardImageUrl(snapshot, gt);
 }
 
 /**
- * Render a rectangular grid board (Chess 8x8 or Xiangqi 9x10) with piece labels.
- */
-function createGridBoardImageUrl(snapshot, gameType) {
-    const cols = gameType === 'xiangqi' ? 9 : 8;
-    const rows = gameType === 'xiangqi' ? 10 : 8;
-    const canvasSize = 768;
-    const padding = 58;
-    const cellW = (canvasSize - padding * 2) / cols;
-    const cellH = (canvasSize - padding * 2) / rows;
-    const canvas = document.createElement('canvas');
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-    const ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = '#deb887';
-    ctx.fillRect(0, 0, canvasSize, canvasSize);
-    ctx.fillStyle = '#2f2419';
-    ctx.font = '18px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    ctx.strokeStyle = 'rgba(47, 36, 25, 0.82)';
-    ctx.lineWidth = 2;
-    for (let r = 0; r <= rows; r++) {
-        const y = padding + r * cellH;
-        ctx.beginPath();
-        ctx.moveTo(padding, y);
-        ctx.lineTo(canvasSize - padding, y);
-        ctx.stroke();
-    }
-    for (let col = 0; col <= cols; col++) {
-        const x = padding + col * cellW;
-        ctx.beginPath();
-        ctx.moveTo(x, padding);
-        ctx.lineTo(x, canvasSize - padding);
-        ctx.stroke();
-    }
-
-    if (gameType === 'xiangqi') {
-        const riverY = padding + 4.5 * cellH;
-        ctx.fillStyle = '#deb887';
-        ctx.fillRect(padding, riverY - cellH * 0.4, canvasSize - padding * 2, cellH * 0.8);
-        ctx.fillStyle = '#2f2419';
-        ctx.font = '20px sans-serif';
-        ctx.fillText('\u695a \u6cb3          \u6c49 \u754c', canvasSize / 2, riverY);
-    }
-
-    if (gameType === 'chess') {
-        const labels = 'ABCDEFGH';
-        ctx.font = '16px sans-serif';
-        for (let i = 0; i < 8; i++) {
-            ctx.fillText(labels[i], padding + i * cellW + cellW / 2, padding - 25);
-            ctx.fillText(labels[i], padding + i * cellW + cellW / 2, canvasSize - padding + 25);
-        }
-    }
-
-    ctx.font = 'bold 22px sans-serif';
-    const board = snapshot.board;
-    if (board) {
-        for (let r = 0; r < rows; r++) {
-            for (let col = 0; col < cols; col++) {
-                const cell = board[r] && board[r][col];
-                if (!cell) continue;
-                const x = padding + col * cellW + cellW / 2;
-                const y = padding + r * cellH + cellH / 2;
-                const rad = Math.min(cellW, cellH) * 0.42;
-                ctx.fillStyle = cell.color === 'red' || cell.color === 'black'
-                    ? 'rgba(40,40,40,0.12)' : 'rgba(255,255,255,0.12)';
-                ctx.beginPath();
-                ctx.arc(x, y, rad, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = cell.color === 'red' ? '#cc0000'
-                    : cell.color === 'black' ? '#111' : '#fff';
-                ctx.fillText(cell.symbol || cell.piece || '?', x, y);
-            }
-        }
-    }
-
-    if (snapshot.lastMove) {
-        const x = padding + snapshot.lastMove.col * cellW + cellW / 2;
-        const y = padding + snapshot.lastMove.row * cellH + cellH / 2;
-        ctx.strokeStyle = '#f1c75c';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(x, y, Math.min(cellW, cellH) * 0.46, 0, Math.PI * 2);
-        ctx.stroke();
-    }
-
-    return canvas.toDataURL('image/png');
-}
-
-/**
- * Render an intersection-based board (Gomoku, Go, Junqi).
+ * Render an intersection-based board (Gomoku, Go).
  */
 function createIntersectionBoardImageUrl(snapshot, gameType) {
     const size = Number(snapshot.boardSize) || 15;
@@ -759,218 +684,3 @@ function getBoardImageStarPoints(size) {
  * Render an Othello (Reversi) 8x8 board with green felt and black/white discs.
  * Board cells are 'black' | 'white' | null.
  */
-function createOthelloBoardImageUrl(snapshot) {
-    const size = 8;
-    const canvasSize = 768;
-    const padding = 58;
-    const cell = (canvasSize - padding * 2) / size;
-    const canvas = document.createElement('canvas');
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#0d3b1f';
-    ctx.fillRect(0, 0, canvasSize, canvasSize);
-    ctx.fillStyle = '#e8e8e8';
-    ctx.font = '16px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-    ctx.lineWidth = 1.5;
-    for (let i = 0; i <= size; i += 1) {
-        const pos = padding + i * cell;
-        ctx.beginPath();
-        ctx.moveTo(padding, pos);
-        ctx.lineTo(canvasSize - padding, pos);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(pos, padding);
-        ctx.lineTo(pos, canvasSize - padding);
-        ctx.stroke();
-    }
-
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    [[2, 2], [2, 6], [6, 2], [6, 6]].forEach(([row, col]) => {
-        const x = padding + col * cell;
-        const y = padding + row * cell;
-        ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
-        ctx.fill();
-    });
-
-    ctx.font = '14px sans-serif';
-    ctx.fillStyle = '#cfcfcf';
-    for (let i = 0; i < size; i += 1) {
-        ctx.fillText(String.fromCharCode(65 + i), padding + i * cell + cell / 2, padding - 22);
-        ctx.fillText(String(8 - i), padding - 22, padding + i * cell + cell / 2);
-    }
-
-    const board = snapshot.board;
-    if (board) {
-        for (let row = 0; row < size; row += 1) {
-            for (let col = 0; col < size; col += 1) {
-                const disc = board[row] && board[row][col];
-                if (!disc) continue;
-                const x = padding + col * cell + cell / 2;
-                const y = padding + row * cell + cell / 2;
-                const radius = cell * 0.4;
-                const gradient = ctx.createRadialGradient(
-                    x - radius * 0.35, y - radius * 0.4, radius * 0.2, x, y, radius
-                );
-                if (disc === 'black') {
-                    gradient.addColorStop(0, '#5a5a5a');
-                    gradient.addColorStop(1, '#0a0a0a');
-                } else {
-                    gradient.addColorStop(0, '#ffffff');
-                    gradient.addColorStop(1, '#c9c4ba');
-                }
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = disc === 'black' ? 'rgba(0,0,0,0.6)' : 'rgba(120,110,90,0.5)';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-            }
-        }
-    }
-
-    if (snapshot.lastMove) {
-        const x = padding + snapshot.lastMove.col * cell + cell / 2;
-        const y = padding + snapshot.lastMove.row * cell + cell / 2;
-        ctx.strokeStyle = '#f1c75c';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(x, y, cell * 0.46, 0, Math.PI * 2);
-        ctx.stroke();
-    }
-
-    return canvas.toDataURL('image/png');
-}
-
-/**
- * Render a Shogi (Japanese Chess) 9x9 board with traditional kanji piece labels
- * and promotion zone shading. Cells are {type, side} | null.
- * Row 0 = top (Gote back rank), row 8 = bottom (Sente back rank).
- */
-function createShogiBoardImageUrl(snapshot) {
-    const size = 9;
-    const canvasSize = 768;
-    const padding = 58;
-    const cell = (canvasSize - padding * 2) / size;
-    const canvas = document.createElement('canvas');
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
-
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#d4a853';
-    ctx.fillRect(0, 0, canvasSize, canvasSize);
-    ctx.strokeStyle = 'rgba(47,36,25,0.85)';
-    ctx.lineWidth = 1.5;
-
-    for (let i = 0; i <= size; i += 1) {
-        const pos = padding + i * cell;
-        ctx.beginPath();
-        ctx.moveTo(padding, pos);
-        ctx.lineTo(canvasSize - padding, pos);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(pos, padding);
-        ctx.lineTo(pos, canvasSize - padding);
-        ctx.stroke();
-    }
-
-    ctx.fillStyle = 'rgba(255,200,100,0.35)';
-    ctx.fillRect(padding, padding, canvasSize - padding * 2, cell * 3);
-    ctx.fillRect(padding, canvasSize - padding - cell * 3, canvasSize - padding * 2, cell * 3);
-
-    ctx.fillStyle = '#2f2419';
-    ctx.font = '13px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    var cols = ['9','8','7','6','5','4','3','2','1'];
-    for (let i = 0; i < size; i += 1) {
-        ctx.fillText(cols[i], padding + i * cell + cell / 2, padding - 22);
-        ctx.fillText(String(1 + i), padding - 22, padding + i * cell + cell / 2);
-    }
-
-    var kanjiMap = {
-        K: '\u738B', R: '\u98DB\u8ECA', B: '\u89D2\u884C', G: '\u91D1',
-        S: '\u9280', N: '\u69D8\u99AC', L: '\u9999\u8F66', P: '\u6B69\u5175',
-        DR: '\u9F8D\u738B', DB: '\u9F8D\u9A6C', PS: '\u6210\u9280',
-        PN: '\u6210\u69D8', PL: '\u6210\u9999', PP: '\u6210\u6B69'
-    };
-
-    var board = snapshot.board;
-    if (board) {
-        for (let row = 0; row < size; row += 1) {
-            for (let col = 0; col < size; col += 1) {
-                var piece = board[row] && board[row][col];
-                if (!piece || !piece.type) continue;
-                var x = padding + col * cell + cell / 2;
-                var y = padding + row * cell + cell / 2;
-                var label = kanjiMap[piece.type] || piece.type;
-
-                var isSente = piece.side === 'sente';
-                ctx.save();
-                ctx.translate(x, y);
-                if (!isSente) {
-                    ctx.rotate(Math.PI);
-                }
-
-                ctx.fillStyle = '#2f2419';
-                ctx.font = 'bold 11px sans-serif';
-                ctx.beginPath();
-                var triW = cell * 0.2;
-                var triH = cell * 0.08;
-                if (isSente) {
-                    ctx.moveTo(-triW, -cell * 0.35);
-                    ctx.lineTo(triW, -cell * 0.35);
-                    ctx.lineTo(0, -cell * 0.35 + triH);
-                } else {
-                    ctx.moveTo(-triW, cell * 0.35);
-                    ctx.lineTo(triW, cell * 0.35);
-                    ctx.lineTo(0, cell * 0.35 - triH);
-                }
-                ctx.closePath();
-                ctx.fill();
-
-                ctx.font = 'bold 26px serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                var gradient = ctx.createRadialGradient(0, -4, 2, 0, 0, cell * 0.4);
-                gradient.addColorStop(0, '#faf4e4');
-                gradient.addColorStop(1, '#d4a853');
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.moveTo(0, -cell * 0.35);
-                ctx.lineTo(cell * 0.22, -cell * 0.1);
-                ctx.lineTo(cell * 0.15, cell * 0.32);
-                ctx.lineTo(-cell * 0.15, cell * 0.32);
-                ctx.lineTo(-cell * 0.22, -cell * 0.1);
-                ctx.closePath();
-                ctx.fill();
-                ctx.strokeStyle = '#2f2419';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-
-                ctx.fillStyle = '#1a0e05';
-                ctx.fillText(label, 0, isSente ? 2 : -2);
-                ctx.restore();
-            }
-        }
-    }
-
-    if (snapshot.lastMove) {
-        var lx = padding + snapshot.lastMove.col * cell + cell / 2;
-        var ly = padding + snapshot.lastMove.row * cell + cell / 2;
-        ctx.strokeStyle = '#f1c75c';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(lx, ly, cell * 0.42, 0, Math.PI * 2);
-        ctx.stroke();
-    }
-
-    return canvas.toDataURL('image/png');
-}

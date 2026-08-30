@@ -1,7 +1,7 @@
 {
-  "name": "多棋类合集 · Board Games",
-  "short_name": "棋类合集",
-  "description": "五子棋、围棋、国际象棋、中国象棋和军棋翻翻棋合一的多棋类游戏平台。",
+  "name": "五子棋与围棋 · Board Games",
+  "short_name": "五子棋围棋",
+  "description": "五子棋与围棋合一的棋类游戏，支持 3D 棋盘与可选 LLM 指导。",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#07111d",

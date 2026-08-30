@@ -57,33 +57,9 @@
       "rarity": "rare"
     },
     {
-      "id": "CHESS_MASTER",
-      "name": "Chess Master",
-      "description": "Win 10 Chess games",
-      "icon": "achievement_chess.png",
-      "hidden": false,
-      "rarity": "rare"
-    },
-    {
-      "id": "XIANGQI_MASTER",
-      "name": "Xiangqi Master",
-      "description": "Win 10 Xiangqi games",
-      "icon": "achievement_xiangqi.png",
-      "hidden": false,
-      "rarity": "rare"
-    },
-    {
-      "id": "JUNQI_MASTER",
-      "name": "Junqi Master",
-      "description": "Win 10 Junqi games",
-      "icon": "achievement_junqi.png",
-      "hidden": false,
-      "rarity": "rare"
-    },
-    {
       "id": "ALL_GAMES_WINNER",
       "name": "Grand Champion",
-      "description": "Win at least one game of all 5 types",
+      "description": "Win both Gomoku and Go",
       "icon": "achievement_grand.png",
       "hidden": false,
       "rarity": "legendary"
@@ -123,7 +99,7 @@
     {
       "id": "ALL_ROOKERIES",
       "name": "All-Rounder",
-      "description": "Play all 5 game types",
+      "description": "Play both Gomoku and Go",
       "icon": "achievement_allround.png",
       "hidden": false,
       "rarity": "rare"
@@ -137,25 +113,17 @@
       "rarity": "rare"
     },
     {
-      "id": "CHECKMATE_VICTORY",
-      "name": "Checkmate!",
-      "description": "Win a Chess game by checkmate",
-      "icon": "achievement_checkmate.png",
-      "hidden": false,
-      "rarity": "common"
-    },
-    {
-      "id": "CAPTURE_THE_FLAG",
-      "name": "Capture the Flag",
-      "description": "Win a Junqi game by capturing the flag",
-      "icon": "achievement_flag.png",
+      "id": "GO_TERRITORY",
+      "name": "Territory Sense",
+      "description": "Win a scored Go game on 19×19",
+      "icon": "achievement_go_territory.png",
       "hidden": false,
       "rarity": "rare"
     },
     {
       "id": "3D_ENJOYER",
       "name": "3D Connoisseur",
-      "description": "Try all 5 camera presets in 3D mode",
+      "description": "Try all three tabletop moods in 3D mode",
       "icon": "achievement_3d.png",
       "hidden": false,
       "rarity": "common"

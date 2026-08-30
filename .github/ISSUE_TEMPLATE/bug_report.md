@@ -34,7 +34,7 @@ If applicable, add screenshots to help explain the problem.
 - **Browser**: [e.g., Chrome 120, Firefox 121, Safari 17]
 - **OS**: [e.g., Windows 11, macOS 14, Android 14]
 - **Device**: [e.g., Desktop, iPhone 15, Pixel 8]
-- **Game**: [e.g., Gomoku, Go, Chess, Xiangqi, Junqi]
+- **Game**: [e.g., Gomoku, Go]
 - **Mode**: [e.g., 2D, 3D, Player vs AI, Player vs Player]
 
 ## Additional Context

@@ -2,15 +2,7 @@ import * as THREE from 'three';
 import { RENDER_CONFIG } from '../config/renderConfig.js';
 import { getSceneSpec } from '../config/sceneConfig.js';
 import { createSceneContext } from './scenes/props.js';
-import { buildHomeStudy } from './scenes/homeStudy.js';
-import { buildParkPavilion } from './scenes/parkPavilion.js';
-import { buildTournamentHall } from './scenes/tournamentHall.js';
-
-const SCENE_BUILDERS = {
-    home: buildHomeStudy,
-    park: buildParkPavilion,
-    competition: buildTournamentHall,
-};
+import { applyTabletopMood, buildTabletop } from './scenes/tabletop.js';
 
 export class EnvironmentBuilder {
     constructor(config = RENDER_CONFIG) {
@@ -26,6 +18,7 @@ export class EnvironmentBuilder {
         this.textureLoader = new THREE.TextureLoader();
         this.lastUpdateTime = null;
         this.updateInterval = 1 / 24;
+        this.moodMaterials = null;
     }
 
     build(boardSize = this.config.board.size, scenePreset = 'competition') {
@@ -44,25 +37,21 @@ export class EnvironmentBuilder {
         this.updateInterval = this.getUpdateInterval(scenePreset);
 
         const context = createSceneContext(this.config, boardSize);
-        const sceneBuilder = SCENE_BUILDERS[scenePreset] || SCENE_BUILDERS.competition;
-        sceneBuilder(this, context);
+        this.moodMaterials = buildTabletop(this, context, scenePreset);
 
         this.freezeStaticScene();
         return this.group;
     }
 
-    update(timeSeconds = performance.now() / 1000) {
-        if (this.animators.length === 0) {
-            return false;
-        }
+    applyMood(scenePreset = 'competition') {
+        this.scenePreset = scenePreset;
+        this.updateInterval = this.getUpdateInterval(scenePreset);
+        applyTabletopMood(this.moodMaterials, scenePreset);
+        return this.group;
+    }
 
-        if (this.lastUpdateTime !== null && timeSeconds - this.lastUpdateTime < this.updateInterval) {
-            return false;
-        }
-
-        this.lastUpdateTime = timeSeconds;
-        this.animators.forEach((animator) => animator(timeSeconds));
-        return true;
+    update(_timeSeconds = performance.now() / 1000) {
+        return false;
     }
 
     registerAnimator(animator) {
@@ -151,6 +140,7 @@ export class EnvironmentBuilder {
         this.animators = [];
         this.dynamicObjects.clear();
         this.lastUpdateTime = null;
+        this.moodMaterials = null;
 
         this.trackedResources.forEach((resource) => {
             if (typeof resource.dispose === 'function') {

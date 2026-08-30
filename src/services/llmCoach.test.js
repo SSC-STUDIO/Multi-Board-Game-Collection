@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ---------------------------------------------------------------------------
-// DOM / browser mocks �?llmCoach uses localStorage, fetch, document, window
+// DOM / browser mocks — llmCoach uses localStorage, fetch, document, window
 // ---------------------------------------------------------------------------
 
 const localStorageMock = (() => {
@@ -39,6 +39,7 @@ const {
     loadLlmCoachSettings,
     saveLlmCoachSettings,
     fetchWithTimeout,
+    fetchWithRetry,
     requestLlmCoachAdvice,
     requestPostGameAnalysis
 } = await import('./llmCoach.js');
@@ -260,6 +261,75 @@ describe('fetchWithTimeout', () => {
     });
 });
 
+// ---------------------------------------------------------------------------
+// fetchWithRetry
+// ---------------------------------------------------------------------------
+describe('fetchWithRetry', () => {
+    beforeEach(() => {
+        globalThis.fetch = vi.fn();
+    });
+
+    it('should retry once on transient network failure and succeed', async () => {
+        globalThis.fetch.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+        const mockResponse = { ok: true };
+        globalThis.fetch.mockResolvedValueOnce(mockResponse);
+
+        const resp = await fetchWithRetry('https://api.test/v1', { retries: 2, retryDelayMs: 1 });
+
+        expect(resp).toBe(mockResponse);
+        expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw after exhausting retries on persistent network failure', async () => {
+        globalThis.fetch.mockRejectedValue(new TypeError('network down'));
+
+        await expect(fetchWithRetry('https://bad', { retries: 2, retryDelayMs: 1 }))
+            .rejects.toThrow('network down');
+        // 1 initial attempt + 2 retries
+        expect(globalThis.fetch).toHaveBeenCalledTimes(3);
+    });
+
+    it('should not retry when parent signal aborted between attempts', async () => {
+        const controller = new AbortController();
+        globalThis.fetch.mockImplementation(async () => {
+            controller.abort();
+            throw new TypeError('Failed to fetch');
+        });
+
+        await expect(fetchWithRetry('https://x', { signal: controller.signal, retries: 3, retryDelayMs: 1 }))
+            .rejects.toThrow(LlmCoachError);
+        // aborts before the 2nd attempt
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not retry http-level errors surfaced by callers', async () => {
+        // A non-ok response resolves normally at the transport layer;
+        // retry only applies to network_error/timeout, so a single call happens.
+        globalThis.fetch.mockResolvedValue({ ok: false, status: 500, json: () => Promise.resolve({}) });
+
+        const resp = await fetchWithRetry('https://api.test/v1', { retries: 2, retryDelayMs: 1 });
+        expect(resp.ok).toBe(false);
+        expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('requestLlmCoachAdvice should recover from one transient failure', async () => {
+        const settings = { enabled: true, baseUrl: 'https://api.test', model: 'gpt-4o', apiKey: 'sk-test' };
+        const snapshot = { boardSize: 15, board: [], moveHistory: [], currentPlayer: 'black', lastMove: null };
+        globalThis.fetch.mockRejectedValueOnce(new TypeError('flaky'));
+        globalThis.fetch.mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({
+                choices: [{ message: { content: '{"recommended":{"row":7,"col":7},"alternatives":[],"reason":"center","risk":"low","plan":"control"}' } }],
+                usage: null
+            })
+        });
+
+        const advice = await requestLlmCoachAdvice({ settings, snapshot, gameType: 'gomoku' });
+        expect(advice.reason).toBe('center');
+        expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    });
+});
+
 // Mock canvas for board image rendering in test env
 const origCreateElement = document.createElement.bind(document);
 document.createElement = (tag) => {
@@ -312,37 +382,6 @@ describe('requestLlmCoachAdvice multi-game support', () => {
         await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'go' });
         const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
         expect(body.messages[0].content).toContain('Go');
-    });
-
-    it('should use Chess role when gameType is chess', async () => {
-        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'chess' });
-        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        expect(body.messages[0].content).toContain('Chess');
-    });
-
-    it('should use Xiangqi role when gameType is xiangqi', async () => {
-        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'xiangqi' });
-        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        expect(body.messages[0].content).toContain('Xiangqi');
-    });
-
-    it('should use Junqi role when gameType is junqi', async () => {
-        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'junqi' });
-        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        expect(body.messages[0].content).toContain('Military Chess');
-    });
-
-    it('should use Othello role when gameType is othello', async () => {
-        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'othello' });
-        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        expect(body.messages[0].content).toContain('Othello');
-        expect(body.messages[0].content).toContain('Reversi');
-    });
-
-    it('should use Shogi role when gameType is shogi', async () => {
-        await requestLlmCoachAdvice({ settings, snapshot: baseSnapshot, gameType: 'shogi' });
-        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        expect(body.messages[0].content).toContain('Shogi');
     });
 
     it('should fall back to Gomoku when gameType is empty', async () => {
@@ -401,23 +440,9 @@ describe('requestPostGameAnalysis', () => {
             ok: false,
             json: () => Promise.resolve({ error: { message: 'rate limited' } })
         });
-        await expect(requestPostGameAnalysis({ settings, snapshot, gameType: 'chess' })).rejects.toThrow('rate limited');
+        await expect(requestPostGameAnalysis({ settings, snapshot, gameType: 'gomoku' })).rejects.toThrow('rate limited');
     });
-
-    it('should include Othello post-game advice when gameType is othello', async () => {
-        await requestPostGameAnalysis({ settings, snapshot, gameType: 'othello' });
-        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        const text = body.messages[0].content + JSON.stringify(body.messages[1].content);
-        expect(text).toContain('corner control');
-    });
-
-    it('should include Shogi post-game advice when gameType is shogi', async () => {
-        await requestPostGameAnalysis({ settings, snapshot, gameType: 'shogi' });
-        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        const text = body.messages[0].content + JSON.stringify(body.messages[1].content);
-        expect(text).toContain('castle formations');
-    });
-
+});
 
 describe('requestLlmCoachAdvice difficulty-adaptive coaching', () => {
     const settings = { enabled: true, baseUrl: 'https://api.test.com', model: 'gpt-4', apiKey: 'sk-test' };
@@ -473,102 +498,4 @@ describe('requestLlmCoachAdvice difficulty-adaptive coaching', () => {
         const userText = body.messages[1].content[0].text;
         expect(userText).not.toContain('Move history');
     });
-});
-describe('requestLlmCoachAdvice Othello board rendering', () => {
-    const settings = { enabled: true, baseUrl: 'https://api.test.com', model: 'gpt-4', apiKey: 'sk-test' };
-
-    beforeEach(() => {
-        globalThis.fetch = vi.fn().mockResolvedValue({
-            ok: true,
-            json: () => Promise.resolve({ choices: [{ message: { content: JSON.stringify({ recommended: { row: 0, col: 0 }, alternatives: [], reason: 'corner', risk: 'low', plan: 'take corner' }) } }], usage: null })
-        });
-    });
-
-    it('should render an 8x8 board with black and white discs', async () => {
-        const snapshot = {
-            boardSize: 8,
-            board: [
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, 'black', null, null, null, null],
-                [null, null, 'black', 'white', 'black', null, null, null],
-                [null, null, null, 'black', 'white', null, null, null],
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null]
-            ],
-            moveHistory: [],
-            currentPlayer: 'white',
-            lastMove: { row: 3, col: 3 }
-        };
-        await requestLlmCoachAdvice({ settings, snapshot, gameType: 'othello' });
-        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        expect(body.messages[0].content).toContain('Othello');
-        expect(body.messages[1].content[1].image_url.url).toBe('data:image/png;base64,mock');
-    });
-
-    it('should include lastMove highlight for othello', async () => {
-        const snapshot = {
-            boardSize: 8,
-            board: Array.from({ length: 8 }, () => Array(8).fill(null)),
-            moveHistory: [],
-            currentPlayer: 'black',
-            lastMove: { row: 0, col: 0 }
-        };
-        await requestLlmCoachAdvice({ settings, snapshot, gameType: 'othello' });
-        expect(globalThis.fetch).toHaveBeenCalled();
-    });
-});
-
-describe('requestLlmCoachAdvice Shogi board rendering', () => {
-    const settings = { enabled: true, baseUrl: 'https://api.test.com', model: 'gpt-4', apiKey: 'sk-test' };
-
-    beforeEach(() => {
-        globalThis.fetch = vi.fn().mockResolvedValue({
-            ok: true,
-            json: () => Promise.resolve({ choices: [{ message: { content: JSON.stringify({ recommended: { from: { row: 6, col: 4 }, to: { row: 5, col: 4 } }, alternatives: [], reason: 'pawn advance', risk: 'low', plan: 'control center' }) } }], usage: null })
-        });
-    });
-
-    it('should render a 9x9 board with piece objects', async () => {
-        const snapshot = {
-            boardSize: 9,
-            board: [
-                [{ type: 'L', side: 'gote' }, { type: 'N', side: 'gote' }, { type: 'S', side: 'gote' }, { type: 'G', side: 'gote' }, { type: 'K', side: 'gote' }, { type: 'G', side: 'gote' }, { type: 'S', side: 'gote' }, { type: 'N', side: 'gote' }, { type: 'L', side: 'gote' }],
-                [null, { type: 'R', side: 'gote' }, null, null, null, null, null, { type: 'B', side: 'gote' }, null],
-                [{ type: 'P', side: 'gote' }, { type: 'P', side: 'gote' }, { type: 'P', side: 'gote' }, { type: 'P', side: 'gote' }, { type: 'P', side: 'gote' }, { type: 'P', side: 'gote' }, { type: 'P', side: 'gote' }, { type: 'P', side: 'gote' }, { type: 'P', side: 'gote' }],
-                Array(9).fill(null),
-                Array(9).fill(null),
-                Array(9).fill(null),
-                [{ type: 'P', side: 'sente' }, { type: 'P', side: 'sente' }, { type: 'P', side: 'sente' }, { type: 'P', side: 'sente' }, { type: 'P', side: 'sente' }, { type: 'P', side: 'sente' }, { type: 'P', side: 'sente' }, { type: 'P', side: 'sente' }, { type: 'P', side: 'sente' }],
-                [null, { type: 'B', side: 'sente' }, null, null, null, null, null, { type: 'R', side: 'sente' }, null],
-                [{ type: 'L', side: 'sente' }, { type: 'N', side: 'sente' }, { type: 'S', side: 'sente' }, { type: 'G', side: 'sente' }, { type: 'K', side: 'sente' }, { type: 'G', side: 'sente' }, { type: 'S', side: 'sente' }, { type: 'N', side: 'sente' }, { type: 'L', side: 'sente' }]
-            ],
-            moveHistory: [],
-            turn: 'sente',
-            lastMove: null
-        };
-        await requestLlmCoachAdvice({ settings, snapshot, gameType: 'shogi' });
-        const body = JSON.parse(globalThis.fetch.mock.calls[0][1].body);
-        expect(body.messages[0].content).toContain('Shogi');
-        expect(body.messages[1].content[1].image_url.url).toBe('data:image/png;base64,mock');
-    });
-
-    it('should handle promoted pieces in shogi board', async () => {
-        const board = Array.from({ length: 9 }, () => Array(9).fill(null));
-        board[0][4] = { type: 'K', side: 'gote' };
-        board[8][4] = { type: 'K', side: 'sente' };
-        board[4][4] = { type: 'DR', side: 'sente' };
-        const snapshot = {
-            boardSize: 9,
-            board,
-            moveHistory: [],
-            turn: 'sente',
-            lastMove: { row: 4, col: 4 }
-        };
-        await requestLlmCoachAdvice({ settings, snapshot, gameType: 'shogi' });
-        expect(globalThis.fetch).toHaveBeenCalled();
-    });
-});
-
 });

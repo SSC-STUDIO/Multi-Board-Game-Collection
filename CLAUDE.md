@@ -2,15 +2,15 @@
 
 ## 项目概述
 
-Board Games 是一款多款棋盘游戏合集，采用原生 JavaScript + Three.js 构建，集成五子棋、围棋、国际象棋、中国象棋和军棋翻翻棋于一体。支持 Web、Android (Capacitor) 和桌面端 (Electron) 多平台发布。
+Board Games 是五子棋与围棋合集，采用原生 JavaScript + Three.js 构建。支持 Web、Android (Capacitor) 和桌面端 (Electron) 多平台发布。
 
 **核心特性**：
-- 5 款游戏：五子棋、围棋、国际象棋、中国象棋、军棋翻翻棋
-- 统一启动器：从启动器选择任意游戏进入
+- 2 款游戏：五子棋、围棋
+- 统一启动器：从启动器选择游戏进入
 - 多种游戏模式：PvP、PvE（AI）、练习模式
 - 围棋：中国规则/日本规则计分、让子、3D 渲染（Three.js）
 - 五子棋：禁手规则（Renju）、3D 渲染（Three.js）三档 AI 难度、QI 指导（LLM Coach）
-- 3D 场景：Three.js 沉浸式场景（家/公园/比赛现场），支持场景切换
+- 3D 场景：共用桌面布景，家/公园/比赛三种氛围（光照、雾、相机、色调）
 - LLM Coach：可选接入外部 LLM API 获取智能建议
 
 ## 技术栈
@@ -36,18 +36,14 @@ src/
 ├── game/                 # 五子棋游戏逻辑 (遗留，games/gomoku 为重构版)
 ├── games/                # 各游戏独立模块
 │   ├── gomoku/           # 五子棋 (state.js, rules.js, ai.js)
-│   ├── go/               # 围棋 (state.js, rules.js, 含计分+3D渲染)
-│   ├── chess/            # 国际象棋 (state.js, rules.js)
-│   ├── xiangqi/          # 中国象棋 (state.js, rules.js)
-│   └── junqi/flip/       # 军棋翻翻棋 (state.js, rules.js)
+│   └── go/               # 围棋 (state.js, rules.js, 含计分+3D渲染)
 ├── ui/                   # 表现层 (DOM 操作、渲染)
 │   ├── dom.js           # DOM 引用获取、事件绑定
 │   └── render.js        # UI 渲染、状态同步
 ├── render3d/             # 3D 渲染模块 (Three.js)
 │   ├── GomokuRenderer3D.js  # 五子棋 3D 渲染器
-│   ├── scenes/          # 场景预设 (home/park/competition)
+│   ├── scenes/tabletop.js   # 共用桌面布景 + 三种氛围
 │   └── ...               # SceneManager, CameraController 等
-├── render3d/go/          # 围棋 3D 渲染模块 (Three.js)
 ├── config/               # 配置层
 │   ├── gameConfig.js    # 游戏常量、默认选项、模式标签
 │   ├── sceneConfig.js   # 3D 场景配置
@@ -116,7 +112,7 @@ npm test
 # 运行特定测试文件
 npx vitest run src/games/go/rules.test.js
 
-# 测试数量 (2026-05-16): 822 tests, 35 files
+# 测试数量 (2026-08-30): 821 tests, 34 files
 ```
 
 ### 覆盖范围
@@ -138,7 +134,7 @@ npx vitest run src/games/go/rules.test.js
 
 ## 已知问题
 
-1. **LLM Coach 网络错误处理**：`llmCoach.js` 依赖外部 API，网络异常处理需加强
+1. **LLM Coach 网络错误处理**：`llmCoach.js` 依赖外部 API。已支持瞬时错误（network_error/timeout）自动重试（`fetchWithRetry`，默认 2 次线性退避 400ms 起），HTTP/配置/解析错误不重试；超长流式响应与代理层断连仍需观察
 2. **3D 移动端性能**：低端设备上 Three.js 场景可能卡顿，PixelRatio 已有限制但仍需优化
 3. **Electron 在 WSL 中不可用**：需要 Windows 原生环境构建和测试
 4. **Gomoku 3D 截图在 headless Chromium 中不可用**：Three.js 场景使用 SwiftShader 渲染时 `page.screenshot()` 超时（已知 Playwright + headless 限制）。Go 3D 渲染（较简单结构）可正常截图。不影响真实用户。

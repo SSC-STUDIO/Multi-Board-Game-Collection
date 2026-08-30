@@ -20,9 +20,10 @@ import {
     CameraController,
     MaterialFactory,
     StoneBuilder,
-    AnimationManager
-,
-    ParticleSystem} from '../../../render3d/index.js';
+    AnimationManager,
+    EnvironmentBuilder,
+    ParticleSystem
+} from '../../../render3d/index.js';
 import { boardToWorld, worldToBoard } from '../../../config/renderConfig.js';
 
 const BOARD_COLOR = '#d6a86a';
@@ -35,6 +36,14 @@ const KO_MARKER_COLOR = 0xcc2222;
 const TERRITORY_BLACK = 0x1a1a1a;
 const TERRITORY_WHITE = 0xf0f0f0;
 const HINT_MARKER_COLOR = 0xff9800;
+
+/**
+ * 主光阴影相机半宽：棋盘表面总半径 + 余量，限制在 [10, 26]。
+ */
+function computeGoShadowExtent(boardSize, cellSize) {
+    const totalSize = (boardSize + 1) * cellSize;
+    return Math.min(26, Math.max(10, totalSize / 2 + 2));
+}
 
 /** 不同路数的星位。坐标是 (row, col)。 */
 export function getStarPoints(size) {
@@ -155,13 +164,24 @@ export class GoRenderer3D {
         this.lightingSetup = new LightingSetup(this.sceneManager, config);
         this.lightingSetup.setPresentationMode('game');
         this.lightingSetup.setup('competition');
+        this.lightingSetup.setShadowExtent(computeGoShadowExtent(this.boardSize, this.cellSize));
+
+        this.environmentBuilder = new EnvironmentBuilder(config);
+        this.sceneManager.add(this.environmentBuilder.build(this.boardSize, 'competition'));
 
         this.materialFactory = new MaterialFactory(config);
         this.stoneBuilder = new StoneBuilder(config);
         this.sceneManager.add(this.stoneBuilder.createStonesGroup());
 
         this.animationManager = new AnimationManager(this.sceneManager, config);
-        this.particleSystem = new ParticleSystem(this.sceneManager.scene);
+        const deviceProfile = config.deviceProfile || {};
+        const lowEndGraphics = Boolean(
+            deviceProfile.isExtremeLowEnd || deviceProfile.isMobile || deviceProfile.isLowMemory
+        );
+        this.particleSystem = new ParticleSystem(
+            this.sceneManager.scene,
+            lowEndGraphics ? { maxParticles: 360, dropBurst: 9 } : { maxParticles: 1000, dropBurst: 16 }
+        );
         this.ambientTimer = 0;
 
         this.sceneManager.onBeforeRender = () => {
@@ -169,11 +189,6 @@ export class GoRenderer3D {
             const dt = this._lastFrameTime ? (now - this._lastFrameTime) / 1000 : 0.016;
             this._lastFrameTime = now;
             this.particleSystem?.update(dt);
-            this.ambientTimer += dt;
-            if (this.ambientTimer > 4) {
-                this.ambientTimer = 0;
-                this.particleSystem?.emitAmbientParticles();
-            }
         };
 
         this.buildBoard();
@@ -274,6 +289,7 @@ export class GoRenderer3D {
         this.boardSize = size;
         this.clearStones();
         this.buildBoard();
+        this.lightingSetup?.setShadowExtent(computeGoShadowExtent(size, this.cellSize));
         this.cameraController?.fitToBoard(size, false);
         this.applyGoCameraFrame(false);
     }
@@ -501,6 +517,7 @@ export class GoRenderer3D {
         this.boardTexture?.dispose();
         this.stoneBuilder?.dispose?.();
         this.materialFactory?.dispose?.();
+        this.environmentBuilder?.dispose?.();
         this.lightingSetup?.dispose?.();
         this.animationManager?.dispose?.();
         this.cameraController?.dispose?.();

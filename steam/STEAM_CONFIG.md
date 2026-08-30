@@ -9,10 +9,10 @@
 **Store Page:** steam/STORE_PAGE.md
 
 ## Store Summary (English)
-Five classic board games in one beautifully crafted 3D collection: Gomoku, Go, Chess, Xiangqi, and Junqi. Immersive Three.js rendering, intelligent AI opponents, and an AI-powered QI Coach to help you improve.
+Gomoku and Go in one polished 3D collection. Immersive Three.js tabletop moods, smart AI opponents, and an optional LLM QI Coach to help you improve.
 
 ## Store Summary (简体中文)
-五款经典棋类游戏集于一身：五子棋、围棋、国际象棋、中国象棋和军棋。沉浸式Three.js 3D渲染，智能AI对手，AI驱动的棋力指导助你提升。
+五子棋与围棋合集：沉浸式 Three.js 桌面氛围、智能 AI 对手，以及可选的 LLM 棋力指导。
 
 ## Content Rating
 - ESRB: Everyone (E)
@@ -20,19 +20,18 @@ Five classic board games in one beautifully crafted 3D collection: Gomoku, Go, C
 - CERO: A (全年龄)
 
 ## Tags
-Strategy, Board Game, Puzzle, Singleplayer, Local Multiplayer, AI, Classic Games, Chess, Go, Gomoku, Xiangqi, Junqi, Free to Play, Casual, Indie, 3D, Educational
+Strategy, Board Game, Puzzle, Singleplayer, Local Multiplayer, AI, Classic Games, Go, Gomoku, Free to Play, Casual, Indie, 3D, Educational
 
 ## Genres
 Strategy, Casual, Free to Play
 
 ## Features
-- 5 complete board games (Gomoku, Go, Chess, Xiangqi, Junqi)
-- Immersive Three.js 3D rendering
-- AI-powered QI Coach (LLM integration)
+- 2 complete board games (Gomoku, Go)
+- Shared Three.js tabletop with three mood skins
+- Optional AI-powered QI Coach (LLM, Gomoku)
 - 3 difficulty levels per game
 - Full bilingual support (English / 简体中文)
 - Responsive design (Web, Desktop, Mobile)
-- 999 unit tests, 139 build files
 
 ## System Requirements
 
@@ -50,9 +49,9 @@ Strategy, Casual, Free to Play
 - Graphics: WebGL 2.0 capable dedicated GPU
 - Storage: 200 MB available space
 
-## Achievements: 20 total
-- 5 game-specific master achievements
-- 15 cross-game achievements (First Win, AI Conqueror, Grand Champion, etc.)
+## Achievements
+- Game-specific masters for Gomoku and Go
+- Cross-game achievements (First Win, AI Conqueror, Grand Champion, etc.)
 
 ## Marketing Slogan
-"Five Ancient Games, One Modern Experience"
+"Two Ancient Games, One Modern Tabletop"

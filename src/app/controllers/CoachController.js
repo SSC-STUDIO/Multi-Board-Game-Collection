@@ -30,7 +30,7 @@ export class CoachController {
 
     /**
      * Detect the active game type from the DOM or app options.
-     * @returns {string} Game type key (gomoku, go, chess, xiangqi, junqi)
+     * @returns {string} Game type key (gomoku, go)
      */
     getGameType() {
         const domGame = document.body?.dataset?.activeGame;

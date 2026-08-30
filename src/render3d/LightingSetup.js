@@ -18,6 +18,8 @@ export class LightingSetup {
         this.presentationMode = 'setup';
         this.lastUpdateTime = null;
         this.updateInterval = 1 / 24;
+        // 主光阴影相机半宽：随棋盘尺寸动态收紧，保证阴影分辨率集中
+        this.shadowExtent = 18;
     }
 
     setup(scenePreset = 'competition') {
@@ -48,11 +50,35 @@ export class LightingSetup {
         this.applyAmbient(preset.ambient);
         this.applyHemisphere(preset.hemisphere);
         this.applyDirectional(this.lights.main, preset.main);
-        this.applyDirectional(this.lights.fill, preset.fill);
-        this.applyDirectional(this.lights.rim, preset.rim);
-        this.applyPoint(this.lights.accentA, preset.accentA);
-        this.applyPoint(this.lights.accentB, preset.accentB);
-        this.applySpot(this.lights.spot, preset.spot);
+        if (this.lights.fill && preset.fill) {
+            this.applyDirectional(this.lights.fill, preset.fill);
+        }
+        if (this.lights.rim) {
+            if (preset.rim) {
+                this.applyDirectional(this.lights.rim, preset.rim);
+            } else {
+                this.lights.rim.intensity = 0;
+            }
+        }
+        ['accentA', 'accentB'].forEach((name) => {
+            const light = this.lights[name];
+            if (!light) {
+                return;
+            }
+            if (preset[name]) {
+                this.applyPoint(light, preset[name]);
+            } else {
+                light.intensity = 0;
+                light.visible = false;
+            }
+        });
+        if (this.lights.spot) {
+            if (preset.spot) {
+                this.applySpot(this.lights.spot, preset.spot);
+            } else {
+                this.lights.spot.visible = false;
+            }
+        }
         this.lastUpdateTime = null;
 
         this.sceneManager.setNeedsRender();
@@ -121,64 +147,37 @@ export class LightingSetup {
 
     getShadowMapSize(requestedSize = 2048) {
         const qualitySize = this.config.lighting?.main?.shadowMapSize ?? requestedSize;
-        return Math.min(requestedSize, qualitySize);
+        let size = Math.min(requestedSize, qualitySize);
+        const dp = this.config.deviceProfile || {};
+        const isLowEndShadow = Boolean(dp.isMobile || dp.isExtremeLowEnd || dp.isLowMemory);
+        if (isLowEndShadow) size = Math.min(size, 1024);
+        return size;
     }
 
-    update(timeSeconds = performance.now() / 1000) {
-        const preset = this.resolveLightingPreset(this.currentPreset);
-
-        if (this.lastUpdateTime !== null && timeSeconds - this.lastUpdateTime < this.updateInterval) {
-            return false;
+    /**
+     * 设置主光阴影相机半宽（世界单位）。棋盘越大范围越宽，
+     * 让 shadow map 像素集中在棋盘上而非空旷地板。
+     * @param {number} extent 半宽（世界单位），限制在 [10, 26]
+     */
+    setShadowExtent(extent = 18) {
+        const next = Math.min(26, Math.max(10, Number(extent) || 18));
+        if (next === this.shadowExtent) {
+            return;
         }
-
-        this.lastUpdateTime = timeSeconds;
-
-        if (this.currentPreset === 'home') {
-            const daylight = (Math.sin(timeSeconds * 0.12) + 1) / 2;
-            const nightfall = 1 - daylight;
-            const flicker = (Math.sin(timeSeconds * 3.4) + Math.sin(timeSeconds * 5.2 + 0.3)) * 0.03;
-
-            this.lights.ambient.intensity = preset.ambient.intensity - 0.05 + daylight * 0.08;
-            this.lights.hemisphere.intensity = preset.hemisphere.intensity - 0.04 + daylight * 0.08;
-            this.lights.main.intensity = preset.main.intensity - 0.08 + daylight * 0.14;
-            this.lights.fill.intensity = preset.fill.intensity - 0.08 + daylight * 0.1;
-            this.lights.rim.intensity = preset.rim.intensity + daylight * 0.08;
-            this.lights.accentA.intensity = preset.accentA.intensity + nightfall * 0.72 + flicker;
-            this.lights.accentB.intensity = 0.22 + daylight * 0.72;
-            this.lights.spot.intensity = preset.spot.intensity + nightfall * 0.42 + flicker * 2;
-            return true;
+        this.shadowExtent = next;
+        const main = this.lights.main;
+        if (main?.shadow) {
+            main.shadow.camera.left = -next;
+            main.shadow.camera.right = next;
+            main.shadow.camera.top = next;
+            main.shadow.camera.bottom = -next;
+            main.shadow.camera.updateProjectionMatrix?.();
         }
+        this.sceneManager.setNeedsRender();
+    }
 
-        if (this.currentPreset === 'park') {
-            const breeze = (Math.sin(timeSeconds * 0.44) + 1) / 2;
-            const sparkle = Math.sin(timeSeconds * 1.18);
-
-            this.lights.ambient.intensity = preset.ambient.intensity + breeze * 0.05;
-            this.lights.hemisphere.intensity = preset.hemisphere.intensity + breeze * 0.06;
-            this.lights.main.intensity = preset.main.intensity + breeze * 0.14;
-            this.lights.fill.intensity = preset.fill.intensity + sparkle * 0.05;
-            this.lights.rim.intensity = preset.rim.intensity + (Math.sin(timeSeconds * 0.7 + 0.5) + 1) * 0.04;
-            this.lights.accentA.intensity = preset.accentA.intensity + (Math.sin(timeSeconds * 0.9) + 1) * 0.08;
-            this.lights.accentB.intensity = preset.accentB.intensity + (Math.cos(timeSeconds * 0.82) + 1) * 0.05;
-            this.lights.accentA.position.x = preset.accentA.position.x + Math.sin(timeSeconds * 0.2) * 0.8;
-            this.lights.accentA.position.y = preset.accentA.position.y + Math.sin(timeSeconds * 0.16) * 0.24;
-            return true;
-        }
-
-        const drift = Math.sin(timeSeconds * 0.16);
-        const breathe = (Math.sin(timeSeconds * 0.28) + 1) / 2;
-
-        this.lights.ambient.intensity = preset.ambient.intensity + breathe * 0.015;
-        this.lights.hemisphere.intensity = preset.hemisphere.intensity + breathe * 0.01;
-        this.lights.main.intensity = preset.main.intensity + breathe * 0.03;
-        this.lights.fill.intensity = preset.fill.intensity + breathe * 0.02;
-        this.lights.rim.intensity = preset.rim.intensity + breathe * 0.015;
-        this.lights.accentA.intensity = preset.accentA.intensity + breathe * 0.025;
-        this.lights.accentB.intensity = preset.accentB.intensity + breathe * 0.02;
-        this.lights.spot.intensity = preset.spot.intensity + breathe * 0.04;
-        this.lights.spot.position.x = preset.spot.position.x + drift * 0.14;
-        this.lights.spot.target.position.x = preset.spot.target.x + drift * 0.08;
-        return true;
+    update(_timeSeconds = performance.now() / 1000) {
+        return false;
     }
 
     createAmbientLight() {
@@ -239,14 +238,15 @@ export class LightingSetup {
         light.castShadow = light.userData.isPrimaryShadowLight && Boolean(settings.castShadow);
         if (light.castShadow) {
             const shadowMapSize = this.getShadowMapSize(settings.shadowMapSize);
+            const extent = this.shadowExtent;
             light.shadow.mapSize.width = shadowMapSize;
             light.shadow.mapSize.height = shadowMapSize;
             light.shadow.camera.near = 0.5;
-            light.shadow.camera.far = 60;
-            light.shadow.camera.left = -18;
-            light.shadow.camera.right = 18;
-            light.shadow.camera.top = 18;
-            light.shadow.camera.bottom = -18;
+            light.shadow.camera.far = extent * 3.2 + 16;
+            light.shadow.camera.left = -extent;
+            light.shadow.camera.right = extent;
+            light.shadow.camera.top = extent;
+            light.shadow.camera.bottom = -extent;
             light.shadow.bias = -0.00012;
             light.shadow.normalBias = 0.02;
         }

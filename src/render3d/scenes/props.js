@@ -151,12 +151,14 @@ export function addTable(builder, parent, key, ctx, settings) {
         roughness = 0.72,
         castShadow = true,
         apronHeight = 0.28,
+        map = null,
     } = settings;
     const group = addGroup(parent, `${key}:table`);
     const topMaterial = material(builder, `${key}:table-top-material`, {
         color,
         roughness,
         metalness,
+        ...(map ? { map } : {}),
     });
     const legMaterial = material(builder, `${key}:table-leg-material`, {
         color: legColor,

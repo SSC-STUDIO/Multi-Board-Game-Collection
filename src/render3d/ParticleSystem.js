@@ -7,10 +7,11 @@ import * as THREE from 'three';
 import { boardToWorld } from '../config/renderConfig.js';
 
 export class ParticleSystem {
-    constructor(scene) {
+    constructor(scene, options = {}) {
         this.scene = scene;
         this.geometry = new THREE.BufferGeometry();
-        this.maxParticles = 1000;
+        this.maxParticles = options.maxParticles ?? 1000;
+        this.dropBurst = options.dropBurst ?? 20;
         this.activeCount = 0;
 
         // 粒子属性
@@ -49,7 +50,7 @@ export class ParticleSystem {
             ? new THREE.Color(0.2, 0.2, 0.2)
             : new THREE.Color(0.95, 0.95, 0.9);
 
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < this.dropBurst; i++) {
             this.addParticle({
                 x: x + (Math.random() - 0.5) * 0.3,
                 y: y,
@@ -133,21 +134,7 @@ export class ParticleSystem {
      * 环境粒子（背景浮动光点）
      */
     emitAmbientParticles() {
-        const color = new THREE.Color(0.3, 0.4, 0.6);
-
-        for (let i = 0; i < 50; i++) {
-            this.addParticle({
-                x: (Math.random() - 0.5) * 30,
-                y: Math.random() * 15,
-                z: (Math.random() - 0.5) * 30,
-                vx: (Math.random() - 0.5) * 0.2,
-                vy: Math.random() * 0.1,
-                vz: (Math.random() - 0.5) * 0.2,
-                color: color,
-                size: 0.03 + Math.random() * 0.03,
-                lifetime: 5 + Math.random() * 5,
-            });
-        }
+        return;
     }
 
     /**
