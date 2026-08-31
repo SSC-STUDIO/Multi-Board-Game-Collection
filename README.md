@@ -43,26 +43,27 @@
 .
 ├── index.html              # 主入口（启动器）
 ├── sw.js                   # PWA Service Worker
+├── electron-main.js        # Electron 主进程（唯一入口）
 ├── capacitor.config.json   # Capacitor Android 配置
 ├── android/                # Android 原生工程
 ├── src/
 │   ├── main.js             # 应用入口，启动器初始化
-│   ├── app/                # 应用层（GomokuApp + 控制器）
-│   ├── games/
-│   │   ├── registry.js     # 游戏注册表
-│   │   ├── gomoku/         # 五子棋（state/rules/ai）
-│   │   └── go/             # 围棋（state/rules/ai/scoring + 3D）
+│   ├── app/                # 跨游戏应用壳（BoardGameApp + 共享控制器）
+│   ├── games/              # 各游戏自洽模块（逻辑 + 应用 + 3D 渲染器）
+│   │   ├── registry.js     # 游戏注册表（懒加载）
+│   │   ├── gomoku/         # 五子棋（GomokuApp/state/rules/ai/controllers/render3d）
+│   │   └── go/             # 围棋（GoApp/state/rules/ai/scoring/render3d）
+│   ├── render3d/           # 共享 3D 引擎（Three.js，含 scenes/tabletop.js）
 │   ├── ui/                 # 表现层
-│   ├── render3d/           # 3D 渲染（Three.js，含 scenes/tabletop.js）
 │   ├── utils/              # 工具层（i18n、棋盘坐标等）
 │   ├── config/             # 配置层
 │   ├── audio/              # 音效
-│   ├── services/           # 服务（LLM Coach、AI 解说）
+│   ├── services/           # 服务（LLM Coach、AI 解说、棋盘识图）
+│   ├── locales/            # 本地化文件（zh/en）
 │   └── styles/             # 样式文件
-├── locales/                # 本地化文件
 ├── steam/                  # Steam 配置
 ├── tools/                  # 构建工具脚本
-└── docs/                   # 文档
+└── docs/                   # 文档（docs/notes/ 存放开发笔记）
 ```
 
 ### 快速开始

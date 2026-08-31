@@ -1,10 +1,10 @@
 /**
  * 设置控制器：管理界面选项、帮助系统、LLM 设置、首屏引导与沉浸式 UI。
- * @module app/controllers/SettingsController
+ * @module games/gomoku/controllers/SettingsController
  */
 
-import { i18n } from '../../utils/i18n.js';
-import { setActiveButton, setActiveByValue } from '../../ui/dom.js';
+import { i18n } from '../../../utils/i18n.js';
+import { setActiveButton, setActiveByValue } from '../../../ui/dom.js';
 import {
     syncSetupPanel,
     updateMeta,
@@ -13,15 +13,15 @@ import {
     updateGuidance,
     updatePlacementPanel,
     showResultOverlay
-} from '../../ui/render.js';
+} from '../../../ui/render.js';
 import {
     getLlmCoachConfigStatus,
     isLlmCoachConfigured,
     normalizeLlmCoachSettings,
     saveLlmCoachSettings,
     testLlmCoachConnection
-} from '../../services/llmCoach.js';
-import { getSceneAmbienceCue } from '../../config/sceneConfig.js';
+} from '../../../services/llmCoach.js';
+import { getSceneAmbienceCue } from '../../../config/sceneConfig.js';
 
 const IMMERSIVE_UI_STORAGE_KEY = 'gomoku-immersive-ui';
 const FIRST_RUN_GUIDE_STORAGE_KEY = 'gomoku-first-run-guide';

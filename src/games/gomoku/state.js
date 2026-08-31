@@ -1,6 +1,6 @@
 /**
  * 游戏状态工厂与类型定义。
- * @module game/state
+ * @module games/gomoku/state
  */
 
 import { DEFAULT_OPTIONS } from '../../config/gameConfig.js';

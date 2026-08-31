@@ -33,7 +33,7 @@ export const GAMES = [
         glyph: '五',
         accent: '#e6b15b',
         accentAlt: '#6f4b25',
-        loadModule: () => import('../app/GomokuApp.js').then((m) => ({
+        loadModule: () => import('./gomoku/GomokuApp.js').then((m) => ({
             enter(root) {
                 // 兼容旧入口：直接实例化 GomokuApp。
                 return new m.GomokuApp(root);

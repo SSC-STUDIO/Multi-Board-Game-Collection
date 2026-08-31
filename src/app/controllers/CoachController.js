@@ -22,7 +22,7 @@ const DEV_LLM_LOG_LIMIT = 50;
  */
 export class CoachController {
     /**
-     * @param {import('../GomokuApp.js').GomokuApp} app - 应用主实例
+     * @param {import('../../games/gomoku/GomokuApp.js').GomokuApp} app - 应用主实例
      */
     constructor(app) {
         this.app = app;

@@ -1,17 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('../../utils/i18n.js', () => ({
+vi.mock('../../../utils/i18n.js', () => ({
     i18n: { t: (key, params) => {
         if (params) return `${key}:${JSON.stringify(params)}`;
         return key;
     } },
     t: (key) => key
 }));
-vi.mock('../../ui/dom.js', () => ({
+vi.mock('../../../ui/dom.js', () => ({
     setActiveButton: vi.fn(),
     setActiveByValue: vi.fn()
 }));
-vi.mock('../../ui/render.js', () => ({
+vi.mock('../../../ui/render.js', () => ({
     syncSetupPanel: vi.fn(),
     updateMeta: vi.fn(),
     updateStatus: vi.fn(),
@@ -20,7 +20,7 @@ vi.mock('../../ui/render.js', () => ({
     updatePlacementPanel: vi.fn(),
     showResultOverlay: vi.fn()
 }));
-vi.mock('../../services/llmCoach.js', () => ({
+vi.mock('../../../services/llmCoach.js', () => ({
     getLlmCoachConfigStatus: vi.fn(() => 'missing'),
     isLlmCoachConfigured: vi.fn(() => false),
     normalizeLlmCoachSettings: vi.fn((s) => ({
@@ -32,12 +32,12 @@ vi.mock('../../services/llmCoach.js', () => ({
     saveLlmCoachSettings: vi.fn((s) => ({ ...s, saved: true })),
     testLlmCoachConnection: vi.fn()
 }));
-vi.mock('../../config/sceneConfig.js', () => ({
+vi.mock('../../../config/sceneConfig.js', () => ({
     getSceneAmbienceCue: vi.fn(() => 'home-setup-idle')
 }));
 
 import { SettingsController } from './SettingsController.js';
-import { setActiveButton, setActiveByValue } from '../../ui/dom.js';
+import { setActiveButton, setActiveByValue } from '../../../ui/dom.js';
 import {
     syncSetupPanel,
     updateMeta,
@@ -46,14 +46,14 @@ import {
     updateGuidance,
     updatePlacementPanel,
     showResultOverlay
-} from '../../ui/render.js';
+} from '../../../ui/render.js';
 import {
     getLlmCoachConfigStatus,
     isLlmCoachConfigured,
     normalizeLlmCoachSettings,
     saveLlmCoachSettings,
     testLlmCoachConnection
-} from '../../services/llmCoach.js';
+} from '../../../services/llmCoach.js';
 
 // Setup document.body mock with classList support
 if (!document.body) {

@@ -1,19 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('../../utils/i18n.js', () => ({
+vi.mock('../../../utils/i18n.js', () => ({
     i18n: { t: (key) => key },
     t: (key) => key
 }));
-vi.mock('../../games/gomoku/rules.js', () => ({
+vi.mock('../rules.js', () => ({
     getForbiddenReason: vi.fn(() => '')
 }));
-vi.mock('../../ui/render.js', () => ({
+vi.mock('../../../ui/render.js', () => ({
     showMessage: vi.fn()
 }));
 
 import { InteractionManager } from './InteractionManager.js';
-import { getForbiddenReason } from '../../games/gomoku/rules.js';
-import { showMessage } from '../../ui/render.js';
+import { getForbiddenReason } from '../rules.js';
+import { showMessage } from '../../../ui/render.js';
 
 function createBoard(size) {
     return Array.from({ length: size }, () => Array(size).fill(null));

@@ -15,7 +15,7 @@ import {
     ParticleSystem,
     InteractionHandler,
     boardToWorld,
-} from './index.js';
+} from '../../../render3d/index.js';
 
 const MARKER_THEMES = {
     hint: { color: 0xf7c76a, innerRadius: 0.12, outerRadius: 0.24, opacity: 0.8 },

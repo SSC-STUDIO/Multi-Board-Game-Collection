@@ -1,6 +1,6 @@
-/** 沉浸式 HUD 控制器：管理桌面端沉浸式 UI 模式的鼠标跟踪/区域显隐 @module app/controllers/ImmersiveHudManager */
+/** 沉浸式 HUD 控制器：管理桌面端沉浸式 UI 模式的鼠标跟踪/区域显隐 @module games/gomoku/controllers/ImmersiveHudManager */
 
-import { i18n } from '../../utils/i18n.js';
+import { i18n } from '../../../utils/i18n.js';
 
 const IMMERSIVE_REGION_KEYS = ['top', 'left', 'right', 'bottom'];
 

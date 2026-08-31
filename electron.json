@@ -17,7 +17,6 @@
       "index.html",
       "src/**/*",
       "assets/**/*",
-      "locales/**/*",
       "steam/**/*",
       "version.json",
       "electron-preload.js",

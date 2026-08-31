@@ -87,7 +87,7 @@ const { mockControllerFactory } = vi.hoisted(() => {
     return { mockControllerFactory: factory };
 });
 
-vi.mock('../render3d/GomokuRenderer3D.js', () => ({
+vi.mock('./render3d/GomokuRenderer3D.js', () => ({
     GomokuRenderer3D: class MockRenderer {
         constructor() { this.callbacks = {}; }
         static isWebGLAvailable() { return true; }
@@ -102,7 +102,7 @@ vi.mock('../render3d/GomokuRenderer3D.js', () => ({
     }
 }));
 
-vi.mock('../audio/SoundManager.js', () => ({
+vi.mock('../../audio/SoundManager.js', () => ({
     SoundManager: class {
         constructor() { this._enabled = true; }
         play() { }
@@ -112,7 +112,7 @@ vi.mock('../audio/SoundManager.js', () => ({
     }
 }));
 
-vi.mock('../services/llmCoach.js', () => ({
+vi.mock('../../services/llmCoach.js', () => ({
     loadLlmCoachSettings: () => ({
         apiEndpoint: '', apiKey: '', model: '', enabled: false,
         defaultMessages: '', systemPrompt: ''
@@ -129,7 +129,7 @@ vi.mock('./controllers/GameController.js', () => {
     makeMockCtrls.game = ctrl;
     return { GameController: class { constructor() { return ctrl; } } };
 });
-vi.mock('./controllers/CoachController.js', () => {
+vi.mock('../../app/controllers/CoachController.js', () => {
     const ctrl = mockControllerFactory();
     makeMockCtrls.coach = ctrl;
     return { CoachController: class { constructor() { return ctrl; } } };
@@ -150,7 +150,7 @@ vi.mock('./controllers/InteractionManager.js', () => {
     return { InteractionManager: class { constructor() { return ctrl; } } };
 });
 
-vi.mock('../ui/dom.js', () => {
+vi.mock('../../ui/dom.js', () => {
     const makeEl = (tag = 'div') => ({
         tag,
         classList: {
@@ -214,15 +214,15 @@ vi.mock('../ui/dom.js', () => {
     };
 });
 
-vi.mock('../ui/devPanel.js', () => ({
+vi.mock('../../ui/devPanel.js', () => ({
     mountDevPanel: vi.fn(() => ({ dispose: vi.fn() })),
 }));
 
-vi.mock('../utils/formatters.js', () => ({
+vi.mock('../../utils/formatters.js', () => ({
     formatMove: (r, c) => `${String.fromCharCode(65 + c)}${r + 1}`,
 }));
 
-vi.mock('../games/gomoku/state.js', () => ({
+vi.mock('./state.js', () => ({
     createGameState: () => ({
         currentPlayer: 'black', moveHistory: [], lastMove: null,
         aiThinking: false, gameOver: false, coachSuggestion: null,

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'board-games-v4';
+const CACHE_NAME = 'board-games-v5';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -11,30 +11,42 @@ const STATIC_ASSETS = [
   './src/styles/components.css',
   './src/styles/responsive.css',
 
-  // App entry
+  // App shell
   './src/main.js',
-  './src/app/GomokuApp.js',
-  './src/app/controllers/GameController.js',
+  './src/app/BoardGameApp.js',
+  './src/app/controllers/LauncherController.js',
   './src/app/controllers/CoachController.js',
-  './src/app/controllers/SettingsController.js',
-  './src/app/controllers/ImmersiveHudManager.js',
-  './src/app/controllers/InteractionManager.js',
 
-  // Game logic
+  // Game registry
+  './src/games/registry.js',
+
+  // Gomoku
+  './src/games/gomoku/GomokuApp.js',
   './src/games/gomoku/state.js',
   './src/games/gomoku/rules.js',
   './src/games/gomoku/ai.js',
+  './src/games/gomoku/controllers/GameController.js',
+  './src/games/gomoku/controllers/SettingsController.js',
+  './src/games/gomoku/controllers/ImmersiveHudManager.js',
+  './src/games/gomoku/controllers/InteractionManager.js',
+  './src/games/gomoku/render3d/GomokuRenderer3D.js',
 
-  // Go (3D)
+  // Go
+  './src/games/go/GoApp.js',
+  './src/games/go/state.js',
+  './src/games/go/rules.js',
+  './src/games/go/ai.js',
+  './src/games/go/scoring.js',
   './src/games/go/render3d/GoRenderer3D.js',
 
   // UI
   './src/ui/dom.js',
   './src/ui/render.js',
+  './src/ui/confirmDialog.js',
+  './src/ui/devPanel.js',
 
-  // 3D rendering
+  // Shared 3D engine
   './src/render3d/index.js',
-  './src/render3d/GomokuRenderer3D.js',
   './src/render3d/SceneManager.js',
   './src/render3d/BoardBuilder.js',
   './src/render3d/StoneBuilder.js',
@@ -58,12 +70,20 @@ const STATIC_ASSETS = [
   './src/utils/formatters.js',
   './src/utils/i18n.js',
 
+  // Locales
+  './src/locales/zh.json',
+  './src/locales/en.json',
+
   // Audio & services
   './src/audio/SoundManager.js',
   './src/services/llmCoach.js',
+  './src/services/aiCommentary.js',
+  './src/services/boardImageAnalyzer.js',
 
   // Three.js
-  './node_modules/three/build/three.module.js'
+  './node_modules/three/build/three.module.js',
+  './node_modules/three/examples/jsm/controls/OrbitControls.js',
+  './node_modules/three/examples/jsm/environments/RoomEnvironment.js'
 ];
 
 self.addEventListener('install', (event) => {

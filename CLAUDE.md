@@ -29,46 +29,46 @@ Board Games 是五子棋与围棋合集，采用原生 JavaScript + Three.js 构
 
 ```
 src/
-├── main.js              # 应用入口 (DOMContentLoaded → 启动器)
-├── app/                  # 应用层
-│   ├── GomokuApp.js     # 应用主类，协调各模块
-│   └── controllers/     # 控制器模块
-├── game/                 # 五子棋游戏逻辑 (遗留，games/gomoku 为重构版)
-├── games/                # 各游戏独立模块
-│   ├── gomoku/           # 五子棋 (state.js, rules.js, ai.js)
-│   └── go/               # 围棋 (state.js, rules.js, 含计分+3D渲染)
-├── ui/                   # 表现层 (DOM 操作、渲染)
-│   ├── dom.js           # DOM 引用获取、事件绑定
-│   └── render.js        # UI 渲染、状态同步
-├── render3d/             # 3D 渲染模块 (Three.js)
-│   ├── GomokuRenderer3D.js  # 五子棋 3D 渲染器
-│   ├── scenes/tabletop.js   # 共用桌面布景 + 三种氛围
-│   └── ...               # SceneManager, CameraController 等
-├── config/               # 配置层
-│   ├── gameConfig.js    # 游戏常量、默认选项、模式标签
-│   ├── sceneConfig.js   # 3D 场景配置
-│   └── renderConfig.js  # 渲染参数配置
-├── utils/                # 工具层
-│   ├── board.js         # 棋盘坐标工具
-│   ├── formatters.js    # 格式化函数
-│   └── i18n.js          # 国际化 (中/英)
-├── audio/
-│   └── SoundManager.js  # 音效管理 (Web Audio API)
-├── services/
-│   └── llmCoach.js      # LLM Coach 服务 (可选外部 API，仅五子棋)
-└── styles/               # CSS 样式
-    ├── main.css         # 主样式入口
-    ├── base.css         # 基础样式、变量
-    ├── layout.css       # 布局
-    ├── components.css   # 组件样式
-    └── responsive.css   # 响应式适配
+├── main.js                  # 应用入口 (DOMContentLoaded → 启动器)
+├── app/                     # 跨游戏应用壳
+│   ├── BoardGameApp.js      # 共享生命周期骨架 (围棋使用)
+│   └── controllers/
+│       ├── LauncherController.js  # 启动器网格、进入游戏
+│       └── CoachController.js     # LLM 教练 (两款游戏共用)
+├── games/                   # 各游戏自洽模块 (逻辑 + 应用 + 3D 渲染器)
+│   ├── registry.js          # 游戏注册表 (元数据 + 懒加载 enter())
+│   ├── gomoku/              # 五子棋
+│   │   ├── GomokuApp.js     # 应用主类，协调各模块
+│   │   ├── state.js / rules.js / ai.js
+│   │   ├── controllers/     # 五子棋专属控制器
+│   │   │   └── GameController / SettingsController /
+│   │   │       ImmersiveHudManager / InteractionManager
+│   │   └── render3d/GomokuRenderer3D.js
+│   └── go/                  # 围棋
+│       ├── GoApp.js
+│       ├── state.js / rules.js / ai.js / scoring.js
+│       └── render3d/GoRenderer3D.js
+├── render3d/                # 共享 3D 引擎 (Three.js)
+│   ├── index.js             # 桶文件出口 (游戏渲染器从这里导入)
+│   ├── SceneManager.js      # 场景/相机/渲染循环 + IBL 环境光照
+│   ├── BoardBuilder / StoneBuilder / MaterialFactory
+│   ├── CameraController / LightingSetup / AnimationManager
+│   ├── InteractionHandler / EnvironmentBuilder / ParticleSystem
+│   └── scenes/              # tabletop.js 共用桌面布景 + props.js
+├── ui/                      # 表现层 (dom / render / confirmDialog / devPanel)
+├── config/                  # 配置层 (gameConfig / sceneConfig / renderConfig)
+├── utils/                   # 工具层 (board / formatters / i18n)
+├── audio/SoundManager.js    # 音效管理 (Web Audio API)
+├── services/                # llmCoach / aiCommentary / boardImageAnalyzer
+├── locales/                 # zh.json / en.json (运行时加载)
+└── styles/                  # CSS (main / base / layout / components / responsive)
 ```
 
 **模块依赖关系**：
-- `games/` 纯逻辑层，仅依赖 `config/` 和 `utils/`
-- `app/` 依赖 `games/`、`ui/`、`render3d/`、`audio/`、`services/`
-- `ui/` 依赖 `game/`（或 `games/`）和 `render3d/`
-- `render3d/` 依赖 `config/` 和 Three.js
+- `games/<game>/` 自洽：纯逻辑 (state/rules/ai) 仅依赖 `config/` 和 `utils/`；应用类依赖 `ui/`、`audio/`、`services/`、共享控制器与共享 3D 引擎
+- `app/` 应用壳：启动器与共享控制器，依赖 `games/registry.js` 懒加载各游戏
+- `render3d/` 共享引擎：仅依赖 `config/` 和 Three.js，经 `index.js` 桶文件对外出口
+- `ui/` 依赖 `utils/`（i18n）与游戏状态快照
 
 ## 开发命令
 
@@ -112,7 +112,7 @@ npm test
 # 运行特定测试文件
 npx vitest run src/games/go/rules.test.js
 
-# 测试数量 (2026-08-30): 821 tests, 34 files
+# 测试数量 (2026-08-31): 799 tests, 33 files
 ```
 
 ### 覆盖范围

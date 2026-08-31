@@ -4,6 +4,7 @@
   "description": "五子棋与围棋合集 / Gomoku and Go with 3D boards and optional LLM coaching",
   "private": true,
   "type": "module",
+  "main": "electron-main.js",
   "author": "Your Name",
   "license": "MIT",
   "repository": {

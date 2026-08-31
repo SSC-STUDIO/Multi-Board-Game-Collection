@@ -1,11 +1,11 @@
 /**
  * 游戏控制器：管理游戏生命周期、落子逻辑与 AI 调度。
- * @module app/controllers/GameController
+ * @module games/gomoku/controllers/GameController
  */
 
-import { getAIDelay, getBestMove, getMoveGuidance, getMoveReview } from '../../games/gomoku/ai.js';
-import { getForbiddenReason as getForbidden, getWinningLine } from '../../games/gomoku/rules.js';
-import { createGameState } from '../../games/gomoku/state.js';
+import { getAIDelay, getBestMove, getMoveGuidance, getMoveReview } from '../ai.js';
+import { getForbiddenReason as getForbidden, getWinningLine } from '../rules.js';
+import { createGameState } from '../state.js';
 import {
     hideResultOverlay,
     renderBoard,
@@ -20,14 +20,14 @@ import {
     updatePlacementPanel,
     updateStatus,
     showSetup
-} from '../../ui/render.js';
-import { setActiveByValue } from '../../ui/dom.js';
-import { i18n } from '../../utils/i18n.js';
-import { formatMove, getPlayerLabel } from '../../utils/formatters.js';
-import { getOpponent, isBoardFull, isInside } from '../../utils/board.js';
-import { getSceneAmbienceCue } from '../../config/sceneConfig.js';
-import { getLlmCoachConfigStatus, isLlmCoachConfigured } from '../../services/llmCoach.js';
-import { getMoveCommentary, isCommentaryAvailable, clearCommentaryCache } from '../../services/aiCommentary.js';
+} from '../../../ui/render.js';
+import { setActiveByValue } from '../../../ui/dom.js';
+import { i18n } from '../../../utils/i18n.js';
+import { formatMove, getPlayerLabel } from '../../../utils/formatters.js';
+import { getOpponent, isBoardFull, isInside } from '../../../utils/board.js';
+import { getSceneAmbienceCue } from '../../../config/sceneConfig.js';
+import { getLlmCoachConfigStatus, isLlmCoachConfigured } from '../../../services/llmCoach.js';
+import { getMoveCommentary, isCommentaryAvailable, clearCommentaryCache } from '../../../services/aiCommentary.js';
 
 /**
  * 游戏流程控制器。

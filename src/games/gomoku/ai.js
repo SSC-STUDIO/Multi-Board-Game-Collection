@@ -1,4 +1,4 @@
-/** AI 引擎：走法评分、搜索决策与引导分析 @module game/ai */
+/** AI 引擎：走法评分、搜索决策与引导分析 @module games/gomoku/ai */
 
 import {
     AI_DELAY_BY_LEVEL,

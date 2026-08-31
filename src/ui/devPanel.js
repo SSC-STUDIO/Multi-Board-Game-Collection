@@ -31,7 +31,7 @@ function shouldAutoOpen() {
 
 /**
  * 挂载开发者面板到 body，监听全局快捷键。
- * @param {import('../app/GomokuApp.js').GomokuApp} app - 应用主实例
+ * @param {import('../games/gomoku/GomokuApp.js').GomokuApp} app - 应用主实例
  * @returns {{ dispose(): void, toggle(): void, open(): void, close(): void }|null} 控制句柄，非浏览器环境返回 null
  */
 export function mountDevPanel(app) {

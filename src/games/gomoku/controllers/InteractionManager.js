@@ -1,10 +1,10 @@
-/** 交互控制器：管理棋盘点击、落子前选择流程、预览和高亮 @module app/controllers/InteractionManager */
+/** 交互控制器：管理棋盘点击、落子前选择流程、预览和高亮 @module games/gomoku/controllers/InteractionManager */
 
-import { getForbiddenReason as getForbidden } from '../../games/gomoku/rules.js';
-import { i18n } from '../../utils/i18n.js';
-import { isInside } from '../../utils/board.js';
-import { formatMove } from '../../utils/formatters.js';
-import { showMessage as showMessageUI } from '../../ui/render.js';
+import { getForbiddenReason as getForbidden } from '../rules.js';
+import { i18n } from '../../../utils/i18n.js';
+import { isInside } from '../../../utils/board.js';
+import { formatMove } from '../../../utils/formatters.js';
+import { showMessage as showMessageUI } from '../../../ui/render.js';
 
 /**
  * 交互控制器

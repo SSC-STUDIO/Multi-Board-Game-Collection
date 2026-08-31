@@ -1,4 +1,4 @@
-/** Gomoku 规则引擎：胜负判定、禁手检测 @module game/rules */
+/** Gomoku 规则引擎：胜负判定、禁手检测 @module games/gomoku/rules */
 
 import { DIRECTIONS, FOUR_PATTERNS, OPEN_THREE_PATTERNS } from '../../config/gameConfig.js';
 import { isInside } from '../../utils/board.js';

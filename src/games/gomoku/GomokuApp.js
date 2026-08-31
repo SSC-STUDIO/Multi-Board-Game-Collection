@@ -1,20 +1,20 @@
 /**
  * 五子棋应用主协调器。
  * 负责装配 DOM、控制器、3D 渲染器、声音系统与测试钩子。
- * @module app/GomokuApp
+ * @module games/gomoku/GomokuApp
  */
 
-import { createGameState, createOptions } from '../games/gomoku/state.js';
-import { getDOMReferences, setupLanguageSwitch } from '../ui/dom.js';
-import { mountDevPanel } from '../ui/devPanel.js';
-import { GomokuRenderer3D } from '../render3d/GomokuRenderer3D.js';
-import { SoundManager } from '../audio/SoundManager.js';
-import { loadLlmCoachSettings, setupGlobalErrorHandlers } from '../services/llmCoach.js';
-import { formatMove } from '../utils/formatters.js';
+import { createGameState, createOptions } from './state.js';
+import { getDOMReferences, setupLanguageSwitch } from '../../ui/dom.js';
+import { mountDevPanel } from '../../ui/devPanel.js';
+import { GomokuRenderer3D } from './render3d/GomokuRenderer3D.js';
+import { SoundManager } from '../../audio/SoundManager.js';
+import { loadLlmCoachSettings, setupGlobalErrorHandlers } from '../../services/llmCoach.js';
+import { formatMove } from '../../utils/formatters.js';
 
 import { GameController } from './controllers/GameController.js';
-import { CoachController } from './controllers/CoachController.js';
-import { i18n } from '../utils/i18n.js';
+import { CoachController } from '../../app/controllers/CoachController.js';
+import { i18n } from '../../utils/i18n.js';
 import { SettingsController } from './controllers/SettingsController.js';
 import { ImmersiveHudManager } from './controllers/ImmersiveHudManager.js';
 import { InteractionManager } from './controllers/InteractionManager.js';

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('../../utils/i18n.js', () => ({
+vi.mock('../../../utils/i18n.js', () => ({
     i18n: {
         t: (key, params) => {
             if (params && Object.keys(params).length > 0) return `${key}:${JSON.stringify(params)}`;
@@ -9,17 +9,17 @@ vi.mock('../../utils/i18n.js', () => ({
     },
     t: (key) => key
 }));
-vi.mock('../../games/gomoku/ai.js', () => ({
+vi.mock('../ai.js', () => ({
     getAIDelay: vi.fn(() => 0),
     getBestMove: vi.fn(),
     getMoveGuidance: vi.fn(),
     getMoveReview: vi.fn()
 }));
-vi.mock('../../games/gomoku/rules.js', () => ({
+vi.mock('../rules.js', () => ({
     getForbiddenReason: vi.fn(() => ''),
     getWinningLine: vi.fn(() => [])
 }));
-vi.mock('../../games/gomoku/state.js', () => ({
+vi.mock('../state.js', () => ({
     createGameState: vi.fn((opts) => ({
         board: Array.from({ length: opts?.size || 15 }, () => Array(opts?.size || 15).fill(null)),
         currentPlayer: 'black',
@@ -49,7 +49,7 @@ vi.mock('../../games/gomoku/state.js', () => ({
         awaitingPlacementConfirm: false
     }))
 }));
-vi.mock('../../ui/render.js', () => ({
+vi.mock('../../../ui/render.js', () => ({
     hideResultOverlay: vi.fn(),
     renderBoard: vi.fn(),
     setAIThinking: vi.fn(),
@@ -64,35 +64,35 @@ vi.mock('../../ui/render.js', () => ({
     updatePlacementPanel: vi.fn(),
     updateStatus: vi.fn()
 }));
-vi.mock('../../ui/dom.js', () => ({
+vi.mock('../../../ui/dom.js', () => ({
     setActiveByValue: vi.fn()
 }));
-vi.mock('../../utils/formatters.js', () => ({
+vi.mock('../../../utils/formatters.js', () => ({
     formatMove: vi.fn((r, c) => `${String.fromCharCode(65 + (c >= 8 ? c + 1 : c))}${r + 1}`),
     getPlayerLabel: vi.fn((color) => color === 'black' ? 'Black' : 'White')
 }));
-vi.mock('../../utils/board.js', () => ({
+vi.mock('../../../utils/board.js', () => ({
     getOpponent: vi.fn((color) => color === 'black' ? 'white' : 'black'),
     isBoardFull: vi.fn(() => false),
     isInside: vi.fn(() => true)
 }));
-vi.mock('../../config/sceneConfig.js', () => ({
+vi.mock('../../../config/sceneConfig.js', () => ({
     getSceneAmbienceCue: vi.fn(() => 'home-game-idle')
 }));
-vi.mock('../../services/llmCoach.js', () => ({
+vi.mock('../../../services/llmCoach.js', () => ({
     getLlmCoachConfigStatus: vi.fn(() => 'missing'),
     isLlmCoachConfigured: vi.fn(() => false)
 }));
-vi.mock('../../services/aiCommentary.js', () => ({
+vi.mock('../../../services/aiCommentary.js', () => ({
     getMoveCommentary: vi.fn(async () => null),
     isCommentaryAvailable: vi.fn(() => false),
     clearCommentaryCache: vi.fn()
 }));
 
 import { GameController } from './GameController.js';
-import { getBestMove, getAIDelay, getMoveReview } from '../../games/gomoku/ai.js';
-import { getForbiddenReason as getForbidden, getWinningLine } from '../../games/gomoku/rules.js';
-import { createGameState } from '../../games/gomoku/state.js';
+import { getBestMove, getAIDelay, getMoveReview } from '../ai.js';
+import { getForbiddenReason as getForbidden, getWinningLine } from '../rules.js';
+import { createGameState } from '../state.js';
 import {
     hideResultOverlay,
     showSetup,
@@ -106,9 +106,9 @@ import {
     updateGuidance,
     updateBoardPreviewOverlay,
     updatePlacementPanel
-} from '../../ui/render.js';
-import { setActiveByValue } from '../../ui/dom.js';
-import { getOpponent, isBoardFull } from '../../utils/board.js';
+} from '../../../ui/render.js';
+import { setActiveByValue } from '../../../ui/dom.js';
+import { getOpponent, isBoardFull } from '../../../utils/board.js';
 
 function createBoard(size) {
     return Array.from({ length: size }, () => Array(size).fill(null));
