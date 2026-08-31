@@ -83,6 +83,13 @@ export const RENDER_CONFIG = {
         previewWhite: 0xcccccc, // 预览白子颜色
     },
 
+    // 粒子配置：落子/获胜特效用的缓冲池上限，以及氛围粒子数量
+    particles: {
+        maxParticles: 1000,
+        dropBurst: 20,
+        ambientCount: 150,
+    },
+
     // 动画配置
     animation: {
         dropDuration: 0.4,      // 落子动画时长（秒）
@@ -112,6 +119,7 @@ export const RENDER_CONFIG = {
         antialias: true,
         usePhysicalStoneMaterials: true,
         boardTextureSizeCap: 2048,
+        ambientParticles: 220,
     },
 
     // 移动端配置：降低 DPR，但保留抗锯齿
@@ -122,6 +130,7 @@ export const RENDER_CONFIG = {
         antialias: true,
         usePhysicalStoneMaterials: false,
         boardTextureSizeCap: 1024,
+        ambientParticles: 55,
     },
 
     // 降质配置（低内存桌面）
@@ -132,9 +141,10 @@ export const RENDER_CONFIG = {
         antialias: true,
         usePhysicalStoneMaterials: false,
         boardTextureSizeCap: 1536,
+        ambientParticles: 100,
     },
 
-    // 极低端设备配置
+    // 极低端设备配置：完全关闭氛围粒子
     extremeLowQuality: {
         shadowMapSize: 512,
         stoneSegments: 12,
@@ -142,6 +152,7 @@ export const RENDER_CONFIG = {
         antialias: false,
         usePhysicalStoneMaterials: false,
         boardTextureSizeCap: 1024,
+        ambientParticles: 0,
     },
 
     // 场景环境配置
@@ -244,6 +255,10 @@ export function getOptimalConfig() {
             ...RENDER_CONFIG.stone,
             segments: quality.stoneSegments ?? RENDER_CONFIG.stone.segments,
             usePhysicalStoneMaterials: quality.usePhysicalStoneMaterials ?? RENDER_CONFIG.stone.usePhysicalStoneMaterials,
+        },
+        particles: {
+            ...RENDER_CONFIG.particles,
+            ambientCount: quality.ambientParticles ?? RENDER_CONFIG.particles.ambientCount,
         },
     };
 }

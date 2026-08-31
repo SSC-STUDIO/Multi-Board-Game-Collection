@@ -112,6 +112,7 @@ export class GomokuRenderer3D {
             this.sceneManager.scene,
             lowEndGraphics ? { maxParticles: 360, dropBurst: 9 } : { maxParticles: 1000, dropBurst: 16 }
         );
+        this.applyAmbientParticles();
         this.sceneManager.onBeforeRender = () => this.handleFrame();
 
         this.interactionHandler = new InteractionHandler(this.sceneManager, {
@@ -123,7 +124,7 @@ export class GomokuRenderer3D {
 
     handleFrame() {
         const dt = this.sceneManager?.clock?.getDelta?.() ?? 0.016;
-        this.particleSystem?.update(dt);
+        const particlesAnimated = this.particleSystem?.update(dt) ?? false;
 
         this.ambientTimer += dt;
 
@@ -131,9 +132,28 @@ export class GomokuRenderer3D {
         const environmentAnimated = this.environmentBuilder?.update(timeSeconds) ?? false;
         const lightingAnimated = this.lightingSetup?.update(timeSeconds) ?? false;
 
-        if (environmentAnimated || lightingAnimated) {
+        if (environmentAnimated || lightingAnimated || particlesAnimated) {
             this.sceneManager.setNeedsRender();
         }
+    }
+
+    /**
+     * 按当前氛围与设备画像重建环境粒子层。
+     * 漂浮区域用棋盘尺寸推导，保证不同棋盘规模下密度观感一致。
+     */
+    applyAmbientParticles() {
+        if (!this.particleSystem) {
+            return;
+        }
+        const count = this.config.particles?.ambientCount ?? 0;
+        const { cellSize, borderWidth, thickness, baseHeight } = this.config.board;
+        const boardTotal = (this.boardSize - 1) * cellSize + borderWidth * 2;
+        const boardBottomY = -thickness / 2 - baseHeight;
+        this.particleSystem.emitAmbientParticles(this.scenePreset, count, {
+            radius: boardTotal * 1.15,
+            floorY: boardBottomY - 2.4,
+            height: boardTotal,
+        });
     }
 
     createBoardBuilder() {
@@ -182,6 +202,7 @@ export class GomokuRenderer3D {
         this.interactionHandler.updateBoardSize(size);
         this.cameraController.setScenePreset(this.scenePreset);
         this.cameraController.fitToBoard(size, true);
+        this.applyAmbientParticles();
     }
 
     setScenePreset(scenePreset, { animate = false } = {}) {
@@ -196,6 +217,7 @@ export class GomokuRenderer3D {
 
         if (sceneChanged) {
             this.environmentBuilder?.applyMood(this.scenePreset);
+            this.applyAmbientParticles();
         }
 
         this.lightingSetup?.applyPreset(this.scenePreset);

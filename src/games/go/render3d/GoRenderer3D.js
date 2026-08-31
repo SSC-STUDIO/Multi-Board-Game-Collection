@@ -183,12 +183,20 @@ export class GoRenderer3D {
             lowEndGraphics ? { maxParticles: 360, dropBurst: 9 } : { maxParticles: 1000, dropBurst: 16 }
         );
         this.ambientTimer = 0;
+        this.applyAmbientParticles();
 
         this.sceneManager.onBeforeRender = () => {
             const now = performance.now();
             const dt = this._lastFrameTime ? (now - this._lastFrameTime) / 1000 : 0.016;
             this._lastFrameTime = now;
-            this.particleSystem?.update(dt);
+            const particlesAnimated = this.particleSystem?.update(dt) ?? false;
+
+            const timeSeconds = now / 1000;
+            const environmentAnimated = this.environmentBuilder?.update(timeSeconds) ?? false;
+            const lightingAnimated = this.lightingSetup?.update(timeSeconds) ?? false;
+            if (environmentAnimated || lightingAnimated || particlesAnimated) {
+                this.sceneManager.setNeedsRender();
+            }
         };
 
         this.buildBoard();
@@ -200,6 +208,23 @@ export class GoRenderer3D {
         this.applyGoCameraFrame(false);
 
         this._setupInteraction();
+    }
+
+    /** 按设备画像铺一层比赛大厅的微光尘。 */
+    applyAmbientParticles() {
+        if (!this.particleSystem) {
+            return;
+        }
+        const config = this.sceneManager.config;
+        const count = config.particles?.ambientCount ?? 0;
+        const { thickness, baseHeight } = config.board;
+        const boardTotal = (this.boardSize + 1) * this.cellSize;
+        const boardBottomY = -thickness / 2 - baseHeight;
+        this.particleSystem.emitAmbientParticles('competition', count, {
+            radius: boardTotal * 1.15,
+            floorY: boardBottomY - 2.4,
+            height: boardTotal,
+        });
     }
 
     buildBoard() {
@@ -292,6 +317,7 @@ export class GoRenderer3D {
         this.lightingSetup?.setShadowExtent(computeGoShadowExtent(size, this.cellSize));
         this.cameraController?.fitToBoard(size, false);
         this.applyGoCameraFrame(false);
+        this.applyAmbientParticles();
     }
 
     applyGoCameraFrame(animate = false) {

@@ -6,6 +6,38 @@
 import * as THREE from 'three';
 import { boardToWorld } from '../config/renderConfig.js';
 
+/**
+ * 各氛围的环境粒子性格：
+ * - 家里：暖白尘埃，被窗光照亮后缓慢上浮
+ * - 公园：黄绿落叶与花粉，向下飘并大幅横摆
+ * - 比赛：冷白微光尘，几乎静止，只做极缓的浮沉
+ */
+const AMBIENT_STEP = 1 / 30;
+
+const AMBIENT_PRESETS = {
+    home: {
+        colors: [0xffd9a0, 0xffe8c4, 0xfff4e2],
+        size: 0.085,
+        opacity: 0.5,
+        rise: 0.24,
+        sway: 0.32,
+    },
+    park: {
+        colors: [0xd8c866, 0xc9a94e, 0xa8c46a, 0xfff0c0],
+        size: 0.11,
+        opacity: 0.44,
+        rise: -0.34,
+        sway: 0.62,
+    },
+    competition: {
+        colors: [0xdfe7f2, 0xf2f4f8, 0xc9d6e8],
+        size: 0.07,
+        opacity: 0.34,
+        rise: 0.12,
+        sway: 0.16,
+    },
+};
+
 export class ParticleSystem {
     constructor(scene, options = {}) {
         this.scene = scene;
@@ -36,6 +68,141 @@ export class ParticleSystem {
 
         this.points = new THREE.Points(this.geometry, this.material);
         this.scene.add(this.points);
+
+        // 氛围粒子独立成层：不受重力与碰撞影响，只做缓慢漂浮循环
+        this.ambient = null;
+    }
+
+    /**
+     * 按氛围配置环境粒子（家里=尘埃光点 / 公园=飘落叶与花粉 / 比赛=微光尘）。
+     * 数量为 0 时直接拆除该层，低端设备完全不付代价。
+     * @param {string} scenePreset 'home' | 'park' | 'competition'
+     * @param {number} count 粒子数量（由 renderConfig 的设备画像决定）
+     * @param {{ radius: number, floorY: number, height: number }} bounds 漂浮区域
+     */
+    emitAmbientParticles(scenePreset = 'competition', count = 0, bounds = {}) {
+        this.disposeAmbient();
+        if (!Number.isFinite(count) || count <= 0) {
+            return;
+        }
+
+        const preset = AMBIENT_PRESETS[scenePreset] ?? AMBIENT_PRESETS.competition;
+        const radius = bounds.radius ?? 14;
+        const floorY = bounds.floorY ?? -2;
+        const height = bounds.height ?? 10;
+
+        const positions = new Float32Array(count * 3);
+        const colors = new Float32Array(count * 3);
+        const sizes = new Float32Array(count);
+        const phases = new Float32Array(count);
+        const speeds = new Float32Array(count);
+
+        const color = new THREE.Color();
+        for (let i = 0; i < count; i += 1) {
+            const i3 = i * 3;
+            const angle = Math.random() * Math.PI * 2;
+            const spread = Math.sqrt(Math.random()) * radius;
+            positions[i3] = Math.cos(angle) * spread;
+            positions[i3 + 1] = floorY + Math.random() * height;
+            positions[i3 + 2] = Math.sin(angle) * spread;
+
+            color.setHex(preset.colors[i % preset.colors.length]);
+            const shade = 0.75 + Math.random() * 0.25;
+            colors[i3] = color.r * shade;
+            colors[i3 + 1] = color.g * shade;
+            colors[i3 + 2] = color.b * shade;
+
+            sizes[i] = preset.size * (0.6 + Math.random() * 0.8);
+            phases[i] = Math.random() * Math.PI * 2;
+            speeds[i] = preset.rise * (0.5 + Math.random());
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+        const material = new THREE.PointsMaterial({
+            size: preset.size,
+            vertexColors: true,
+            transparent: true,
+            opacity: preset.opacity,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            sizeAttenuation: true,
+        });
+
+        const points = new THREE.Points(geometry, material);
+        points.name = `ambient-particles:${scenePreset}`;
+        points.frustumCulled = false;
+        this.scene.add(points);
+
+        this.ambient = {
+            points,
+            geometry,
+            material,
+            positions,
+            phases,
+            speeds,
+            count,
+            floorY,
+            height,
+            sway: preset.sway,
+            elapsed: 0,
+            accumulator: 0,
+        };
+    }
+
+    /**
+     * 推进氛围粒子。以 30fps 步进积分，避免仅为了漂浮粒子就把
+     * 按需渲染的场景拉到满帧。
+     * @returns {boolean} 本次是否真的移动了粒子（需要重绘）
+     */
+    updateAmbient(deltaTime) {
+        const ambient = this.ambient;
+        if (!ambient) {
+            return false;
+        }
+
+        ambient.accumulator += deltaTime;
+        if (ambient.accumulator < AMBIENT_STEP) {
+            return false;
+        }
+        const step = ambient.accumulator;
+        ambient.accumulator = 0;
+        ambient.elapsed += step;
+        deltaTime = step;
+
+        const { positions, phases, speeds, count, floorY, height, sway } = ambient;
+        const top = floorY + height;
+
+        for (let i = 0; i < count; i += 1) {
+            const i3 = i * 3;
+            const phase = phases[i] + ambient.elapsed * 0.6;
+            positions[i3] += Math.cos(phase) * sway * deltaTime;
+            positions[i3 + 1] += speeds[i] * deltaTime;
+            positions[i3 + 2] += Math.sin(phase * 0.8) * sway * deltaTime;
+
+            // 越界后从另一端回流，维持恒定密度
+            if (positions[i3 + 1] > top) {
+                positions[i3 + 1] = floorY;
+            } else if (positions[i3 + 1] < floorY) {
+                positions[i3 + 1] = top;
+            }
+        }
+
+        ambient.geometry.attributes.position.needsUpdate = true;
+        return true;
+    }
+
+    disposeAmbient() {
+        if (!this.ambient) {
+            return;
+        }
+        this.scene.remove(this.ambient.points);
+        this.ambient.geometry.dispose();
+        this.ambient.material.dispose();
+        this.ambient = null;
     }
 
     /**
@@ -131,13 +298,6 @@ export class ParticleSystem {
     }
 
     /**
-     * 环境粒子（背景浮动光点）
-     */
-    emitAmbientParticles() {
-        return;
-    }
-
-    /**
      * 添加单个粒子
      */
     addParticle({ x, y, z, vx, vy, vz, color, size, lifetime }) {
@@ -167,8 +327,14 @@ export class ParticleSystem {
     /**
      * 更新粒子系统
      * @param {number} deltaTime 帧间隔（秒）
+     * @returns {boolean} 本帧是否有粒子在动（需要重绘）
      */
     update(deltaTime) {
+        const ambientAdvanced = this.updateAmbient(deltaTime);
+        if (this.activeCount === 0) {
+            return ambientAdvanced;
+        }
+
         const gravity = -9.8;
 
         for (let i = this.activeCount - 1; i >= 0; i--) {
@@ -210,6 +376,7 @@ export class ParticleSystem {
         this.geometry.attributes.color.needsUpdate = true;
         this.geometry.attributes.size.needsUpdate = true;
         this.geometry.setDrawRange(0, this.activeCount);
+        return true;
     }
 
     /**
@@ -247,10 +414,6 @@ export class ParticleSystem {
     }
 
     /**
-     * 销毁粒子系统
-     */
-
-    /**
      * Emit celebration particles at a board position using the buffer particle system.
      * @param {number} row
      * @param {number} col
@@ -280,6 +443,7 @@ export class ParticleSystem {
     }
 
     dispose() {
+        this.disposeAmbient();
         this.geometry.dispose();
         this.material.dispose();
         this.scene.remove(this.points);
