@@ -1,4 +1,4 @@
-const CACHE_NAME = 'board-games-v5';
+const CACHE_NAME = 'board-games-v6';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -7,7 +7,6 @@ const STATIC_ASSETS = [
   // CSS
   './src/styles/main.css',
   './src/styles/base.css',
-  './src/styles/layout.css',
   './src/styles/components.css',
   './src/styles/responsive.css',
 

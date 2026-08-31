@@ -1,50 +1,58 @@
+/*
+ * 设计 token 根 —— 深色高级感视觉系统。
+ * 这里只定义语义化变量，供 main.css / components.css 引用。
+ * 实际页面底色与组件外观由 main.css 的深色主题驱动；
+ * 这里的变量统一为深色等价，消除历史上"浅暖底 + 深玻璃"两套并存导致的对比度隐患。
+ */
 :root {
-    --bg-start: #f0e7d8;
-    --bg-end: #e0c7a1;
-    --ink: #1c1c1c;
-    --muted: #5a4e42;
-    --accent: #d17b30;
-    --accent-deep: #9e5220;
-    --panel: rgba(255, 255, 255, 0.92);
-    --panel-strong: rgba(255, 255, 255, 0.98);
-    --shadow: 0 18px 40px rgba(56, 32, 10, 0.2);
-    --wood: #c58b4c;
-    --wood-deep: #a0672c;
+    /* 页面底色（深色系，突出 3D 场景） */
+    --bg-start: #131a26;
+    --bg-end: #0a0e15;
+    --ink: #f2ede1;
+    --muted: rgba(233, 231, 223, 0.66);
+    --accent: #e0aa5e;
+    --accent-deep: #c98a3e;
+    --panel: rgba(16, 22, 32, 0.6);
+    --panel-strong: rgba(20, 27, 39, 0.82);
+    --shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+    --wood: #b3854e;
+    --wood-deep: #7d5527;
     --cell-size: 32px;
-    /* Semantic design tokens for component theming */
-    --heading-color: #4c2610;
-    --card-warm-bg: #fffaf2;
-    --card-dark-bg: #292525;
-    --card-dark-mid: #5b4333;
-    --card-warm-light: #c98c52;
-    --card-warm-pale: #f3d4af;
-    --card-finished-dark: #8c5123;
-    --card-finished-light: #d38d45;
-    --option-active-start: #f6c37a;
-    --option-active-end: #d17b30;
-    --option-active-border: #c8722d;
-    --option-active-text: #2c1404;
-    --btn-primary-text: #fffaf2;
-    --btn-ghost-hover: rgba(255, 255, 255, 0.8);
+
+    /* 语义化组件 token（深色等价） */
+    --heading-color: #f2e8d5;
+    --card-warm-bg: #fdf6ea;
+    --card-dark-bg: #1d1a16;
+    --card-dark-mid: #3a2e22;
+    --card-warm-light: #d3a06a;
+    --card-warm-pale: #e9cfa6;
+    --card-finished-dark: #7a4a22;
+    --card-finished-light: #c98a45;
+    --option-active-start: #f0c078;
+    --option-active-end: #d18a3a;
+    --option-active-border: #b8762e;
+    --option-active-text: #1c1005;
+    --btn-primary-text: #fdf6ea;
+    --btn-ghost-hover: rgba(255, 255, 255, 0.12);
     --stone-black-start: #4a4a4a;
     --stone-black-mid: #1a1a1a;
     --stone-black-end: #0a0a0a;
     --stone-white-start: #ffffff;
     --stone-white-mid: #e8e8e8;
     --stone-white-end: #c8c8c8;
-    --focus-ring-color: #ffb347;
-    --control-btn-bg: #2f2f2f;
-    --control-btn-text: #fff5e8;
+    --focus-ring-color: #f0b45a;
+    --control-btn-bg: #2a2620;
+    --control-btn-text: #f2e9d8;
     --control-btn-danger: #a43a3a;
-    --message-success-text: #2f5f36;
-    --message-success-bg: rgba(213, 241, 220, 0.9);
-    --message-error-text: #7a2525;
-    --message-error-bg: rgba(255, 224, 224, 0.95);
-    --panel-card-value-color: #4a2812;
-    --result-title-color: #4d2810;
-    --result-stat-value-color: #43200d;
-    --board-depth-start: #8b6914;
-    --board-depth-end: #5a3d0a;
+    --message-success-text: #7fce8c;
+    --message-success-bg: rgba(28, 52, 34, 0.9);
+    --message-error-text: #ff9c9c;
+    --message-error-bg: rgba(56, 22, 22, 0.92);
+    --panel-card-value-color: #f0dcb8;
+    --result-title-color: #f2e8d5;
+    --result-stat-value-color: #eed9b8;
+    --board-depth-start: #6b4e1e;
+    --board-depth-end: #40290a;
     --dot-marker: #2b1a0a;
 }
 
@@ -59,97 +67,22 @@ body {
     font-family: "ZCOOL XiaoWei", "STKaiti", "KaiTi", serif;
     color: var(--ink);
     background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 30px;
     position: relative;
     overflow-x: hidden;
     transition: background 0.7s ease, color 0.4s ease;
 }
 
-body::before,
-body::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.25;
-    pointer-events: none;
-}
-
-body::before {
-    width: 420px;
-    height: 420px;
-    background: radial-gradient(circle, #fbe9c8, transparent 70%);
-    top: -160px;
-    left: -120px;
-}
-
-body::after {
-    width: 360px;
-    height: 360px;
-    background: radial-gradient(circle, #f6d9ae, transparent 70%);
-    bottom: -120px;
-    right: -80px;
-}
-
+/* 状态级页面底色微调（深色基调，仅做明度/色相漂移） */
 body.scene-game-active {
     background:
-        radial-gradient(circle at top, #f7ecd7 0%, #e1c394 48%, #c98a51 100%);
-}
-
-body.turn-black-active::before {
-    opacity: 0.34;
-    transform: scale(1.02);
-}
-
-body.turn-white-active::after {
-    opacity: 0.34;
-    transform: scale(1.05);
-}
-
-body.ai-active {
-    cursor: progress;
+        radial-gradient(circle at top, #18202e 0%, #101623 48%, #0a0e15 100%);
 }
 
 body.game-finished {
     background:
-        radial-gradient(circle at top, #f9f0de 0%, #e7ceac 44%, #c37a42 100%);
+        radial-gradient(circle at top, #1a2230 0%, #121826 44%, #0b0f16 100%);
 }
 
-.bg-orb {
-    position: fixed;
-    border-radius: 999px;
-    filter: blur(18px);
-    opacity: 0.38;
-    pointer-events: none;
-    z-index: 0;
-    animation: floatOrb 13s ease-in-out infinite;
-}
-
-.bg-orb-left {
-    width: 220px;
-    height: 220px;
-    background: radial-gradient(circle, rgba(255, 241, 202, 0.88), rgba(255, 241, 202, 0));
-    left: 5vw;
-    top: 18vh;
-}
-
-.bg-orb-right {
-    width: 260px;
-    height: 260px;
-    background: radial-gradient(circle, rgba(227, 158, 92, 0.48), rgba(227, 158, 92, 0));
-    right: 4vw;
-    bottom: 14vh;
-    animation-delay: -5s;
-}
-
-@keyframes floatOrb {
-    0%,
-    100% {
-        transform: translate3d(0, 0, 0) scale(1);
-    }
-    50% {
-        transform: translate3d(0, -18px, 0) scale(1.08);
-    }
+body.ai-active {
+    cursor: progress;
 }
