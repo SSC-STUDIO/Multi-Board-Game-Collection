@@ -217,6 +217,7 @@ export class GomokuRenderer3D {
         this.presentationMode = presentationMode;
         this.lightingSetup?.setPresentationMode(presentationMode);
         this.cameraController?.setPresentationMode(presentationMode);
+        this.measureHudMargins();
         this.cameraController?.updateFrameState(this.boardSize);
         if (animate) {
             this.cameraController?.playPresentationEntry(presentationMode);
@@ -230,8 +231,38 @@ export class GomokuRenderer3D {
         return this.cameraController?.getPresentationProfileName?.() ?? `${this.scenePreset}-${this.presentationMode}`;
     }
 
+    /**
+     * 测量 HUD 各栏实际占用的屏幕边距，交给相机按净可视区取景。
+     * 仅在对局模式（HUD 可见）下测量，设置页 HUD 隐藏时清零。
+     */
+    measureHudMargins() {
+        if (this.presentationMode !== 'game') {
+            this.cameraController?.setViewMargin({ left: 0, right: 0, top: 0, bottom: 0 });
+            return;
+        }
+        const vw = window.innerWidth;
+        const read = (selector) => {
+            const el = document.querySelector(selector);
+            if (!el) return 0;
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0 ? rect : null;
+        };
+        const left = read('.hud-left');
+        const right = read('.hud-right');
+        const top = read('.hud-top');
+        const bottom = read('.hud-bottom');
+        this.cameraController?.setViewMargin({
+            left: left ? left.x + left.width : 0,
+            right: right ? vw - right.x : 0,
+            top: top ? top.y + top.height : 0,
+            bottom: bottom ? window.innerHeight - bottom.y : 0
+        });
+    }
+
     resize() {
         this.sceneManager.handleResize();
+        this.measureHudMargins();
+        this.cameraController?.updateFrameState(this.boardSize);
     }
 
     fitToBoard(size = this.boardSize, animate = false) {

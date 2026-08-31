@@ -49,6 +49,8 @@ export class CameraController {
         );
         this.scenePreset = 'competition';
         this.presentationMode = 'game';
+        // HUD 占用的屏幕边距（px），取景时从可视区扣除，避免棋盘被侧栏/顶底栏挤小
+        this.viewMargin = { left: 0, right: 0, top: 0, bottom: 0 };
         this.motionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)') ?? null;
         this.prefersReducedMotion = this.motionQuery?.matches ?? false;
 
@@ -65,6 +67,19 @@ export class CameraController {
 
     setPresentationMode(mode = 'game') {
         this.presentationMode = mode === 'setup' ? 'setup' : 'game';
+    }
+
+    /**
+     * 设置 HUD 占用的屏幕边距（px），取景时扣除。
+     * @param {{ left?: number, right?: number, top?: number, bottom?: number }} margin
+     */
+    setViewMargin(margin = {}) {
+        this.viewMargin = {
+            left: margin.left ?? 0,
+            right: margin.right ?? 0,
+            top: margin.top ?? 0,
+            bottom: margin.bottom ?? 0
+        };
     }
 
     getFrameConfig(scenePreset = this.scenePreset, presentationMode = this.presentationMode) {
@@ -350,12 +365,17 @@ export class CameraController {
         const { cellSize, borderWidth, thickness } = this.config.board;
         const boardSpan = (boardSize - 1) * cellSize;
         const totalSize = boardSpan + borderWidth * 2;
-        const aspect = this.sceneManager.container.clientWidth / this.sceneManager.container.clientHeight || 1;
-        const aspectMultiplier = aspect < 1 ? 1.16 : aspect < 1.35 ? 1.08 : aspect > 1.9 ? 0.94 : 1;
+        const containerW = this.sceneManager.container.clientWidth || 1;
+        const containerH = this.sceneManager.container.clientHeight || 1;
+        // 净可视区 = 容器减去 HUD 边距；宽高比与取景距离都按净区计算
+        const netW = Math.max(containerW - this.viewMargin.left - this.viewMargin.right, 1);
+        const netH = Math.max(containerH - this.viewMargin.top - this.viewMargin.bottom, 1);
+        const aspect = netW / netH;
+        const aspectMultiplier = aspect < 1 ? 1.1 : aspect < 1.35 ? 1.04 : aspect > 1.9 ? 0.94 : 1;
         const frame = this.getFrameConfig();
         const elevation = THREE.MathUtils.degToRad(frame.elevation ?? 50);
         const azimuth = THREE.MathUtils.degToRad(frame.azimuth ?? 0);
-        const distance = Math.max(totalSize * 1.12 * aspectMultiplier, 14) * (frame.distanceScale ?? 1);
+        const distance = Math.max(totalSize * 1.02 * aspectMultiplier, 14) * (frame.distanceScale ?? 1);
         const targetLookAt = new THREE.Vector3(
             frame.targetOffset?.x ?? 0,
             thickness / 2 + (frame.targetOffset?.y ?? 0),
@@ -367,6 +387,22 @@ export class CameraController {
             targetLookAt.y + Math.sin(elevation) * distance + (frame.lift ?? 0),
             targetLookAt.z + Math.cos(azimuth) * horizontalDistance
         );
+
+        // HUD 不对称时，把相机目标沿屏幕横向平移，让棋盘在净可视区居中
+        const netCenterX = (this.viewMargin.left + containerW - this.viewMargin.right) / 2;
+        const shiftX = netCenterX - containerW / 2;
+        if (Math.abs(shiftX) > 0.5) {
+            const halfFov = THREE.MathUtils.degToRad((this.camera.fov ?? 45) / 2);
+            const visibleWidth = 2 * distance * Math.tan(halfFov) * (containerW / containerH);
+            const worldShift = (shiftX / containerW) * visibleWidth;
+            // 屏幕右方向 = 相机右向量在水平面的投影（方位角决定）
+            const rightX = Math.cos(azimuth);
+            const rightZ = -Math.sin(azimuth);
+            targetLookAt.x -= rightX * worldShift;
+            targetLookAt.z -= rightZ * worldShift;
+            targetPosition.x -= rightX * worldShift;
+            targetPosition.z -= rightZ * worldShift;
+        }
 
         this.defaultPosition.copy(targetPosition);
         this.defaultTarget.copy(targetLookAt);

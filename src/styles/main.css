@@ -1041,14 +1041,14 @@ body[data-scene="competition"].scene-setup-active .setup-panel::after {
     position: fixed;
     inset: 0;
     display: grid;
-    grid-template-columns: minmax(214px, 258px) 1fr minmax(224px, 272px);
+    grid-template-columns: minmax(196px, 224px) 1fr minmax(200px, 232px);
     grid-template-rows: auto 1fr auto;
     grid-template-areas:
         "top top top"
         "left center right"
         "bottom bottom bottom";
     gap: var(--hud-gap);
-    padding: 20px;
+    padding: 16px;
     animation: gameReveal 0.45s ease;
     pointer-events: none;
 }
@@ -2460,8 +2460,8 @@ body.touch-input-active.awaiting-placement .hud-bottom {
 
 @media (max-width: 1200px) {
     .game-panel {
-        grid-template-columns: minmax(210px, 260px) 1fr minmax(220px, 270px);
-        padding: 18px;
+        grid-template-columns: minmax(192px, 224px) 1fr minmax(196px, 230px);
+        padding: 16px;
     }
 }
 
@@ -3205,9 +3205,9 @@ body[data-device-form="mobile"][data-screen-shape="short"] .scene-preview-media 
 }
 
 body[data-device-form="desktop"] .game-panel {
-    grid-template-columns: minmax(214px, 256px) minmax(0, 1fr) minmax(222px, 270px);
-    gap: 16px;
-    padding: 18px 20px 16px;
+    grid-template-columns: minmax(196px, 222px) minmax(0, 1fr) minmax(200px, 230px);
+    gap: 14px;
+    padding: 14px 16px 14px;
 }
 
 body[data-device-form="desktop"] .hud-side {

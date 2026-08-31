@@ -296,6 +296,7 @@ export class GoRenderer3D {
 
     applyGoCameraFrame(animate = false) {
         if (!this.cameraController) return;
+        this.measureHudMargins();
         const span = (this.boardSize - 1) * this.cellSize;
         const distance = Math.max(span * 1.22, 16);
         // 更高的俯视角 + 居中目标，避免棋盘底边被取景框裁掉
@@ -491,6 +492,31 @@ export class GoRenderer3D {
         if (existing) group.remove(existing);
     }
 
+    /**
+     * 测量 HUD 各栏占用的屏幕边距，取景时扣除（与五子棋同一套净区取景）。
+     */
+    measureHudMargins() {
+        if (!this.cameraController) return;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const read = (selector) => {
+            const el = document.querySelector(selector);
+            if (!el) return null;
+            const rect = el.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0 ? rect : null;
+        };
+        const left = read('.hud-left');
+        const right = read('.hud-right');
+        const top = read('.hud-top');
+        const bottom = read('.hud-bottom');
+        this.cameraController.setViewMargin({
+            left: left ? left.x + left.width : 0,
+            right: right ? vw - right.x : 0,
+            top: top ? top.y + top.height : 0,
+            bottom: bottom ? vh - bottom.y : 0
+        });
+    }
+
     show() {
         this.container.classList.remove('hidden');
         this.container.setAttribute('aria-hidden', 'false');
@@ -498,6 +524,7 @@ export class GoRenderer3D {
         // 尺寸可能在隐藏时变化，重新 fit
         if (this.container.clientWidth && this.container.clientHeight) {
             this.sceneManager?.handleResize?.();
+            this.applyGoCameraFrame(false);
         }
     }
 
