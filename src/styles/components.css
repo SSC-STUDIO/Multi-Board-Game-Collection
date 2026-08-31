@@ -423,15 +423,19 @@
     background: var(--control-btn-danger);
 }
 
+/* 提示条统一为深色玻璃底 + 浅色文字：需同时覆盖 .message.info 等
+   高优先级变体，避免与 main.css 的深底规则组合出深字压深底。 */
 .message {
     min-height: 52px;
     text-align: center;
-    padding: 14px 16px;
+    padding: 13px 18px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.86);
-    color: var(--muted);
+    background: rgba(20, 16, 11, 0.85);
+    color: #f6efe2;
+    font-size: 0.98rem;
+    letter-spacing: 0.01em;
     margin-bottom: 14px;
-    box-shadow: inset 0 0 0 1px rgba(90, 60, 30, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 28px rgba(0, 0, 0, 0.35);
     transform-origin: center;
 }
 
@@ -440,17 +444,18 @@
 }
 
 .message.success {
-    color: var(--message-success-text);
-    background: rgba(213, 241, 220, 0.9);
+    color: #dfffe6;
+    background: rgba(53, 103, 67, 0.82);
 }
 
 .message.error {
-    color: var(--message-error-text);
-    background: rgba(255, 224, 224, 0.95);
+    color: #ffe4e4;
+    background: rgba(104, 41, 41, 0.85);
 }
 
 .message.info {
-    color: var(--muted);
+    color: #f6efe2;
+    background: rgba(20, 16, 11, 0.85);
 }
 
 @keyframes messagePulse {

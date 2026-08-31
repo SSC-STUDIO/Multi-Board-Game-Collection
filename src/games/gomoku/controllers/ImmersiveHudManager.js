@@ -3,6 +3,7 @@
 import { i18n } from '../../../utils/i18n.js';
 
 const IMMERSIVE_REGION_KEYS = ['top', 'left', 'right', 'bottom'];
+const IMMERSIVE_HINT_STORAGE_KEY = 'gomoku-immersive-hint-shown';
 
 /**
  * 沉浸式 HUD 管理器
@@ -15,6 +16,7 @@ export class ImmersiveHudManager {
      */
     constructor(app) {
         this.app = app;
+        this.autoHideHintShown = false;
     }
 
     /**
@@ -185,7 +187,26 @@ export class ImmersiveHudManager {
         if (!this.app.dom.placement.panel.classList.contains('hidden')) {
             regions.bottom = true;
         }
+        this.maybeShowAutoHideHint(regions);
         this.setImmersiveRegions(regions);
+    }
+
+    /**
+     * 面板首次因鼠标离开边缘而全部收起时，提示玩家如何呼出/关闭沉浸 HUD。
+     * 只提示一次（localStorage 记忆，储存不可用时降级为每次会话一次）。
+     * @param {{ top: boolean, left: boolean, right: boolean, bottom: boolean }} regions - 即将应用的区域显隐
+     */
+    maybeShowAutoHideHint(regions) {
+        if (this.autoHideHintShown) return;
+        if (IMMERSIVE_REGION_KEYS.some((region) => regions[region])) return;
+        this.autoHideHintShown = true;
+        try {
+            if (window.localStorage?.getItem(IMMERSIVE_HINT_STORAGE_KEY)) return;
+            window.localStorage?.setItem(IMMERSIVE_HINT_STORAGE_KEY, '1');
+        } catch {
+            /* 无法持久化时仍提示本次会话 */
+        }
+        this.app.showMessageKey('immersiveUiAutoHideHint');
     }
 
     /**

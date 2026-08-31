@@ -7,6 +7,7 @@
 
 import { LauncherController } from './app/controllers/LauncherController.js';
 import { findGame } from './games/registry.js';
+import { setupLanguageSwitch } from './ui/dom.js';
 
 /** @type {LauncherController|null} */
 let launcher = null;
@@ -68,6 +69,13 @@ function showLauncher() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 语言开关必须在启动器阶段就可用（进入具体游戏前），并按已保存的偏好本地化静态文案。
+    const langZh = document.getElementById('lang-zh');
+    const langEn = document.getElementById('lang-en');
+    if (langZh && langEn) {
+        setupLanguageSwitch({ lang: { zh: langZh, en: langEn } });
+    }
+
     launcher = new LauncherController({
         root: document,
         onEnterGame: enterGame,

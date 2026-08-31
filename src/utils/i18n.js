@@ -69,7 +69,7 @@ const translations = {
         easy: '轻松',
         medium: '进阶',
         hard: '大师',
-        easyDesc: '随机拝子，适合新手练习',
+        easyDesc: '随机落子，适合新手练习',
         mediumDesc: 'Minimax + Alpha-Beta，有基本战术',
         hardDesc: '深度搜索，强力对局分析',
         aiLevelDesc: '选择对局难度',
@@ -102,6 +102,7 @@ const translations = {
         immersiveUiOn: '沉浸开',
         immersiveUiOff: '沉浸关',
         immersiveUiUnavailable: '沉浸 HUD 仅桌面端可用',
+        immersiveUiAutoHideHint: '沉浸 HUD 已收起面板，鼠标移向屏幕边缘即可呼出',
         soundOn: '音效开',
         soundOff: '音效关',
         confirmMove: '确认落子',
@@ -510,6 +511,7 @@ const translations = {
         immersiveUiOn: 'Immersive On',
         immersiveUiOff: 'Immersive Off',
         immersiveUiUnavailable: 'Immersive HUD is desktop-only',
+        immersiveUiAutoHideHint: 'Immersive HUD hid the panels — move your cursor to a screen edge to reveal them.',
         soundOn: 'Sound On',
         soundOff: 'Sound Off',
         confirmMove: 'Confirm Move',
@@ -978,6 +980,7 @@ class I18n {
      * @param {string} lang 'zh' | 'en' 或已通过 loadTranslations() 加载的语言
      */
     setLanguage(lang) {
+        if (lang === this.currentLang) return;
         if (this.translations[lang] || this.remoteTranslations[lang]) {
             this.currentLang = lang;
             localStorage.setItem('gomoku-lang', lang);

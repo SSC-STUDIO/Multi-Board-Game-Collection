@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { getSceneSpec } from '../../config/sceneConfig.js';
-import { addBox, addCylinder, addPlane, addTable, material } from './props.js';
+import { addCylinder, addPlane, addTable, material } from './props.js';
 
 const FALLBACK_MOOD = {
     floor: 0x1a1c22,
@@ -180,10 +180,17 @@ export function buildTabletop(builder, ctx, preset = 'competition') {
         lampMat,
         { segments: 10, castShadow: false, receiveShadow: false }
     );
-    addBox(builder, group, 'tabletop-lamp-shade', [0.62, 0.18, 0.62], [lampX, ctx.supportTopY + 1.86, lampZ], lampMat, {
-        castShadow: false,
-        receiveShadow: false
-    });
+    // 锥形灯罩：俯视视角下方盒会被误读成桌面上的白色贴片，圆锥轮廓更像台灯
+    addCylinder(
+        builder,
+        group,
+        'tabletop-lamp-shade',
+        [0.16, 0.36],
+        0.34,
+        [lampX, ctx.supportTopY + 1.82, lampZ],
+        lampMat,
+        { segments: 14, castShadow: false, receiveShadow: false }
+    );
 
     return {
         floor: floorMat,

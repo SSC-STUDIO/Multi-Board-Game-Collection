@@ -5907,10 +5907,10 @@ a:focus-visible {
     gap: 6px 10px;
 }
 
+/* 标签在上、值在下的堆叠布局：窄列宽下值文案（如"人人对战"）完整可读，不再截断 */
 .meta-item {
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
+    display: grid;
+    gap: 3px;
     min-width: 0;
 }
 
@@ -5921,17 +5921,19 @@ a:focus-visible {
 }
 
 .meta-value {
-    font-size: 0.86rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 0.84rem;
+    line-height: 1.35;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
 }
 
+/* 窄侧栏里横排会把标题截断成省略号，改为纵向堆叠并允许换行 */
 .panel-stage-row {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
 }
 
 .phase-pill {
@@ -5944,9 +5946,10 @@ a:focus-visible {
 .stage-title {
     font-size: 0.98rem;
     margin: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.35;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
 }
 
 .stage-subtitle {
