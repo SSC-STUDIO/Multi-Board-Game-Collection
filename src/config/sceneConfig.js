@@ -7,7 +7,23 @@ export const SCENE_SPECS = {
             table: 0x6b4423,
             legs: 0x3d2a1c,
             backdrop: 0x241810,
-            lamp: 0xe8c9a0
+            lamp: 0xe8c9a0,
+            props: {
+                carpet: 0x5e3226,
+                wall: 0x30231a,
+                wallTrim: 0x1f1610,
+                windowFrame: 0x241a12,
+                windowGlow: 0xffd9a0,
+                shelf: 0x3a2a1c,
+                books: [0x8a4a3a, 0x4a6a52, 0xc2a05a, 0x53638a, 0x7a4a62],
+                painting: 0x8a6a4a,
+                paintingArt: 0x40556a,
+                chair: 0x5d4634,
+                bowlBlack: 0x2f3a34,
+                bowlWhite: 0x9a7448,
+                cup: 0xd8cfc0,
+                tea: 0x9a7a3a
+            }
         },
         ui: {
             previewImage: 'assets/scene-previews/home.jpg',
@@ -130,9 +146,27 @@ export const SCENE_SPECS = {
         tabletop: {
             floor: 0x3d4a32,
             table: 0x6a5a3a,
-            legs: 0x3f4632,
-            backdrop: 0x7aa0b8,
-            lamp: 0xf2e2b8
+            legs: 0x565b4e,
+            backdrop: 0x9cc0da,
+            lamp: 0xf2e2b8,
+            props: {
+                path: 0x8f8a7c,
+                pathEdge: 0x767268,
+                grassPatch: 0x4a5c3c,
+                bush: 0x4d6a42,
+                bushDark: 0x415c38,
+                treeTrunk: 0x5d3f24,
+                treeCanopy: 0x587c43,
+                treeCanopyAlt: 0x6a8a4c,
+                bench: 0x7b5737,
+                lantern: 0x8f8b82,
+                lanternGlow: 0xffe9b8,
+                leaf: 0xc9a94e,
+                bowlBlack: 0x435139,
+                bowlWhite: 0x87643e,
+                cup: 0xcfc8b8,
+                tea: 0x8a7a3a
+            }
         },
         ui: {
             previewImage: 'assets/scene-previews/park.jpg',
@@ -255,7 +289,27 @@ export const SCENE_SPECS = {
             table: 0x4a3a28,
             legs: 0x2c241c,
             backdrop: 0x2a3040,
-            lamp: 0xcfc6b8
+            lamp: 0xcfc6b8,
+            props: {
+                carpet: 0x572a2a,
+                carpetTrim: 0x8a5a3a,
+                wall: 0x252c3a,
+                wallPanel: 0x1e2430,
+                banner: 0xd9b26a,
+                bannerDark: 0x3a3a4a,
+                rigPole: 0x2a2e36,
+                rigHead: 0x3a4048,
+                rigGlow: 0xfff2d8,
+                clockBody: 0x2e2620,
+                clockFace: 0xf2ead8,
+                clockButton: 0xc9b89a,
+                seat: 0x232830,
+                namePlate: 0xe8dcc4,
+                bowlBlack: 0x30343c,
+                bowlWhite: 0x6e5636,
+                cup: 0xd4cec2,
+                tea: 0x8a6a3a
+            }
         },
         ui: {
             previewImage: 'assets/scene-previews/competition.jpg',

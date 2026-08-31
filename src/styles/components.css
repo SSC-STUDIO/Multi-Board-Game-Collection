@@ -15,14 +15,15 @@
     margin-bottom: 10px;
 }
 
+/* 只出现在深底指引卡上：必须用浅色文字（--heading-color 是浅底用的深墨色） */
 .stage-title {
     font-size: 1.55rem;
-    color: var(--heading-color);
+    color: var(--text-main, #f4f2eb);
     margin-bottom: 8px;
 }
 
 .stage-subtitle {
-    color: var(--muted);
+    color: var(--text-muted, rgba(233, 231, 223, 0.72));
     line-height: 1.6;
 }
 
@@ -471,7 +472,7 @@
 
 .move-list {
     font-size: 0.95rem;
-    color: var(--muted);
+    color: var(--text-muted, rgba(233, 231, 223, 0.72));
     line-height: 1.6;
     min-height: 180px;
     max-height: 280px;

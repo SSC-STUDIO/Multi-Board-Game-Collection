@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { RENDER_CONFIG } from '../config/renderConfig.js';
 import { getSceneSpec } from '../config/sceneConfig.js';
 import { createSceneContext } from './scenes/props.js';
-import { applyTabletopMood, buildTabletop } from './scenes/tabletop.js';
+import { buildTabletop } from './scenes/tabletop.js';
 
 export class EnvironmentBuilder {
     constructor(config = RENDER_CONFIG) {
@@ -27,6 +27,7 @@ export class EnvironmentBuilder {
         this.group = new THREE.Group();
         this.group.name = 'environment';
         this.scenePreset = scenePreset;
+        this.lastBoardSize = boardSize;
         this.animators = [];
         this.dynamicObjects = new Set();
         this.trackedResources = new Set();
@@ -43,11 +44,21 @@ export class EnvironmentBuilder {
         return this.group;
     }
 
+    /**
+     * 切换氛围：各氛围建模不同（家/公园/比赛各有专属布景），
+     * 直接重建整组场景并挂回原父节点，而非仅重染材质。
+     */
     applyMood(scenePreset = 'competition') {
-        this.scenePreset = scenePreset;
-        this.updateInterval = this.getUpdateInterval(scenePreset);
-        applyTabletopMood(this.moodMaterials, scenePreset);
-        return this.group;
+        if (scenePreset === this.scenePreset && this.group) {
+            return this.group;
+        }
+        const parent = this.group?.parent ?? null;
+        const boardSize = this.lastBoardSize ?? this.config.board.size;
+        const group = this.build(boardSize, scenePreset);
+        if (parent) {
+            parent.add(group);
+        }
+        return group;
     }
 
     update(_timeSeconds = performance.now() / 1000) {

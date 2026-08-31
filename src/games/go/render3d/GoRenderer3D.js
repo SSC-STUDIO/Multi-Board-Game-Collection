@@ -297,9 +297,10 @@ export class GoRenderer3D {
     applyGoCameraFrame(animate = false) {
         if (!this.cameraController) return;
         const span = (this.boardSize - 1) * this.cellSize;
-        const distance = Math.max(span * 1.18, 16);
-        const target = new THREE.Vector3(0, this.sceneManager.config.board.thickness / 2, -span * 0.06);
-        const position = new THREE.Vector3(distance * 0.34, distance * 0.78, distance * 0.92);
+        const distance = Math.max(span * 1.22, 16);
+        // 更高的俯视角 + 居中目标，避免棋盘底边被取景框裁掉
+        const target = new THREE.Vector3(0, this.sceneManager.config.board.thickness / 2, -span * 0.02);
+        const position = new THREE.Vector3(distance * 0.3, distance * 0.95, distance * 0.8);
         this.cameraController.defaultTarget.copy(target);
         this.cameraController.defaultPosition.copy(position);
         this.cameraController.controls.minPolarAngle = THREE.MathUtils.degToRad(24);

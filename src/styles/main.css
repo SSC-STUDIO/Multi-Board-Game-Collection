@@ -1336,10 +1336,11 @@ body.scene-game-active .hud-top .icon-btn {
     opacity: 0.66;
 }
 
+/* 深色打底保证任何场景亮度下文字对比度稳定（半透明玻璃会被明亮布景穿透） */
 .panel-block-accent {
     background:
-        linear-gradient(135deg, rgba(230, 177, 91, 0.14), rgba(230, 177, 91, 0.03)),
-        rgba(255, 255, 255, 0.05);
+        linear-gradient(135deg, rgba(230, 177, 91, 0.16), rgba(230, 177, 91, 0.04)),
+        rgba(14, 11, 8, 0.52);
 }
 
 .meta-grid {
@@ -5947,6 +5948,7 @@ a:focus-visible {
     font-size: 0.98rem;
     margin: 0;
     line-height: 1.35;
+    color: var(--text-main);
     overflow: visible;
     text-overflow: clip;
     white-space: normal;
