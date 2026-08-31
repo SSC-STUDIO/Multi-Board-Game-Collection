@@ -806,15 +806,36 @@ body[data-scene="competition"].scene-setup-active .setup-panel::after {
     overflow: hidden;
 }
 
+/* 预览卡不依赖外部图片：氛围主色渐变底 + 棋盘剪影 + 光晕，
+   --scene-preview-color 由 render.js 按场景注入 */
 .scene-preview-media {
     position: relative;
     aspect-ratio: 16 / 9;
     min-height: 168px;
     border-radius: 16px;
     overflow: hidden;
-    background: rgba(8, 18, 30, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    background:
+        radial-gradient(120% 90% at 24% 12%, color-mix(in srgb, var(--scene-preview-color, #2a3040) 55%, #ffffff 12%) 0%, transparent 55%),
+        linear-gradient(160deg, color-mix(in srgb, var(--scene-preview-color, #2a3040) 78%, #ffffff 8%) 0%, var(--scene-preview-color, #2a3040) 52%, color-mix(in srgb, var(--scene-preview-color, #2a3040) 70%, #000000 30%) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: background 0.35s ease;
+}
+
+/* 棋盘剪影：细网格线 + 中央亮点，呼应"棋桌"主题 */
+.scene-preview-media::before {
+    content: "";
+    position: absolute;
+    inset: 12% 18%;
+    border-radius: 8px;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(255, 236, 190, 0.5) 0%, rgba(255, 236, 190, 0.12) 26%, transparent 46%),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 12.5%),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 12.5%);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    transform: perspective(420px) rotateX(38deg) scale(1.02);
+    transform-origin: 50% 62%;
+    pointer-events: none;
 }
 
 .scene-preview-media::after {
@@ -822,25 +843,8 @@ body[data-scene="competition"].scene-setup-active .setup-panel::after {
     position: absolute;
     inset: 0;
     background:
-        linear-gradient(180deg, rgba(7, 15, 24, 0.04) 0%, rgba(7, 15, 24, 0.12) 42%, rgba(7, 15, 24, 0.48) 100%),
-        linear-gradient(90deg, rgba(7, 15, 24, 0.12) 0%, rgba(7, 15, 24, 0.02) 40%, rgba(7, 15, 24, 0.22) 100%);
+        linear-gradient(180deg, rgba(7, 15, 24, 0.02) 0%, rgba(7, 15, 24, 0.1) 46%, rgba(7, 15, 24, 0.42) 100%);
     pointer-events: none;
-}
-
-.scene-preview-image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scale(1.035);
-    filter: saturate(1.04) contrast(1.03);
-    transition: opacity 0.24s ease, filter 0.28s ease, transform 0.28s ease;
-}
-
-.setup-scene-preview.is-loading .scene-preview-image {
-    opacity: 0.22;
-    filter: blur(10px) saturate(0.78) contrast(0.92);
-    transform: scale(1.06);
 }
 
 .scene-preview-content {
@@ -886,18 +890,6 @@ body[data-scene="competition"].scene-setup-active .setup-panel::after {
     line-height: 1.6;
     margin: 0;
     overflow-wrap: anywhere;
-}
-
-.setup-scene-preview[data-scene="home"] .scene-preview-image {
-    object-position: 50% 50%;
-}
-
-.setup-scene-preview[data-scene="park"] .scene-preview-image {
-    object-position: 50% 50%;
-}
-
-.setup-scene-preview[data-scene="competition"] .scene-preview-image {
-    object-position: 50% 46%;
 }
 
 .setup-scene-preview[data-scene="home"] {
@@ -5654,13 +5646,10 @@ a:focus-visible {
     100% { background-position: 400px 0; }
 }
 
-.setup-scene-preview.is-loading .scene-preview-image {
+.setup-scene-preview.is-loading .scene-preview-media {
     background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.04) 75%);
     background-size: 800px 100%;
     animation: skeletonShimmer 1.5s infinite;
-    opacity: 1;
-    filter: none;
-    transform: none;
 }
 
 .coach-status-loading {

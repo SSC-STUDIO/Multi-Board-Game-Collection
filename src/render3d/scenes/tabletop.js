@@ -274,7 +274,7 @@ function buildHomeScene(builder, group, ctx, mood, mats) {
         castShadow: false
     });
 
-    // 发光窗：窗框贴墙 + 暖光窗芯，是"窗边对局"的光源记忆点
+    // 发光窗：窗框贴墙 + 暖光窗芯（克隆材质供呼吸动效），是"窗边对局"的光源记忆点
     const frameMat = material(builder, 'home:window-frame', {
         color: palette.windowFrame ?? 0x241a12,
         roughness: 0.7,
@@ -286,7 +286,8 @@ function buildHomeScene(builder, group, ctx, mood, mats) {
         emissiveIntensity: 1.25,
         roughness: 0.6,
         metalness: 0.0
-    });
+    }).clone();
+    builder.track(glowMat);
     const winX = 5.4 * s;
     const winY = floorY + 6.6;
     const winW = 5.2 * s;
@@ -307,6 +308,13 @@ function buildHomeScene(builder, group, ctx, mood, mats) {
     windowLight.position.set(winX, winY - 0.5, backZ + 1.8);
     windowLight.name = 'home:window-light';
     group.add(windowLight);
+
+    // 窗光呼吸：极缓的明暗起伏，像午后阳光掠过云影
+    builder.registerAnimator((time) => {
+        const wave = Math.sin(time * 0.55) * 0.5 + 0.5;
+        glowMat.emissiveIntensity = 1.12 + wave * 0.22;
+        windowLight.intensity = 0.82 + wave * 0.14;
+    });
 
     // 侧墙挂画
     const paintingFrameMat = material(builder, 'home:painting-frame', {
@@ -396,18 +404,28 @@ function buildParkScene(builder, group, ctx, mood) {
         });
     }
 
-    // 树木与灌木围出树荫感
-    addTree(builder, group, 'park:tree-a', [-13.5 * s, floorY, -9.5 * s], 1.5, {
-        trunk: palette.treeTrunk,
-        canopy: palette.treeCanopy
-    });
-    addTree(builder, group, 'park:tree-b', [12.5 * s, floorY, -12 * s], 1.9, {
-        trunk: palette.treeTrunk,
-        canopy: palette.treeCanopyAlt ?? palette.treeCanopy
-    });
-    addTree(builder, group, 'park:tree-c', [16 * s, floorY, 0.5 * s], 1.2, {
-        trunk: palette.treeTrunk,
-        canopy: palette.treeCanopy
+    // 树木与灌木围出树荫感；树冠标记为动态对象并注册微风摇曳
+    const treeRigs = [
+        addTree(builder, group, 'park:tree-a', [-13.5 * s, floorY, -9.5 * s], 1.5, {
+            trunk: palette.treeTrunk,
+            canopy: palette.treeCanopy
+        }),
+        addTree(builder, group, 'park:tree-b', [12.5 * s, floorY, -12 * s], 1.9, {
+            trunk: palette.treeTrunk,
+            canopy: palette.treeCanopyAlt ?? palette.treeCanopy
+        }),
+        addTree(builder, group, 'park:tree-c', [16 * s, floorY, 0.5 * s], 1.2, {
+            trunk: palette.treeTrunk,
+            canopy: palette.treeCanopy
+        })
+    ];
+    treeRigs.forEach(({ canopyRig }, index) => {
+        builder.markDynamic(canopyRig);
+        const phase = index * 1.7;
+        builder.registerAnimator((time) => {
+            canopyRig.rotation.z = Math.sin(time * 0.9 + phase) * 0.028;
+            canopyRig.rotation.x = Math.cos(time * 0.72 + phase) * 0.02;
+        });
     });
 
     const bushMat = material(builder, 'park:bush', {
@@ -453,7 +471,8 @@ function buildParkScene(builder, group, ctx, mood) {
         emissiveIntensity: 1.1,
         roughness: 0.5,
         metalness: 0.0
-    });
+    }).clone();
+    builder.track(lanternGlowMat);
     const lanternX = 9.5 * s;
     const lanternZ = 6.5 * s;
     addCylinder(builder, group, 'park:lantern-base', [0.62 * s, 0.75 * s], 0.4, [lanternX, floorY + 0.2, lanternZ], lanternMat, {
@@ -471,6 +490,11 @@ function buildParkScene(builder, group, ctx, mood) {
     addCylinder(builder, group, 'park:lantern-roof', [0.1 * s, 0.85 * s], 0.5, [lanternX, floorY + 2.5, lanternZ], lanternMat, {
         segments: 8,
         castShadow: true
+    });
+
+    // 石灯笼烛光：轻微闪烁，像被风拂动
+    builder.registerAnimator((time) => {
+        lanternGlowMat.emissiveIntensity = 1.02 + Math.sin(time * 2.1) * 0.1 + Math.sin(time * 5.3) * 0.05;
     });
 
     // 散落的黄叶点缀草地
@@ -557,7 +581,8 @@ function buildCompetitionScene(builder, group, ctx, mood) {
         emissiveIntensity: 0.85,
         roughness: 0.6,
         metalness: 0.0
-    });
+    }).clone();
+    builder.track(bannerMat);
     const bannerDarkMat = material(builder, 'comp:banner-dark', {
         color: palette.bannerDark ?? 0x3a3a4a,
         roughness: 0.8,
@@ -573,6 +598,11 @@ function buildCompetitionScene(builder, group, ctx, mood) {
     addPlane(builder, group, 'comp:banner-sub', [10 * s, 0.7], [0, floorY + 9.4, backZ + 0.38], bannerMat, {
         castShadow: false,
         receiveShadow: false
+    });
+
+    // 横幅呼吸：赛场大屏的缓慢明暗循环
+    builder.registerAnimator((time) => {
+        bannerMat.emissiveIntensity = 0.78 + (Math.sin(time * 0.8) * 0.5 + 0.5) * 0.2;
     });
 
     // 立式射灯杆一对

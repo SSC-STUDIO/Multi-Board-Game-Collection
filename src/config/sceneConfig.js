@@ -26,7 +26,7 @@ export const SCENE_SPECS = {
             }
         },
         ui: {
-            previewImage: 'assets/scene-previews/home.jpg',
+            previewColor: 0x2a1c14,
             setupTitleKey: 'sceneHomeMood',
             setupBlurbKey: 'sceneHomeBlurb',
             ambienceKey: 'sceneSoundHome'
@@ -169,7 +169,7 @@ export const SCENE_SPECS = {
             }
         },
         ui: {
-            previewImage: 'assets/scene-previews/park.jpg',
+            previewColor: 0x3d4a32,
             setupTitleKey: 'sceneParkMood',
             setupBlurbKey: 'sceneParkBlurb',
             ambienceKey: 'sceneSoundPark'
@@ -312,7 +312,7 @@ export const SCENE_SPECS = {
             }
         },
         ui: {
-            previewImage: 'assets/scene-previews/competition.jpg',
+            previewColor: 0x1a1c22,
             setupTitleKey: 'sceneCompetitionMood',
             setupBlurbKey: 'sceneCompetitionBlurb',
             ambienceKey: 'sceneSoundCompetition'

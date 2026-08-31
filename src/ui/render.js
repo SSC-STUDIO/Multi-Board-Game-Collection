@@ -3,16 +3,9 @@
 import { getResponsiveCellSize, getStarPoints } from '../utils/board.js';
 import { formatMove, getPlayerLabel } from '../utils/formatters.js';
 import { i18n } from '../utils/i18n.js';
-import { SCENE_SPECS, getSceneSpec } from '../config/sceneConfig.js';
+import { getSceneSpec } from '../config/sceneConfig.js';
 
 let messageTimer = null;
-let scenePreviewRequestId = 0;
-let scenePreviewPreloadHookRegistered = false;
-let scenePreviewPreloadFlushScheduled = false;
-
-const SCENE_PREVIEW_SOURCES = Object.values(SCENE_SPECS).map((sceneSpec) => sceneSpec.ui.previewImage);
-const scenePreviewPreloadCache = new Map();
-const pendingScenePreviewPreloads = new Set();
 
 const MODE_I18N_KEYS = {
     pvp: 'pvp',
@@ -54,120 +47,12 @@ function updateSetupScenePreview(dom, options) {
 
     const sceneSpec = getSceneSpec(options.scene);
     dom.setupScene.card.dataset.scene = options.scene;
-    syncSetupScenePreviewImage(dom, sceneSpec.ui.previewImage);
+    // 预览卡不再依赖外部图片：用氛围主色做渐变底，data-scene 驱动 CSS 换色
+    dom.setupScene.card.style.setProperty('--scene-preview-color', `#${(sceneSpec.ui.previewColor ?? 0x2a3040).toString(16).padStart(6, '0')}`);
+    dom.setupScene.card.classList.remove('is-loading');
     dom.setupScene.mood.textContent = i18n.t(sceneSpec.ui.setupTitleKey);
     dom.setupScene.ambience.textContent = i18n.t(sceneSpec.ui.ambienceKey);
     dom.setupScene.copy.textContent = i18n.t(sceneSpec.ui.setupBlurbKey);
-}
-
-function syncSetupScenePreviewImage(dom, src) {
-    const card = dom.setupScene?.card;
-    const image = dom.setupScene?.image;
-    if (!card || !image) {
-        return;
-    }
-
-    const requestId = ++scenePreviewRequestId;
-    const currentAttr = image.getAttribute('src');
-    const alreadyLoaded = isScenePreviewLoaded(image, src);
-
-    card.classList.add('is-loading');
-
-    if (!alreadyLoaded) {
-        const settle = () => {
-            if (requestId !== scenePreviewRequestId) {
-                return;
-            }
-            card.classList.remove('is-loading');
-        };
-
-        image.addEventListener('load', settle, { once: true });
-        image.addEventListener('error', settle, { once: true });
-    }
-
-    if (currentAttr !== src) {
-        image.src = src;
-    }
-
-    if (alreadyLoaded || isScenePreviewLoaded(image, src)) {
-        card.classList.remove('is-loading');
-    }
-
-    queueDeferredScenePreviewPreloads(src);
-}
-
-function preloadScenePreview(src) {
-    const cached = scenePreviewPreloadCache.get(src);
-    if (cached) {
-        return cached;
-    }
-
-    const preload = new Promise((resolve) => {
-        const image = new Image();
-        image.decoding = 'async';
-
-        const settle = () => resolve();
-        image.addEventListener('load', settle, { once: true });
-        image.addEventListener('error', settle, { once: true });
-        image.src = src;
-    });
-
-    scenePreviewPreloadCache.set(src, preload);
-    return preload;
-}
-
-function isScenePreviewLoaded(image, src) {
-    const currentSrc = image.currentSrc || image.src || '';
-    return image.complete
-        && image.naturalWidth > 0
-        && (image.getAttribute('src') === src || currentSrc.endsWith(src));
-}
-
-function queueDeferredScenePreviewPreloads(activeSrc) {
-    SCENE_PREVIEW_SOURCES.forEach((previewSrc) => {
-        if (previewSrc !== activeSrc) {
-            pendingScenePreviewPreloads.add(previewSrc);
-        }
-    });
-
-    if (pendingScenePreviewPreloads.size === 0) {
-        return;
-    }
-
-    if (document.readyState === 'complete') {
-        scheduleScenePreviewPreloadFlush();
-        return;
-    }
-
-    if (scenePreviewPreloadHookRegistered) {
-        return;
-    }
-
-    scenePreviewPreloadHookRegistered = true;
-    window.addEventListener('load', scheduleScenePreviewPreloadFlush, { once: true });
-}
-
-function scheduleScenePreviewPreloadFlush() {
-    if (scenePreviewPreloadFlushScheduled || pendingScenePreviewPreloads.size === 0) {
-        return;
-    }
-
-    scenePreviewPreloadFlushScheduled = true;
-    const flush = () => {
-        scenePreviewPreloadFlushScheduled = false;
-        const sources = Array.from(pendingScenePreviewPreloads);
-        pendingScenePreviewPreloads.clear();
-        sources.forEach((src) => {
-            void preloadScenePreview(src);
-        });
-    };
-
-    if (typeof window.requestIdleCallback === 'function') {
-        window.requestIdleCallback(flush, { timeout: 1200 });
-        return;
-    }
-
-    window.setTimeout(flush, 0);
 }
 
 // === Setup ===

@@ -19,13 +19,13 @@ vi.mock('../utils/formatters.js', () => ({
 
 vi.mock('../config/sceneConfig.js', () => ({
     SCENE_SPECS: {
-        home: { ui: { previewImage: 'home.jpg', setupTitleKey: 'homeTitle', ambienceKey: 'homeAmb', setupBlurbKey: 'homeBlurb' } },
-        park: { ui: { previewImage: 'park.jpg', setupTitleKey: 'parkTitle', ambienceKey: 'parkAmb', setupBlurbKey: 'parkBlurb' } },
-        competition: { ui: { previewImage: 'comp.jpg', setupTitleKey: 'compTitle', ambienceKey: 'compAmb', setupBlurbKey: 'compBlurb' } }
+        home: { ui: { previewColor: 0x2a1c14, setupTitleKey: 'homeTitle', ambienceKey: 'homeAmb', setupBlurbKey: 'homeBlurb' } },
+        park: { ui: { previewColor: 0x3d4a32, setupTitleKey: 'parkTitle', ambienceKey: 'parkAmb', setupBlurbKey: 'parkBlurb' } },
+        competition: { ui: { previewColor: 0x1a1c22, setupTitleKey: 'compTitle', ambienceKey: 'compAmb', setupBlurbKey: 'compBlurb' } }
     },
     getSceneSpec: (scene) => ({
         ui: {
-            previewImage: `${scene}.jpg`,
+            previewColor: 0x1a1c22,
             setupTitleKey: `${scene}Title`,
             ambienceKey: `${scene}Amb`,
             setupBlurbKey: `${scene}Blurb`

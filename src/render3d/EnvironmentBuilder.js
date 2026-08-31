@@ -61,8 +61,20 @@ export class EnvironmentBuilder {
         return group;
     }
 
-    update(_timeSeconds = performance.now() / 1000) {
-        return false;
+    /**
+     * 驱动氛围动效（树冠摇曳/灯光呼吸等），按场景节流。
+     * @returns {boolean} 本帧是否有动画推进（需要重绘）
+     */
+    update(timeSeconds = performance.now() / 1000) {
+        if (this.animators.length === 0) {
+            return false;
+        }
+        if (this.lastUpdateTime !== null && timeSeconds - this.lastUpdateTime < this.updateInterval) {
+            return false;
+        }
+        this.lastUpdateTime = timeSeconds;
+        this.animators.forEach((animator) => animator(timeSeconds));
+        return true;
     }
 
     registerAnimator(animator) {
