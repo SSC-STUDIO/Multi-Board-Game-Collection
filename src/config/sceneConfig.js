@@ -33,7 +33,9 @@ export const SCENE_SPECS = {
                 teapot: 0x6d5240,
                 tray: 0x4a3526,
                 cup: 0xd8cfc0,
-                tea: 0x9a7a3a
+                tea: 0x9a7a3a,
+                sceneAccent: 0xd69a52,
+                sceneAccentSoft: 0x4a3024
             }
         },
         ui: {
@@ -72,8 +74,8 @@ export const SCENE_SPECS = {
             },
             game: {
                 azimuth: 0,
-                elevation: 88,
-                distanceScale: 1.54,
+                elevation: 72,
+                distanceScale: 1.62,
                 targetOffset: { x: 0, y: 0.02, z: 0 },
                 lift: 0,
                 interaction: {
@@ -184,7 +186,9 @@ export const SCENE_SPECS = {
                 teapot: 0x5f6a50,
                 tray: 0x54452e,
                 cup: 0xcfc8b8,
-                tea: 0x8a7a3a
+                tea: 0x8a7a3a,
+                sceneAccent: 0xe7b563,
+                sceneAccentSoft: 0x466347
             }
         },
         ui: {
@@ -223,8 +227,8 @@ export const SCENE_SPECS = {
             },
             game: {
                 azimuth: 0,
-                elevation: 88,
-                distanceScale: 1.58,
+                elevation: 70,
+                distanceScale: 1.66,
                 targetOffset: { x: 0, y: 0.02, z: 0 },
                 lift: 0,
                 interaction: {
@@ -328,6 +332,8 @@ export const SCENE_SPECS = {
                 namePlate: 0xe8dcc4,
                 bowlBlack: 0x30343c,
                 bowlWhite: 0x6e5636,
+                sceneAccent: 0xe6b15b,
+                sceneAccentSoft: 0x243344,
                 cup: 0xd4cec2,
                 tea: 0x8a6a3a
             }
@@ -368,8 +374,8 @@ export const SCENE_SPECS = {
             },
             game: {
                 azimuth: 0,
-                elevation: 88,
-                distanceScale: 1.52,
+                elevation: 74,
+                distanceScale: 1.62,
                 targetOffset: { x: 0, y: 0.02, z: 0 },
                 lift: 0,
                 interaction: {

@@ -113,6 +113,66 @@ function buildBowls(builder, group, ctx, palette) {
     });
 }
 
+/**
+ * 展陈式棋桌边框：用低矮的深色台座、暖色灯带和四角铭点把棋盘从环境里托出来。
+ * 这层只占棋桌外沿，不遮挡棋盘，也不会影响落子射线。
+ */
+function buildExhibitionFrame(builder, group, ctx, mood) {
+    const palette = mood.props ?? {};
+    const tableSize = ctx.boardTotal + 4.4;
+    const edge = tableSize / 2 - 0.28;
+    const accent = glowMaterial(
+        builder,
+        'tabletop:display-accent',
+        palette.sceneAccent ?? mood.lamp,
+        1.15
+    );
+    const dark = material(builder, 'tabletop:display-frame', {
+        color: palette.sceneAccentSoft ?? mood.legs,
+        roughness: 0.62,
+        metalness: 0.14
+    });
+
+    addBox(builder, group, 'tabletop:display-front', [tableSize, 0.08, 0.12], [0, ctx.supportTopY + 0.06, edge], dark, {
+        castShadow: false,
+        receiveShadow: false
+    });
+    addBox(builder, group, 'tabletop:display-back', [tableSize, 0.08, 0.12], [0, ctx.supportTopY + 0.06, -edge], dark, {
+        castShadow: false,
+        receiveShadow: false
+    });
+    addBox(builder, group, 'tabletop:display-left', [0.12, 0.08, tableSize - 0.56], [-edge, ctx.supportTopY + 0.06, 0], dark, {
+        castShadow: false,
+        receiveShadow: false
+    });
+    addBox(builder, group, 'tabletop:display-right', [0.12, 0.08, tableSize - 0.56], [edge, ctx.supportTopY + 0.06, 0], dark, {
+        castShadow: false,
+        receiveShadow: false
+    });
+
+    const stripY = ctx.supportTopY + 0.115;
+    addBox(builder, group, 'tabletop:display-strip-front', [tableSize - 0.72, 0.025, 0.035], [0, stripY, edge - 0.1], accent, {
+        castShadow: false,
+        receiveShadow: false
+    });
+    addBox(builder, group, 'tabletop:display-strip-back', [tableSize - 0.72, 0.025, 0.035], [0, stripY, -edge + 0.1], accent, {
+        castShadow: false,
+        receiveShadow: false
+    });
+
+    [-1, 1].forEach((xSide) => {
+        [-1, 1].forEach((zSide) => {
+            addSphere(builder, group, 'tabletop:display-marker', 0.075, [xSide * (edge - 0.24), stripY + 0.035, zSide * (edge - 0.24)], accent, {
+                castShadow: false,
+                receiveShadow: false,
+                widthSegments: 10,
+                heightSegments: 6,
+                name: `tabletop:display-marker-${xSide}-${zSide}`
+            });
+        });
+    });
+}
+
 /** 落地/桌面灯：锥形灯罩 + 细杆 + 罩内发光面。 */
 function buildDeskLamp(builder, group, ctx, lampMat, tableSize) {
     const lampX = tableSize * 0.36;
@@ -982,6 +1042,8 @@ export function buildTabletop(builder, ctx, preset = 'competition') {
         stretchers: preset !== 'park',
         dentils: preset === 'home' ? 9 : 0
     });
+    buildExhibitionFrame(builder, group, ctx, mood);
+
 
     buildBowls(builder, group, ctx, palette);
 
