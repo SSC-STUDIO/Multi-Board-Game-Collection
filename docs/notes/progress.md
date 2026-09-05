@@ -1,5 +1,7 @@
 Original prompt: Implement the plan to fix grid stability, adapt the game for mobile, add transitions and camera motion, and add a QI guidance play mode.
 
+- 2026-09-05: Added an in-scene action dock for Gomoku and moved Go's existing controls into the 3D scene layer. The dock proxies the existing game buttons so undo, hints, restart, and camera reset keep one source of behavior. Validation passed with `npm run check` and the full Vitest suite (887 tests).
+
 - 2026-07-07: Added LLM Coach post-game analysis to Chess, Go, Xiangqi, and Junqi apps. Each game now has a post-game review button that sends a board snapshot (state, move history, current player) to `requestPostGameAnalysis` for natural-language strategic analysis. Added `loadLlmCoachSettings` imports, button handlers in game lifecycle hooks, and `requestXxxPostGameReview` async methods to all 4 game classes. Validation: 995/995 tests passing, clean build, all 41 test files green.
 
 - 2026-05-23: Performed a full real-browser playability pass across launcher, help/language, Gomoku, Go, Chess, Xiangqi, Junqi classic, Junqi flip, and 390px mobile launcher. Polished the visual shell after inspection: the old Gomoku `.board` DOM is now hidden with the other removed 2D boards, and the Go/Chess/Xiangqi/Junqi WebGL board shells were lightened from a heavy black box into a translucent 3D tabletop window. Validation passed with `npm run check`, full `npm test` (974 tests), an Edge CDP full-playtest matrix with 8 scenarios and 0 console messages, plus a stricter canvas-click smoke where real mouse events on each WebGL canvas changed game state for all 6 playable boards/variants. Artifacts live under `D:\EliuaK_Csy\Working-Paper\New project\3d-audit-artifacts\full-playtest-20260523\`.
@@ -297,4 +299,3 @@ Original prompt: Implement the plan to fix grid stability, adapt the game for mo
 ### Bug Queue
 - `.bugs/1_NEW_REPORTS.md`: No open bugs
 - `.bugs/3_RESOLVED.md`: Contains BUG-001 resolution
-
