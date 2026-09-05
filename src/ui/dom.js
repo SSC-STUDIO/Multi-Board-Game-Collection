@@ -1,5 +1,7 @@
 import { i18n } from '../utils/i18n.js';
 
+const sceneProxyRoots = new WeakSet();
+
 /**
  * DOM 引用与基础 UI 辅助方法。
  * @module ui/dom
@@ -200,6 +202,31 @@ export function setActiveByValue(group, attribute, value) {
 }
 
 /**
+ * 将场景内操作条按钮代理到已有的游戏控制按钮。
+ * 代理只负责触发原按钮，不复制任何游戏业务逻辑。
+ * @param {Document|HTMLElement} [root=document] - 查询根节点
+ * @returns {void}
+ */
+export function bindSceneActionProxies(root = document) {
+    if (!root?.addEventListener || sceneProxyRoots.has(root)) {
+        return;
+    }
+    sceneProxyRoots.add(root);
+    root.addEventListener('click', (event) => {
+        const proxy = event.target?.closest?.('[data-scene-proxy]');
+        if (!proxy) {
+            return;
+        }
+        const selector = proxy.dataset?.sceneProxy;
+        const target = selector && root.querySelector?.(selector);
+        if (!target || target === proxy || target.disabled) {
+            return;
+        }
+        target.click();
+    });
+}
+
+/**
  * 设置语言切换按钮的事件监听与状态同步
  * @param {Object} dom - DOM 元素引用集合
  * @param {Function} [onChange=null] - 语言切换后的回调函数
@@ -268,4 +295,12 @@ export function buildGameCoachMapping(root, prefix) {
         previewCancel: null,
         previewActions: null
     };
+}
+
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => bindSceneActionProxies(document), { once: true });
+    } else {
+        bindSceneActionProxies(document);
+    }
 }

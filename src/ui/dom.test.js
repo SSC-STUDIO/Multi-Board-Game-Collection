@@ -15,6 +15,7 @@ import {
     getDOMReferences,
     setActiveButton,
     setActiveByValue,
+    bindSceneActionProxies,
     setupLanguageSwitch,
     buildGameCoachMapping,
 } from './dom.js';
@@ -41,6 +42,7 @@ function mockEl(tag = 'div', overrides = {}) {
         getAttribute: vi.fn((attr) => overrides[attr] ?? null),
         addEventListener: vi.fn((evt, fn) => { listeners[evt] = fn; }),
         removeEventListener: vi.fn(),
+        click: vi.fn(),
         closest: vi.fn(() => null),
         matches: vi.fn(() => false),
         disabled: false,
@@ -227,6 +229,38 @@ describe('setActiveByValue', () => {
 
     it('handles null group gracefully', () => {
         expect(() => setActiveByValue(null, 'mode', 'x')).not.toThrow();
+    });
+});
+
+describe('bindSceneActionProxies', () => {
+    it('forwards a scene action click to the referenced control', () => {
+        const target = mockEl('button');
+        const proxy = mockEl('button', { dataset: { sceneProxy: '#restart-btn' } });
+        proxy.closest = vi.fn(() => proxy);
+        const root = makeFakeRoot();
+        root.addEventListener = vi.fn((eventName, handler) => {
+            root._sceneClick = handler;
+        });
+        root.querySelector = vi.fn((selector) => selector === '#restart-btn' ? target : null);
+
+        bindSceneActionProxies(root);
+        root._sceneClick({ target: proxy });
+
+        expect(target.click).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores missing or disabled targets', () => {
+        const proxy = mockEl('button', { dataset: { sceneProxy: '#missing' } });
+        proxy.closest = vi.fn(() => proxy);
+        const root = makeFakeRoot();
+        root.addEventListener = vi.fn((eventName, handler) => {
+            root._sceneClick = handler;
+        });
+        root.querySelector = vi.fn(() => null);
+
+        bindSceneActionProxies(root);
+        expect(() => root._sceneClick({ target: proxy })).not.toThrow();
+        expect(proxy.click).not.toHaveBeenCalled();
     });
 });
 
